@@ -22,6 +22,7 @@ pub fn run() {
             commands::fonts::list_system_fonts,
             commands::config::load_config,
             commands::config::save_config,
+            commands::config::reset_config,
         ])
         .setup(|app| {
             let menu = menu::build_menu(app)?;

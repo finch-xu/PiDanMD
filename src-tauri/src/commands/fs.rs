@@ -3,7 +3,7 @@ use std::fs;
 use std::path::PathBuf;
 use std::sync::Mutex;
 use std::time::UNIX_EPOCH;
-use tauri::State;
+use tauri::{Manager, State};
 
 use crate::state::AppState;
 
@@ -102,9 +102,9 @@ pub fn create_directory(path: String, state: State<Mutex<AppState>>) -> Result<(
 }
 
 #[tauri::command]
-pub fn get_default_storage_dir() -> Result<String, String> {
-    let doc_dir = dirs::document_dir().ok_or("Cannot find Documents directory")?;
-    let storage = doc_dir.join("PiDanMD");
+pub fn get_default_storage_dir(app: tauri::AppHandle) -> Result<String, String> {
+    let data_dir = app.path().app_data_dir().map_err(|e| e.to_string())?;
+    let storage = data_dir.join("workspace");
     fs::create_dir_all(&storage).map_err(|e| e.to_string())?;
     Ok(storage.to_string_lossy().to_string())
 }

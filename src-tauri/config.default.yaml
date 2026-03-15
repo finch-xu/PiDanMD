@@ -1,0 +1,17 @@
+theme: system
+locale: zh-CN
+layout: files
+font:
+  ui:
+    family: LXGW WenKai Screen
+    size: 16
+  body:
+    family: LXGW WenKai Screen
+    size: 16
+  code:
+    family: Cascadia Code NF
+    size: 16
+  symbol: Noto Color Emoji
+reading:
+  lineHeight: comfortable
+  contentWidth: standard

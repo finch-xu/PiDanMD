@@ -1,7 +1,7 @@
 import { createSignal, createMemo } from 'solid-js';
 import { emit, listen } from '@tauri-apps/api/event';
 import type { AppConfig } from '~/lib/config-persistence';
-import { updateAndSave } from '~/lib/config-persistence';
+import { updateAndSave, resetConfig } from '~/lib/config-persistence';
 
 // ── Types ──────────────────────────────────────
 
@@ -199,5 +199,10 @@ const resolvedTheme = createMemo(() => {
 
 const theme = () => settings().theme;
 const setTheme = (t: Theme) => updateSettings({ theme: t });
+
+export async function resetToDefaults() {
+  const config = await resetConfig();
+  initSettingsFromConfig(config);
+}
 
 export { settings, updateSettings, theme, setTheme, resolvedTheme };

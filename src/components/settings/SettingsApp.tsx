@@ -6,6 +6,7 @@ import { NumberStepper } from './controls/NumberStepper';
 import {
   settings,
   updateSettings,
+  resetToDefaults,
   BUILTIN_TEXT_FONTS,
   BUILTIN_CODE_FONTS,
   type BuiltinFont,
@@ -39,20 +40,38 @@ const tabs: { id: TabId; label: () => string; icon: () => JSX.Element }[] = [
 
 /* ── Pane: 基础 ── */
 function BasicPane() {
+  const [confirming, setConfirming] = createSignal(false);
+
   return (
-    <SegmentedControl<Locale>
-      label={t('language')}
-      value={locale()}
-      options={[
-        { value: 'zh-CN', label: '简体' },
-        { value: 'zh-TW', label: '繁體' },
-        { value: 'en-US', label: 'EN' },
-        { value: 'ja-JP', label: '日本語' },
-        { value: 'ko-KR', label: '한국어' },
-      ]}
-      onChange={(v) => setLocale(v)}
-      minWidth="280px"
-    />
+    <div class="space-y-5">
+      <SegmentedControl<Locale>
+        label={t('language')}
+        value={locale()}
+        options={[
+          { value: 'zh-CN', label: '简体' },
+          { value: 'zh-TW', label: '繁體' },
+          { value: 'en-US', label: 'EN' },
+          { value: 'ja-JP', label: '日本語' },
+          { value: 'ko-KR', label: '한국어' },
+        ]}
+        onChange={(v) => setLocale(v)}
+        minWidth="280px"
+      />
+
+      <div class="flex items-center justify-between pt-4 border-t border-surface0/50">
+        <span class="text-sm text-subtext1">{t('resetConfig')}</span>
+        <button
+          class="px-3 py-1.5 text-sm rounded-md transition-colors bg-surface0/50 text-subtext1 hover:bg-red/20 hover:text-red"
+          onClick={async () => {
+            if (!confirming()) { setConfirming(true); return; }
+            await resetToDefaults();
+            setConfirming(false);
+          }}
+        >
+          {confirming() ? t('confirmReset') : t('resetConfig')}
+        </button>
+      </div>
+    </div>
   );
 }
 

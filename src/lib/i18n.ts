@@ -59,6 +59,8 @@ const messages: Record<Locale, Record<string, string>> = {
     words: '字数',
     characters: '字符数',
     lines: '行数',
+    resetConfig: '重置配置',
+    confirmReset: '确认重置',
   },
   'zh-TW': {
     appName: '皮蛋記',
@@ -110,6 +112,8 @@ const messages: Record<Locale, Record<string, string>> = {
     words: '字數',
     characters: '字元數',
     lines: '行數',
+    resetConfig: '重置設定',
+    confirmReset: '確認重置',
   },
   'en-US': {
     appName: 'PiDanMD',
@@ -161,6 +165,8 @@ const messages: Record<Locale, Record<string, string>> = {
     words: 'Words',
     characters: 'Characters',
     lines: 'Lines',
+    resetConfig: 'Reset Settings',
+    confirmReset: 'Confirm Reset',
   },
   'ja-JP': {
     appName: 'PiDanMD',
@@ -212,6 +218,8 @@ const messages: Record<Locale, Record<string, string>> = {
     words: '単語数',
     characters: '文字数',
     lines: '行数',
+    resetConfig: '設定をリセット',
+    confirmReset: 'リセットを確認',
   },
   'ko-KR': {
     appName: 'PiDanMD',
@@ -263,6 +271,8 @@ const messages: Record<Locale, Record<string, string>> = {
     words: '단어 수',
     characters: '문자 수',
     lines: '줄 수',
+    resetConfig: '설정 초기화',
+    confirmReset: '초기화 확인',
   },
 };
 

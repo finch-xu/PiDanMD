@@ -41,6 +41,12 @@ export function updateAndSave(mutator: (config: AppConfig) => void): void {
   );
 }
 
+export async function resetConfig(): Promise<AppConfig> {
+  const config = await invoke<AppConfig>('reset_config');
+  _cache = config;
+  return config;
+}
+
 // ── localStorage Migration ──────────────────────
 
 export async function migrateFromLocalStorage(config: AppConfig): Promise<void> {

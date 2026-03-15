@@ -88,6 +88,14 @@ impl Default for AppConfig {
     }
 }
 
+// ── Default from YAML ───────────────────────────
+
+const DEFAULT_CONFIG_YAML: &str = include_str!("../../config.default.yaml");
+
+fn default_from_yaml() -> AppConfig {
+    serde_yaml::from_str(DEFAULT_CONFIG_YAML).unwrap_or_default()
+}
+
 // ── Config Path ─────────────────────────────────
 
 fn config_path(app: &tauri::AppHandle) -> Result<PathBuf, String> {
@@ -139,17 +147,13 @@ pub fn load_config(app: tauri::AppHandle) -> AppConfig {
     migrate_legacy_config(&app);
     let path = match config_path(&app) {
         Ok(p) => p,
-        Err(_) => return AppConfig::default(),
+        Err(_) => return default_from_yaml(),
     };
 
-    let config = if path.exists() {
-        fs::read_to_string(&path)
-            .ok()
-            .and_then(|c| serde_yaml::from_str::<AppConfig>(&c).ok())
-            .unwrap_or_default()
-    } else {
-        AppConfig::default()
-    };
+    let config = fs::read_to_string(&path)
+        .ok()
+        .and_then(|c| serde_yaml::from_str::<AppConfig>(&c).ok())
+        .unwrap_or_else(default_from_yaml);
 
     // 首次创建或补充新字段，都回写一次
     let _ = save_config_inner(&path, &config);
@@ -160,4 +164,12 @@ pub fn load_config(app: tauri::AppHandle) -> AppConfig {
 pub fn save_config(app: tauri::AppHandle, config: AppConfig) -> Result<(), String> {
     let path = config_path(&app)?;
     save_config_inner(&path, &config)
+}
+
+#[tauri::command]
+pub fn reset_config(app: tauri::AppHandle) -> Result<AppConfig, String> {
+    let path = config_path(&app)?;
+    let config = default_from_yaml();
+    save_config_inner(&path, &config)?;
+    Ok(config)
 }
