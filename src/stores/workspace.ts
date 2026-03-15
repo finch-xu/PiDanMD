@@ -1,0 +1,283 @@
+import { createSignal } from 'solid-js';
+import { createStore } from 'solid-js/store';
+import type { FileNode } from '~/types/file-tree';
+import { listDirectory, createDirectory, getDefaultStorageDir, readFile, type FileEntry } from '~/lib/tauri/commands';
+import { open as openDialog } from '@tauri-apps/plugin-dialog';
+
+interface WorkspaceState {
+  tree: FileNode[];
+  selectedFile: string | null;
+  workspacePath: string | null;
+}
+
+const [state, setState] = createStore<WorkspaceState>({
+  tree: [],
+  selectedFile: null,
+  workspacePath: null,
+});
+
+function entriesToNodes(entries: FileEntry[]): FileNode[] {
+  return entries.map((entry) => ({
+    name: entry.name,
+    path: entry.path,
+    isDirectory: entry.is_directory,
+    modified: entry.modified,
+    children: undefined,
+    isExpanded: false,
+    isLoading: false,
+  }));
+}
+
+async function loadChildrenDeep(nodes: FileNode[], depth: number): Promise<void> {
+  if (depth <= 0) return;
+  const dirs = nodes.filter(n => n.isDirectory);
+  await Promise.all(dirs.map(async (dir) => {
+    try {
+      const entries = await listDirectory(dir.path);
+      dir.children = entriesToNodes(entries);
+      await loadChildrenDeep(dir.children, depth - 1);
+    } catch {
+      // 读取失败则留 children 为 undefined，toggleFolder 会在用户点击时重试
+    }
+  }));
+}
+
+async function loadTitles(nodes: FileNode[]) {
+  await Promise.all(nodes.map(async (node) => {
+    if (!node.isDirectory && node.name.endsWith('.md')) {
+      try {
+        const content = await readFile(node.path);
+        const match = content.match(/^#\s+(.+)$/m);
+        if (match) node.title = match[1];
+      } catch { /* ignore read errors */ }
+    }
+    if (node.children) {
+      await loadTitles(node.children);
+    }
+  }));
+}
+
+async function openWorkspace(path: string) {
+  const entries = await listDirectory(path);
+  const nodes = entriesToNodes(entries);
+  await loadChildrenDeep(nodes, 2);
+  await loadTitles(nodes);
+  setState({
+    tree: nodes,
+    workspacePath: path,
+    selectedFile: null,
+  });
+}
+
+async function initWorkspace() {
+  try {
+    const dir = await getDefaultStorageDir();
+    await openWorkspace(dir);
+  } catch {
+    // Silently fail if default dir unavailable
+  }
+}
+
+async function refreshWorkspace() {
+  const path = state.workspacePath;
+  if (!path) return;
+  const entries = await listDirectory(path);
+  const nodes = entriesToNodes(entries);
+  await loadChildrenDeep(nodes, 2);
+  await loadTitles(nodes);
+  setState('tree', nodes);
+}
+
+async function createFolder(name: string) {
+  const base = state.workspacePath;
+  if (!base) return;
+  const fullPath = base + '/' + name;
+  await createDirectory(fullPath);
+  await refreshWorkspace();
+}
+
+async function toggleFolder(path: string) {
+  const node = findNode(state.tree, path);
+  if (!node || !node.isDirectory) return;
+
+  if (node.isExpanded) {
+    updateNodeAtPath(path, () => ({ isExpanded: false }));
+  } else if (node.children === undefined) {
+    updateNodeAtPath(path, () => ({ isLoading: true }));
+    try {
+      const entries = await listDirectory(path);
+      const children = entriesToNodes(entries);
+      await loadTitles(children);
+      updateNodeAtPath(path, () => ({ children, isLoading: false, isExpanded: true }));
+    } catch {
+      updateNodeAtPath(path, () => ({ isLoading: false }));
+    }
+  } else {
+    updateNodeAtPath(path, () => ({ isExpanded: true }));
+  }
+}
+
+function selectFile(path: string) {
+  setState('selectedFile', path);
+  // Auto-highlight parent folder
+  const parent = findParentFolder(path);
+  if (parent) {
+    setSelectedFolder(parent);
+  }
+}
+
+const [selectedFolder, setSelectedFolder] = createSignal<string | null>(null);
+
+function selectFolder(path: string | null) {
+  setSelectedFolder(path);
+}
+
+function findParentFolder(filePath: string): string | null {
+  for (const node of state.tree) {
+    if (node.isDirectory && filePath.startsWith(node.path + '/')) {
+      return node.path;
+    }
+  }
+  return null;
+}
+
+function collectMarkdownFiles(folderPath?: string | null): FileNode[] {
+  const files: FileNode[] = [];
+
+  function collect(nodes: FileNode[]) {
+    for (const node of nodes) {
+      if (!node.isDirectory && node.name.endsWith('.md')) {
+        files.push(node);
+      }
+      if (node.children) {
+        collect(node.children);
+      }
+    }
+  }
+
+  if (folderPath) {
+    const folder = findNode(state.tree, folderPath);
+    if (folder?.children) {
+      collect(folder.children);
+    }
+  } else {
+    collect(state.tree);
+  }
+
+  return files.sort((a, b) => (b.modified ?? 0) - (a.modified ?? 0));
+}
+
+interface FileGroup {
+  folderName: string;
+  folderPath: string;
+  files: FileNode[];
+}
+
+function collectMarkdownFilesByGroup(): FileGroup[] {
+  const wsPath = state.workspacePath;
+  if (!wsPath) return [];
+
+  const groupMap = new Map<string, FileGroup>();
+
+  function collect(nodes: FileNode[], parentPath: string) {
+    for (const node of nodes) {
+      if (!node.isDirectory && node.name.endsWith('.md')) {
+        let group = groupMap.get(parentPath);
+        if (!group) {
+          const relative = parentPath === wsPath
+            ? parentPath.split('/').pop() || ''
+            : parentPath.slice(wsPath.length + 1);
+          group = { folderName: relative, folderPath: parentPath, files: [] };
+          groupMap.set(parentPath, group);
+        }
+        group.files.push(node);
+      }
+      if (node.isDirectory && node.children) {
+        collect(node.children, node.path);
+      }
+    }
+  }
+
+  collect(state.tree, wsPath);
+
+  // Sort files within each group by modified desc
+  for (const group of groupMap.values()) {
+    group.files.sort((a, b) => (b.modified ?? 0) - (a.modified ?? 0));
+  }
+
+  const groups = Array.from(groupMap.values());
+
+  // Root group first, then by newest file in group desc
+  groups.sort((a, b) => {
+    if (a.folderPath === wsPath) return -1;
+    if (b.folderPath === wsPath) return 1;
+    const aMax = a.files[0]?.modified ?? 0;
+    const bMax = b.files[0]?.modified ?? 0;
+    return bMax - aMax;
+  });
+
+  return groups;
+}
+
+function findNode(nodes: FileNode[], path: string): FileNode | undefined {
+  for (const node of nodes) {
+    if (node.path === path) return node;
+    if (node.children) {
+      const found = findNode(node.children, path);
+      if (found) return found;
+    }
+  }
+  return undefined;
+}
+
+function updateNodeAtPath(
+  path: string,
+  updater: (node: FileNode) => Partial<FileNode>,
+) {
+  setState(
+    'tree',
+    (tree) => updateTreeNodes(tree, path, updater),
+  );
+}
+
+function updateTreeNodes(
+  nodes: FileNode[],
+  path: string,
+  updater: (node: FileNode) => Partial<FileNode>,
+): FileNode[] {
+  return nodes.map((node) => {
+    if (node.path === path) {
+      return { ...node, ...updater(node) };
+    }
+    if (node.children) {
+      return { ...node, children: updateTreeNodes(node.children, path, updater) };
+    }
+    return node;
+  });
+}
+
+async function openSingleFile(): Promise<string | null> {
+  const selected = await openDialog({
+    directory: false,
+    multiple: false,
+    filters: [{ name: 'Markdown', extensions: ['md'] }],
+  });
+  if (!selected) return null;
+  return selected;
+}
+
+export {
+  state as workspaceState,
+  openWorkspace,
+  initWorkspace,
+  refreshWorkspace,
+  createFolder,
+  toggleFolder,
+  selectFile,
+  selectedFolder,
+  selectFolder,
+  collectMarkdownFiles,
+  collectMarkdownFilesByGroup,
+  openSingleFile,
+};
+export type { FileGroup };

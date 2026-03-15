@@ -1,0 +1,321 @@
+import { createSignal } from 'solid-js';
+import { emit, listen } from '@tauri-apps/api/event';
+import type { AppConfig } from '~/lib/config-persistence';
+import { updateAndSave } from '~/lib/config-persistence';
+
+export type Locale = 'zh-CN' | 'zh-TW' | 'en-US' | 'ja-JP' | 'ko-KR';
+
+const VALID_LOCALES: Locale[] = ['zh-CN', 'zh-TW', 'en-US', 'ja-JP', 'ko-KR'];
+
+// 翻译字典
+const messages: Record<Locale, Record<string, string>> = {
+  'zh-CN': {
+    appName: '皮蛋记',
+    settings: '设置',
+    edit: '编辑',
+    preview: '预览',
+    layout: '布局',
+    open: '打开',
+    openFolder: '打开文件夹',
+    openFile: '打开文件',
+    openDirectory: '打开目录',
+    openFolderToStart: '打开一个文件夹开始',
+    notOpened: '未打开',
+    workspaceNotOpened: '未打开工作区',
+    unsaved: '未保存',
+    noHeadings: '无标题',
+    documentToc: '文档目录',
+    selectFont: '选择字体',
+    decrease: '减小',
+    increase: '增大',
+    fontSizeAdjust: '字号调节',
+    loading: '加载中…',
+    reading: '阅读',
+    typography: '字体',
+    theme: '主题',
+    contentWidth: '内容宽度',
+    lineHeight: '行距',
+    uiLabel: '界面',
+    bodyLabel: '正文',
+    codeLabel: '代码',
+    narrow: '窄',
+    standard: '标准',
+    wide: '宽',
+    compact: '紧凑',
+    comfortable: '舒适',
+    loose: '宽松',
+    followSystem: '跟随系统',
+    lightTheme: '亮色',
+    darkTheme: '暗色',
+    catDark: '深色',
+    catLight: '浅色',
+    builtinFonts: '内置字体',
+    systemFonts: '系统字体',
+    language: '语言',
+    basic: '基础',
+    formatMarkdown: '自动排版',
+    symbolLabel: '符号',
+    stats: '文档统计',
+    words: '字数',
+    characters: '字符数',
+    lines: '行数',
+  },
+  'zh-TW': {
+    appName: '皮蛋記',
+    settings: '設定',
+    edit: '編輯',
+    preview: '預覽',
+    layout: '佈局',
+    open: '開啟',
+    openFolder: '開啟資料夾',
+    openFile: '開啟檔案',
+    openDirectory: '開啟目錄',
+    openFolderToStart: '開啟一個資料夾開始',
+    notOpened: '未開啟',
+    workspaceNotOpened: '未開啟工作區',
+    unsaved: '未儲存',
+    noHeadings: '無標題',
+    documentToc: '文件目錄',
+    selectFont: '選擇字型',
+    decrease: '縮小',
+    increase: '放大',
+    fontSizeAdjust: '字型大小',
+    loading: '載入中…',
+    reading: '閱讀',
+    typography: '字型',
+    theme: '主題',
+    contentWidth: '內容寬度',
+    lineHeight: '行距',
+    uiLabel: '介面',
+    bodyLabel: '正文',
+    codeLabel: '程式碼',
+    narrow: '窄',
+    standard: '標準',
+    wide: '寬',
+    compact: '緊湊',
+    comfortable: '舒適',
+    loose: '寬鬆',
+    followSystem: '跟隨系統',
+    lightTheme: '亮色',
+    darkTheme: '暗色',
+    catDark: '深色',
+    catLight: '淺色',
+    builtinFonts: '內建字型',
+    systemFonts: '系統字型',
+    language: '語言',
+    basic: '基礎',
+    formatMarkdown: '自動排版',
+    symbolLabel: '符號',
+    stats: '文件統計',
+    words: '字數',
+    characters: '字元數',
+    lines: '行數',
+  },
+  'en-US': {
+    appName: 'PiDanMD',
+    settings: 'Settings',
+    edit: 'Edit',
+    preview: 'Preview',
+    layout: 'Layout',
+    open: 'Open',
+    openFolder: 'Open Folder',
+    openFile: 'Open File',
+    openDirectory: 'Open Directory',
+    openFolderToStart: 'Open a folder to start',
+    notOpened: 'Not Opened',
+    workspaceNotOpened: 'No Workspace',
+    unsaved: 'Unsaved',
+    noHeadings: 'No Headings',
+    documentToc: 'Table of Contents',
+    selectFont: 'Select Font',
+    decrease: 'Decrease',
+    increase: 'Increase',
+    fontSizeAdjust: 'Font Size',
+    loading: 'Loading...',
+    reading: 'Reading',
+    typography: 'Typography',
+    theme: 'Theme',
+    contentWidth: 'Content Width',
+    lineHeight: 'Line Height',
+    uiLabel: 'UI',
+    bodyLabel: 'Body',
+    codeLabel: 'Code',
+    narrow: 'Narrow',
+    standard: 'Standard',
+    wide: 'Wide',
+    compact: 'Compact',
+    comfortable: 'Comfortable',
+    loose: 'Loose',
+    followSystem: 'System',
+    lightTheme: 'Light',
+    darkTheme: 'Dark',
+    catDark: 'Dark',
+    catLight: 'Light',
+    builtinFonts: 'Built-in',
+    systemFonts: 'System',
+    language: 'Language',
+    basic: 'Basic',
+    formatMarkdown: 'Format',
+    symbolLabel: 'Symbol',
+    stats: 'Stats',
+    words: 'Words',
+    characters: 'Characters',
+    lines: 'Lines',
+  },
+  'ja-JP': {
+    appName: 'PiDanMD',
+    settings: '設定',
+    edit: '編集',
+    preview: 'プレビュー',
+    layout: 'レイアウト',
+    open: '開く',
+    openFolder: 'フォルダを開く',
+    openFile: 'ファイルを開く',
+    openDirectory: 'ディレクトリを開く',
+    openFolderToStart: 'フォルダを開いて始めましょう',
+    notOpened: '未開封',
+    workspaceNotOpened: 'ワークスペース未設定',
+    unsaved: '未保存',
+    noHeadings: '見出しなし',
+    documentToc: '目次',
+    selectFont: 'フォントを選択',
+    decrease: '縮小',
+    increase: '拡大',
+    fontSizeAdjust: 'フォントサイズ',
+    loading: '読み込み中…',
+    reading: '読書',
+    typography: 'タイポグラフィ',
+    theme: 'テーマ',
+    contentWidth: 'コンテンツ幅',
+    lineHeight: '行間',
+    uiLabel: 'UI',
+    bodyLabel: '本文',
+    codeLabel: 'コード',
+    narrow: '狭い',
+    standard: '標準',
+    wide: '広い',
+    compact: 'コンパクト',
+    comfortable: '快適',
+    loose: 'ゆったり',
+    followSystem: 'システム',
+    lightTheme: 'ライト',
+    darkTheme: 'ダーク',
+    catDark: 'ダーク',
+    catLight: 'ライト',
+    builtinFonts: '内蔵',
+    systemFonts: 'システム',
+    language: '言語',
+    basic: '基本',
+    formatMarkdown: 'フォーマット',
+    symbolLabel: '記号',
+    stats: '統計',
+    words: '単語数',
+    characters: '文字数',
+    lines: '行数',
+  },
+  'ko-KR': {
+    appName: 'PiDanMD',
+    settings: '설정',
+    edit: '편집',
+    preview: '미리보기',
+    layout: '레이아웃',
+    open: '열기',
+    openFolder: '폴더 열기',
+    openFile: '파일 열기',
+    openDirectory: '디렉토리 열기',
+    openFolderToStart: '폴더를 열어 시작하세요',
+    notOpened: '열리지 않음',
+    workspaceNotOpened: '워크스페이스 없음',
+    unsaved: '저장되지 않음',
+    noHeadings: '제목 없음',
+    documentToc: '목차',
+    selectFont: '글꼴 선택',
+    decrease: '축소',
+    increase: '확대',
+    fontSizeAdjust: '글꼴 크기',
+    loading: '로딩 중…',
+    reading: '읽기',
+    typography: '타이포그래피',
+    theme: '테마',
+    contentWidth: '콘텐츠 너비',
+    lineHeight: '줄 간격',
+    uiLabel: 'UI',
+    bodyLabel: '본문',
+    codeLabel: '코드',
+    narrow: '좁게',
+    standard: '표준',
+    wide: '넓게',
+    compact: '좁게',
+    comfortable: '편안하게',
+    loose: '넓게',
+    followSystem: '시스템',
+    lightTheme: '라이트',
+    darkTheme: '다크',
+    catDark: '다크',
+    catLight: '라이트',
+    builtinFonts: '내장',
+    systemFonts: '시스템',
+    language: '언어',
+    basic: '기본',
+    formatMarkdown: '서식',
+    symbolLabel: '기호',
+    stats: '통계',
+    words: '단어 수',
+    characters: '문자 수',
+    lines: '줄 수',
+  },
+};
+
+const [locale, _setLocale] = createSignal<Locale>('zh-CN');
+
+function detectBrowserLocale(): Locale {
+  const lang = navigator.language;
+  if (lang === 'zh-TW' || lang === 'zh-Hant' || lang.startsWith('zh-Hant')) return 'zh-TW';
+  if (lang.startsWith('zh')) return 'zh-CN';
+  if (lang.startsWith('ja')) return 'ja-JP';
+  if (lang.startsWith('ko')) return 'ko-KR';
+  return 'en-US';
+}
+
+export function initLocaleFromConfig(config: AppConfig) {
+  const l = config.locale as Locale;
+  if (VALID_LOCALES.includes(l)) {
+    _setLocale(l);
+  } else {
+    _setLocale(detectBrowserLocale());
+  }
+  document.documentElement.lang = locale();
+}
+
+export function t(key: string): string {
+  return messages[locale()][key] ?? key;
+}
+
+// 带数字插值的笔记计数
+export function noteCount(n: number): string {
+  const l = locale();
+  if (l === 'zh-CN') return `${n} 篇笔记`;
+  if (l === 'zh-TW') return `${n} 篇筆記`;
+  if (l === 'ja-JP') return `${n} 件のノート`;
+  if (l === 'ko-KR') return `${n}개 노트`;
+  return `${n} notes`;
+}
+
+export function setLocale(l: Locale) {
+  if (l === locale()) return;
+  _setLocale(l);
+  document.documentElement.lang = l;
+  emit('locale-changed', l);
+  updateAndSave((c) => { c.locale = l; });
+}
+
+// 跨窗口同步
+listen<Locale>('locale-changed', (event) => {
+  const incoming = event.payload;
+  if (incoming !== locale()) {
+    _setLocale(incoming);
+    document.documentElement.lang = incoming;
+  }
+});
+
+export { locale };

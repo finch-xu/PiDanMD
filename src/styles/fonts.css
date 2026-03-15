@@ -1,0 +1,29 @@
+@font-face {
+  font-family: 'LXGW WenKai Screen';
+  src: url('/fonts/LXGWWenKaiScreen.ttf') format('truetype');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'LXGW WenKai Mono Screen';
+  src: url('/fonts/LXGWWenKaiMonoScreen.ttf') format('truetype');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Cascadia Code NF';
+  src: url('/fonts/CascadiaCodeNF.ttf') format('truetype');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Noto Color Emoji';
+  src: url('/fonts/NotoColorEmoji-Regular.ttf') format('truetype');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Noto Sans Symbols';
+  src: url('/fonts/NotoSansSymbols-Regular.ttf') format('truetype');
+  font-display: swap;
+}

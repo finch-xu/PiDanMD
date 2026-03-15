@@ -1,1 +1,62 @@
-# PiDanMD
+<p align="center">
+  <img src="public/logo.png" width="80" />
+</p>
+
+<h1 align="center">PiDanMD 皮蛋记</h1>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/version-0.1.0-blue" />
+  <img src="https://img.shields.io/badge/license-MIT-green" />
+  <img src="https://img.shields.io/badge/Tauri-2-24C8D8?logo=tauri&logoColor=white" />
+  <img src="https://img.shields.io/badge/SolidJS-1.9-2C4F7C?logo=solid&logoColor=white" />
+  <img src="https://img.shields.io/badge/Rust-1.80+-DEA584?logo=rust&logoColor=white" />
+  <img src="https://img.shields.io/badge/Tailwind_CSS-4-06B6D4?logo=tailwindcss&logoColor=white" />
+</p>
+
+<p align="center">一个轻量美观的跨平台 Markdown 编辑器桌面应用，支持 macOS / Windows / Linux，提供实时预览、GFM、数学公式与代码高亮。</p>
+
+## 技术选型
+
+| 层级 | 技术 |
+|------|------|
+| 桌面框架 | Tauri 2 |
+| 前端框架 | SolidJS |
+| 编辑器内核 | CodeMirror 6 |
+| Markdown 渲染 | unified (remark + rehype) |
+| 代码高亮 | Shiki |
+| 数学公式 | KaTeX |
+| 样式 | Tailwind CSS 4 |
+
+## 开发
+
+需要预装 [Rust](https://rustup.rs/) 和 [pnpm](https://pnpm.io/)。
+
+```bash
+pnpm install
+pnpm tauri dev
+```
+
+## 打包
+
+```bash
+pnpm tauri build
+```
+
+## 语言支持
+
+界面支持简体中文、繁體中文、English、日本語、한국어，可在设置中切换，也会自动跟随系统语言。
+
+## 内置字体
+
+本项目内置以下字体，详见 [THIRD_PARTY_LICENSES](THIRD_PARTY_LICENSES)。
+
+| 字体 | 用途 | 许可证 |
+|------|------|--------|
+| LXGW WenKai Screen (霞鹜文楷屏幕阅读版) | 正文 / UI | SIL OFL 1.1 |
+| Cascadia Code NF | 代码 | SIL OFL 1.1 |
+| Noto Color Emoji | Emoji | SIL OFL 1.1 + Apache 2.0 |
+| Noto Sans Symbols | 符号 | SIL OFL 1.1 |
+
+## License
+
+[MIT](LICENSE)

@@ -1,0 +1,175 @@
+[data-theme="mocha"] {
+  --ctp-base: #1e1e2e;
+  --ctp-mantle: #181825;
+  --ctp-crust: #11111b;
+  --ctp-surface0: #313244;
+  --ctp-surface1: #45475a;
+  --ctp-surface2: #585b70;
+  --ctp-overlay0: #6c7086;
+  --ctp-overlay1: #7f849c;
+  --ctp-overlay2: #9399b2;
+  --ctp-subtext0: #a6adc8;
+  --ctp-subtext1: #bac2de;
+  --ctp-text: #cdd6f4;
+  --ctp-lavender: #b4befe;
+  --ctp-blue: #89b4fa;
+  --ctp-sapphire: #74c7ec;
+  --ctp-sky: #89dceb;
+  --ctp-teal: #94e2d5;
+  --ctp-green: #a6e3a1;
+  --ctp-yellow: #f9e2af;
+  --ctp-peach: #fab387;
+  --ctp-maroon: #eba0ac;
+  --ctp-red: #f38ba8;
+  --ctp-mauve: #cba6f7;
+  --ctp-pink: #f5c2e7;
+  --ctp-flamingo: #f2cdcd;
+  --ctp-rosewater: #f5e0dc;
+}
+
+[data-theme="latte"] {
+  --ctp-base: #eff1f5;
+  --ctp-mantle: #e6e9ef;
+  --ctp-crust: #dce0e8;
+  --ctp-surface0: #ccd0da;
+  --ctp-surface1: #bcc0cc;
+  --ctp-surface2: #acb0be;
+  --ctp-overlay0: #9ca0b0;
+  --ctp-overlay1: #8c8fa1;
+  --ctp-overlay2: #7c7f93;
+  --ctp-subtext0: #6c6f85;
+  --ctp-subtext1: #5c5f77;
+  --ctp-text: #4c4f69;
+  --ctp-lavender: #7287fd;
+  --ctp-blue: #1e66f5;
+  --ctp-sapphire: #209fb5;
+  --ctp-sky: #04a5e5;
+  --ctp-teal: #179299;
+  --ctp-green: #40a02b;
+  --ctp-yellow: #df8e1d;
+  --ctp-peach: #fe640b;
+  --ctp-maroon: #e64553;
+  --ctp-red: #d20f39;
+  --ctp-mauve: #8839ef;
+  --ctp-pink: #ea76cb;
+  --ctp-flamingo: #dd7878;
+  --ctp-rosewater: #dc8a78;
+}
+
+[data-theme="frappe"] {
+  --ctp-base: #303446;
+  --ctp-mantle: #292c3c;
+  --ctp-crust: #232634;
+  --ctp-surface0: #414559;
+  --ctp-surface1: #51576d;
+  --ctp-surface2: #626880;
+  --ctp-overlay0: #737994;
+  --ctp-overlay1: #838ba7;
+  --ctp-overlay2: #949cbb;
+  --ctp-subtext0: #a5adce;
+  --ctp-subtext1: #b5bfe2;
+  --ctp-text: #c6d0f5;
+  --ctp-lavender: #babbf1;
+  --ctp-blue: #8caaee;
+  --ctp-sapphire: #85c1dc;
+  --ctp-sky: #99d1db;
+  --ctp-teal: #81c8be;
+  --ctp-green: #a6d189;
+  --ctp-yellow: #e5c890;
+  --ctp-peach: #ef9f76;
+  --ctp-maroon: #ea999c;
+  --ctp-red: #e78284;
+  --ctp-mauve: #ca9ee6;
+  --ctp-pink: #f4b8e4;
+  --ctp-flamingo: #eebebe;
+  --ctp-rosewater: #f2d5cf;
+}
+
+[data-theme="macchiato"] {
+  --ctp-base: #24273a;
+  --ctp-mantle: #1e2030;
+  --ctp-crust: #181926;
+  --ctp-surface0: #363a4f;
+  --ctp-surface1: #494d64;
+  --ctp-surface2: #5b6078;
+  --ctp-overlay0: #6e738d;
+  --ctp-overlay1: #8087a2;
+  --ctp-overlay2: #939ab7;
+  --ctp-subtext0: #a5adcb;
+  --ctp-subtext1: #b8c0e0;
+  --ctp-text: #cad3f5;
+  --ctp-lavender: #b7bdf8;
+  --ctp-blue: #8aadf4;
+  --ctp-sapphire: #7dc4e4;
+  --ctp-sky: #91d7e3;
+  --ctp-teal: #8bd5ca;
+  --ctp-green: #a6da95;
+  --ctp-yellow: #eed49f;
+  --ctp-peach: #f5a97f;
+  --ctp-maroon: #ee99a0;
+  --ctp-red: #ed8796;
+  --ctp-mauve: #c6a0f6;
+  --ctp-pink: #f5bde6;
+  --ctp-flamingo: #f0c6c6;
+  --ctp-rosewater: #f4dbd6;
+}
+
+/* ── macOS Native Light ──────────────────────── */
+[data-theme="light"] {
+  --ctp-base: #ffffff;
+  --ctp-mantle: #f5f5f7;
+  --ctp-crust: #e8e8ed;
+  --ctp-surface0: #e5e5ea;
+  --ctp-surface1: #d1d1d6;
+  --ctp-surface2: #c7c7cc;
+  --ctp-overlay0: #aeaeb2;
+  --ctp-overlay1: #8e8e93;
+  --ctp-overlay2: #636366;
+  --ctp-subtext0: #636366;
+  --ctp-subtext1: #48484a;
+  --ctp-text: #1d1d1f;
+  --ctp-blue: #007aff;
+  --ctp-red: #ff3b30;
+  --ctp-green: #34c759;
+  --ctp-yellow: #ff9500;
+  --ctp-mauve: #af52de;
+  --ctp-peach: #e45c00;
+  --ctp-teal: #30b0c7;
+  --ctp-pink: #ff2d55;
+  --ctp-sky: #5ac8fa;
+  --ctp-sapphire: #0071e3;
+  --ctp-lavender: #7b6cf6;
+  --ctp-flamingo: #e8586d;
+  --ctp-rosewater: #f0a0a8;
+  --ctp-maroon: #d1242f;
+}
+
+/* ── macOS Native Dark ───────────────────────── */
+[data-theme="dark"] {
+  --ctp-base: #1c1c1e;
+  --ctp-mantle: #2c2c2e;
+  --ctp-crust: #1c1c1e;
+  --ctp-surface0: #3a3a3c;
+  --ctp-surface1: #48484a;
+  --ctp-surface2: #636366;
+  --ctp-overlay0: #636366;
+  --ctp-overlay1: #8e8e93;
+  --ctp-overlay2: #aeaeb2;
+  --ctp-subtext0: #8e8e93;
+  --ctp-subtext1: #aeaeb2;
+  --ctp-text: #f5f5f7;
+  --ctp-blue: #0a84ff;
+  --ctp-red: #ff453a;
+  --ctp-green: #30d158;
+  --ctp-yellow: #ff9f0a;
+  --ctp-mauve: #bf5af2;
+  --ctp-peach: #ff6723;
+  --ctp-teal: #40c8e0;
+  --ctp-pink: #ff375f;
+  --ctp-sky: #64d2ff;
+  --ctp-sapphire: #0a84ff;
+  --ctp-lavender: #a78bfa;
+  --ctp-flamingo: #ff6b81;
+  --ctp-rosewater: #ffb3b8;
+  --ctp-maroon: #e03e3e;
+}

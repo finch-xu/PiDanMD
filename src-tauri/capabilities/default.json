@@ -1,0 +1,13 @@
+{
+  "identifier": "default",
+  "description": "Default capabilities for PiDanMD",
+  "windows": ["main", "settings"],
+  "permissions": [
+    "core:default",
+    "core:window:allow-start-dragging",
+    "core:window:allow-set-focus",
+    "core:webview:allow-create-webview-window",
+    "dialog:default",
+    "opener:default"
+  ]
+}
