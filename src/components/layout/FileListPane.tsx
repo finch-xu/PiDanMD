@@ -68,9 +68,13 @@ function FileItem(props: { file: import('~/types/file-tree').FileNode; isActive:
 
 export function FileListPane() {
   const handleOpen = async () => {
-    const selected = await open({ directory: true });
-    if (selected) {
-      openWorkspace(selected);
+    try {
+      const selected = await open({ directory: true });
+      if (selected) {
+        openWorkspace(selected);
+      }
+    } catch (e) {
+      console.error('Failed to open folder dialog:', e);
     }
   };
 
@@ -120,7 +124,7 @@ export function FileListPane() {
         <div class="flex items-center gap-0.5">
           <button
             class="w-6 h-6 flex items-center justify-center rounded-md text-overlay1 hover:text-text hover:bg-surface0 focus-visible:ring-1 focus-visible:ring-overlay1 focus-visible:outline-none transition-colors"
-            onClick={() => openSingleFile().then((p) => { if (p) loadFile(p); })}
+            onClick={() => openSingleFile().then((p) => { if (p) loadFile(p); }).catch((e) => console.error('Failed to open file dialog:', e))}
             title={t('openFile')}
           >
             <FileText size={16} />

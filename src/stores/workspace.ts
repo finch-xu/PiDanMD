@@ -1,7 +1,7 @@
 import { createSignal } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import type { FileNode } from '~/types/file-tree';
-import { listDirectory, createDirectory, getDefaultStorageDir, readFile, type FileEntry } from '~/lib/tauri/commands';
+import { listDirectory, createDirectory, getDefaultStorageDir, readFile, openWorkspaceCommand, type FileEntry } from '~/lib/tauri/commands';
 import { open as openDialog } from '@tauri-apps/plugin-dialog';
 
 interface WorkspaceState {
@@ -58,6 +58,7 @@ async function loadTitles(nodes: FileNode[]) {
 }
 
 async function openWorkspace(path: string) {
+  await openWorkspaceCommand(path);
   const entries = await listDirectory(path);
   const nodes = entriesToNodes(entries);
   await loadChildrenDeep(nodes, 2);
@@ -257,13 +258,25 @@ function updateTreeNodes(
 }
 
 async function openSingleFile(): Promise<string | null> {
-  const selected = await openDialog({
-    directory: false,
-    multiple: false,
-    filters: [{ name: 'Markdown', extensions: ['md'] }],
-  });
-  if (!selected) return null;
-  return selected;
+  try {
+    const selected = await openDialog({
+      directory: false,
+      multiple: false,
+      filters: [{ name: 'Markdown', extensions: ['md'] }],
+    });
+    if (!selected) return null;
+
+    // If the file is outside the current workspace, switch workspace to its parent
+    const parentDir = selected.substring(0, selected.lastIndexOf('/'));
+    if (!state.workspacePath || !selected.startsWith(state.workspacePath + '/')) {
+      await openWorkspace(parentDir);
+    }
+
+    return selected;
+  } catch (e) {
+    console.error('[workspace] Failed to open file dialog:', e);
+    return null;
+  }
 }
 
 export {

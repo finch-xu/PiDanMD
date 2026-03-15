@@ -6,15 +6,23 @@ import FileText from 'lucide-solid/icons/file-text';
 
 export function WorkspaceHeader() {
   const handleOpen = async () => {
-    const selected = await open({ directory: true });
-    if (selected) {
-      openWorkspace(selected);
+    try {
+      const selected = await open({ directory: true });
+      if (selected) {
+        openWorkspace(selected);
+      }
+    } catch (e) {
+      console.error('Failed to open folder dialog:', e);
     }
   };
 
   const handleOpenFile = async () => {
-    const path = await openSingleFile();
-    if (path) loadFile(path);
+    try {
+      const path = await openSingleFile();
+      if (path) loadFile(path);
+    } catch (e) {
+      console.error('Failed to open file dialog:', e);
+    }
   };
 
   const folderName = () => {

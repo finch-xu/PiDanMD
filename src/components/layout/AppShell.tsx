@@ -20,12 +20,12 @@ export function AppShell() {
         case 'open-file':
           openSingleFile().then((path) => {
             if (path) loadFile(path);
-          });
+          }).catch((e) => console.error('Failed to open file dialog:', e));
           break;
         case 'open-folder':
           open({ directory: true }).then((selected) => {
             if (selected) openWorkspace(selected as string);
-          });
+          }).catch((e) => console.error('Failed to open folder dialog:', e));
           break;
         case 'save':
           if (filePath()) saveFile();

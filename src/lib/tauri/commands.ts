@@ -30,3 +30,7 @@ export async function createDirectory(path: string): Promise<void> {
 export async function getDefaultStorageDir(): Promise<string> {
   return invoke('get_default_storage_dir');
 }
+
+export async function openWorkspaceCommand(path: string): Promise<void> {
+  return invoke('open_workspace', { path });
+}
