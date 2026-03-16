@@ -40,7 +40,7 @@ export const BUILTIN_CODE_FONTS: BuiltinFont[] = [
 ];
 
 function escapeCssFontName(name: string): string {
-  return name.replace(/'/g, "\\'");
+  return name.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
 }
 
 export function fontToCss(name: string, builtinList: BuiltinFont[]): string {

@@ -50,9 +50,19 @@ const HEADING_RE = /<(h[1-6])>([\s\S]*?)<\/h[1-6]>/g;
 const HTML_TAG_RE = /<[^>]+>/g;
 const COLOR_CODE_RE = /<code>(#[0-9a-fA-F]{3,8})<\/code>/g;
 
+function getPlainTextFromHtml(html: string): string {
+  let prev = '';
+  let result = html;
+  while (result !== prev) {
+    prev = result;
+    result = result.replace(HTML_TAG_RE, '');
+  }
+  return decodeHtmlEntities(result);
+}
+
 function addHeadingIds(html: string): string {
   return html.replace(HEADING_RE, (match, tag, inner) => {
-    const text = inner.replace(HTML_TAG_RE, '').trim();
+    const text = getPlainTextFromHtml(inner).trim();
     const id = text.toLowerCase().replace(/[^\w\u4e00-\u9fff]+/g, '-').replace(/^-|-$/g, '');
     return `<${tag} id="${escapeHtml(id)}">${inner}</${tag}>`;
   });
