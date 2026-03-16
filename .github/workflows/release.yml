@@ -14,23 +14,29 @@ jobs:
           - platform: macos-latest
             args: --target aarch64-apple-darwin
             rust_targets: aarch64-apple-darwin,x86_64-apple-darwin
+            os_name: macos
           - platform: macos-latest
             args: --target x86_64-apple-darwin
             rust_targets: aarch64-apple-darwin,x86_64-apple-darwin
+            os_name: macos
           # Windows
           - platform: windows-latest
             args: --target x86_64-pc-windows-msvc
             rust_targets: ''
+            os_name: windows
           - platform: windows-latest
             args: --target aarch64-pc-windows-msvc
             rust_targets: aarch64-pc-windows-msvc
+            os_name: windows
           # Linux
           - platform: ubuntu-22.04
             args: ''
             rust_targets: ''
+            os_name: linux
           - platform: ubuntu-22.04-arm
             args: ''
             rust_targets: ''
+            os_name: linux
 
     runs-on: ${{ matrix.platform }}
     environment: APPLE_CERTIFICATE
@@ -65,6 +71,7 @@ jobs:
       - run: pnpm install
 
       - uses: tauri-apps/tauri-action@v0
+        id: build
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
@@ -74,7 +81,20 @@ jobs:
           APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
         with:
-          tagName: ${{ github.event.release.tag_name }}
-          releaseName: ${{ github.event.release.name }}
-          releaseId: ${{ github.event.release.id }}
           args: ${{ matrix.args }}
+
+      - name: Rename and upload artifacts
+        shell: bash
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG="${{ github.event.release.tag_name }}"
+          OS="${{ matrix.os_name }}"
+          ARTIFACTS='${{ steps.build.outputs.artifactPaths }}'
+          echo "$ARTIFACTS" | jq -r '.[]' | while read -r path; do
+            [ -f "$path" ] || continue
+            filename=$(basename "$path")
+            new_name=$(echo "$filename" | sed "s/_/-${OS}_/")
+            cp "$path" "/tmp/${new_name}"
+            gh release upload "$TAG" "/tmp/${new_name}" --clobber
+          done
