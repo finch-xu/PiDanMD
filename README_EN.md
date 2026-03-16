@@ -31,8 +31,8 @@
 | Windows | ARM64 | Windows 11 | `.msi` `.exe` |
 | Linux | x64 | Ubuntu 22.04 / glibc 2.35+ | `.deb` `.AppImage` |
 | Linux | ARM64 | Ubuntu 22.04 / glibc 2.35+ | `.deb` `.AppImage` |
-| Fedora | x64 | Fedora 40+ | `.rpm` |
-| Fedora | ARM64 | Fedora 40+ | `.rpm` |
+| Linux | x64 | Fedora 40+ | `.rpm` |
+| Linux | ARM64 | Fedora 40+ | `.rpm` |
 
 ## Tech Stack
 
