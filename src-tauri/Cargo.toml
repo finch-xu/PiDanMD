@@ -3,6 +3,7 @@ name = "pidanmd"
 version = "0.1.0"
 description = "A beautiful Markdown editor"
 authors = ["finchxu"]
+license = "MIT"
 edition = "2021"
 
 [lib]

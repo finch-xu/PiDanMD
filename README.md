@@ -57,6 +57,15 @@ pnpm tauri build
 | Noto Color Emoji | Emoji | SIL OFL 1.1 + Apache 2.0 |
 | Noto Sans Symbols | 符号 | SIL OFL 1.1 |
 
+## 许可证检查
+
+本项目使用 [cargo-deny](https://github.com/EmbarkStudios/cargo-deny) 检查 Rust 依赖的许可证兼容性。
+
+```bash
+cargo install cargo-deny        # 首次使用需安装
+cd src-tauri && cargo deny check licenses
+```
+
 ## License
 
 [MIT](LICENSE)
