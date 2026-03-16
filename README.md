@@ -5,7 +5,7 @@
 <h1 align="center">PiDanMD 皮蛋记</h1>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-0.1.0-blue" />
+  <img src="https://img.shields.io/badge/version-0.1.5-blue" />
   <img src="https://img.shields.io/badge/license-MIT-green" />
   <img src="https://img.shields.io/badge/Tauri-2-24C8D8?logo=tauri&logoColor=white" />
   <img src="https://img.shields.io/badge/SolidJS-1.9-2C4F7C?logo=solid&logoColor=white" />
@@ -18,6 +18,17 @@
 <p align="center">
   <img src="public/screenshot.png" width="720" />
 </p>
+
+## 平台支持
+
+| 操作系统 | 架构 | 最低版本 | 安装格式 |
+|---------|------|---------|---------|
+| macOS | ARM64 (Apple Silicon) | macOS 11.0 (Big Sur) | `.dmg` |
+| macOS | x64 (Intel) | macOS 10.13 (High Sierra) | `.dmg` |
+| Windows | x64 | Windows 10 (1803+) | `.msi` `.exe` |
+| Windows | ARM64 | Windows 11 | `.msi` `.exe` |
+| Linux | x64 | Ubuntu 22.04 / glibc 2.35+ | `.deb` `.rpm` `.AppImage` |
+| Linux | ARM64 | Ubuntu 22.04 / glibc 2.35+ | `.deb` `.rpm` `.AppImage` |
 
 ## 技术选型
 
