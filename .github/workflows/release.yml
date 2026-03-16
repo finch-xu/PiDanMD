@@ -16,6 +16,7 @@ jobs:
             args: --target x86_64-pc-windows-msvc
 
     runs-on: ${{ matrix.platform }}
+    environment: APPLE_CERTIFICATE
 
     permissions:
       contents: write
