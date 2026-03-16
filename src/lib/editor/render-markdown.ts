@@ -148,7 +148,8 @@ export async function renderMarkdown(markdown: string, resolvedTheme?: string, f
       const code = decodeHtmlEntities(encodedCode);
       try {
         return { fullMatch, result: await codeToHtml(code, { lang, theme: shikiTheme }) };
-      } catch {
+      } catch (e) {
+        console.warn(`[Shiki] highlight failed for "${lang}":`, e);
         return { fullMatch, result: fullMatch };
       }
     }),
