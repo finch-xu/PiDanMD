@@ -13,7 +13,7 @@
   <img src="https://img.shields.io/badge/Tailwind_CSS-4-06B6D4?logo=tailwindcss&logoColor=white" />
 </p>
 
-<p align="center">一个轻量美观的跨平台 Markdown 编辑器桌面应用，支持 macOS / Windows / Linux，提供实时预览、GFM、数学公式与代码高亮。</p>
+<p align="center">一个轻量美观的跨平台 Markdown 编辑器桌面应用，支持 macOS / Windows / Linux，提供实时预览、GFM、数学公式与代码高亮，开箱即用，并使用了霞鹜文楷字体美观简洁。</p>
 
 ## 技术选型
 
@@ -26,6 +26,7 @@
 | 代码高亮 | Shiki |
 | 数学公式 | KaTeX |
 | 样式 | Tailwind CSS 4 |
+| icons | lucide |
 
 ## 开发
 
