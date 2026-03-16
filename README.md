@@ -1,3 +1,5 @@
+<p align="right"><a href="README_EN.md">English</a></p>
+
 <p align="center">
   <img src="public/logo.png" width="80" />
 </p>
@@ -81,6 +83,10 @@ pnpm tauri build
 cargo install cargo-deny        # 首次使用需安装
 cd src-tauri && cargo deny check licenses
 ```
+
+## 致谢
+
+本项目的界面设计受到 [妙言 MiaoYan](https://github.com/tw93/MiaoYan) 的启发。如果你正在寻找一款原生 macOS Markdown 编辑器，强烈推荐妙言。
 
 ## License
 
