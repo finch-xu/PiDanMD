@@ -28,13 +28,13 @@ jobs:
             args: --target aarch64-pc-windows-msvc
             rust_targets: aarch64-pc-windows-msvc
             os_name: windows
-          # Linux
+          # Linux (deb + AppImage only)
           - platform: ubuntu-22.04
-            args: ''
+            args: '--bundles deb appimage'
             rust_targets: ''
             os_name: linux
           - platform: ubuntu-22.04-arm
-            args: ''
+            args: '--bundles deb appimage'
             rust_targets: ''
             os_name: linux
 
@@ -97,4 +97,60 @@ jobs:
             new_name=$(echo "$filename" | sed "s/_/-${OS}_/")
             cp "$path" "/tmp/${new_name}"
             gh release upload "$TAG" "/tmp/${new_name}" --clobber
+          done
+
+  build-rpm:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: ubuntu-22.04
+          - runner: ubuntu-22.04-arm
+
+    runs-on: ${{ matrix.runner }}
+    container:
+      image: fedora:40
+
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          dnf group install -y "C Development Tools and Libraries"
+          dnf install -y \
+            webkit2gtk4.1-devel openssl-devel libappindicator-gtk3-devel \
+            librsvg2-devel patchelf fontconfig-devel \
+            nodejs npm curl file pkg-config git
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: swatinem/rust-cache@v2
+        with:
+          workspaces: './src-tauri -> target'
+
+      - name: Install pnpm and build
+        run: |
+          npm install -g pnpm
+          pnpm install
+          pnpm tauri build --bundles rpm
+
+      - name: Upload RPM to release
+        shell: bash
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_ID: ${{ github.event.release.id }}
+          REPO: ${{ github.repository }}
+        run: |
+          for rpm in src-tauri/target/release/bundle/rpm/*.rpm; do
+            [ -f "$rpm" ] || continue
+            filename=$(basename "$rpm")
+            new_name=$(echo "$filename" | sed "s/-/-fedora-/")
+            curl -sSL -X POST \
+              -H "Authorization: token ${GITHUB_TOKEN}" \
+              -H "Content-Type: application/octet-stream" \
+              --data-binary "@${rpm}" \
+              "https://uploads.github.com/repos/${REPO}/releases/${RELEASE_ID}/assets?name=${new_name}"
           done
