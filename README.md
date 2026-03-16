@@ -5,7 +5,7 @@
 <h1 align="center">PiDanMD 皮蛋记</h1>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-0.1.5-blue" />
+  <img src="https://img.shields.io/github/v/release/finch-xu/PiDanMD?color=blue&label=version" />
   <img src="https://img.shields.io/badge/license-MIT-green" />
   <img src="https://img.shields.io/badge/Tauri-2-24C8D8?logo=tauri&logoColor=white" />
   <img src="https://img.shields.io/badge/SolidJS-1.9-2C4F7C?logo=solid&logoColor=white" />
