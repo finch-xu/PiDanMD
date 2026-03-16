@@ -15,6 +15,10 @@
 
 <p align="center">一个轻量美观的跨平台 Markdown 编辑器桌面应用，支持 macOS / Windows / Linux，提供实时预览、GFM、数学公式与代码高亮，开箱即用，并使用了霞鹜文楷字体美观简洁。</p>
 
+<p align="center">
+  <img src="public/screenshot.png" width="720" />
+</p>
+
 ## 技术选型
 
 | 层级 | 技术 |

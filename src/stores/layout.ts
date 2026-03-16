@@ -9,8 +9,8 @@ export type LayoutMode = 'files' | 'reading' | 'focus';
 const MODES: LayoutMode[] = ['files', 'reading', 'focus'];
 
 const GRID_COLUMNS: Record<LayoutMode, string> = {
-  files:   '220px 1fr 0px',
-  reading: '220px 1fr 220px',
+  files:   '260px 1fr 0px',
+  reading: '260px 1fr 220px',
   focus:   '0px 1fr 0px',
 };
 

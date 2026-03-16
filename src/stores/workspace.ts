@@ -63,6 +63,12 @@ async function openWorkspace(path: string) {
   const nodes = entriesToNodes(entries);
   await loadChildrenDeep(nodes, 2);
   await loadTitles(nodes);
+  // Auto-expand top-level directories that contain children
+  for (const node of nodes) {
+    if (node.isDirectory && node.children?.length) {
+      node.isExpanded = true;
+    }
+  }
   setState({
     tree: nodes,
     workspacePath: path,
