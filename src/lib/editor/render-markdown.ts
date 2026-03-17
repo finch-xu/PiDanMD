@@ -11,6 +11,7 @@ import { codeToHtml, type BundledTheme } from 'shiki';
 // Extend default sanitization schema to allow KaTeX and code block classes
 const sanitizeSchema = {
   ...defaultSchema,
+  clobberPrefix: '',
   attributes: {
     ...defaultSchema.attributes,
     code: [...(defaultSchema.attributes?.code ?? []), 'className'],
