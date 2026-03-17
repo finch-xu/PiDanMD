@@ -7,6 +7,7 @@ import rehypeKatex from 'rehype-katex';
 import rehypeSanitize, { defaultSchema } from 'rehype-sanitize';
 import rehypeStringify from 'rehype-stringify';
 import { codeToHtml, type BundledTheme } from 'shiki';
+import { headingToId } from './heading-id';
 
 // Extend default sanitization schema to allow KaTeX and code block classes
 const sanitizeSchema = {
@@ -50,22 +51,16 @@ const CODE_BLOCK_RE = /<pre><code class="language-(\w+)">([\s\S]*?)<\/code><\/pr
 const HEADING_RE = /<(h[1-6])>([\s\S]*?)<\/h[1-6]>/g;
 const HTML_TAG_RE = /<[^>]+>/g;
 const COLOR_CODE_RE = /<code>(#[0-9a-fA-F]{3,8})<\/code>/g;
-const TABLE_RE = /<table(?! class="frontmatter-table")(\b[^>]*)>[\s\S]*?<\/table>/g;
+const TABLE_RE = /<table(?! class="frontmatter-table")[^>]*>[\s\S]*?<\/table>/g;
 
 function getPlainTextFromHtml(html: string): string {
-  let prev = '';
-  let result = html;
-  while (result !== prev) {
-    prev = result;
-    result = result.replace(HTML_TAG_RE, '');
-  }
-  return decodeHtmlEntities(result);
+  return decodeHtmlEntities(html.replace(HTML_TAG_RE, ''));
 }
 
 function addHeadingIds(html: string): string {
   return html.replace(HEADING_RE, (match, tag, inner) => {
     const text = getPlainTextFromHtml(inner).trim();
-    const id = text.toLowerCase().replace(/[^\w\u4e00-\u9fff]+/g, '-').replace(/^-|-$/g, '');
+    const id = headingToId(text);
     return `<${tag} id="${escapeHtml(id)}">${inner}</${tag}>`;
   });
 }

@@ -1,4 +1,5 @@
 import type { HeadingInfo } from '~/types/editor';
+import { headingToId } from './heading-id';
 
 export function extractHeadings(markdown: string): HeadingInfo[] {
   const headings: HeadingInfo[] = [];
@@ -8,7 +9,7 @@ export function extractHeadings(markdown: string): HeadingInfo[] {
     if (match) {
       const level = match[1].length;
       const text = match[2].trim();
-      const id = text.toLowerCase().replace(/[^\w\u4e00-\u9fff]+/g, '-').replace(/^-|-$/g, '');
+      const id = headingToId(text);
       headings.push({ id, text, level });
     }
   }
