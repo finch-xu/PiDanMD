@@ -41,7 +41,7 @@ function handleLinkClick(e: MouseEvent) {
   }
 
   if (href.startsWith('#')) {
-    const id = href.slice(1);
+    const id = decodeURIComponent(href.slice(1));
     document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
     return;
   }
