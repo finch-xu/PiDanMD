@@ -23,7 +23,17 @@ const theme = EditorView.theme({
   '.cm-activeLine': {
     backgroundColor: 'color-mix(in srgb, var(--ctp-surface0) 30%, transparent)',
   },
-  '.cm-gutters': { display: 'none' },
+  '.cm-gutters': {
+    backgroundColor: 'transparent',
+    color: 'var(--ctp-overlay0)',
+    border: 'none',
+  },
+  '.cm-lineNumbers .cm-gutterElement': {
+    paddingLeft: '0.5rem',
+    paddingRight: '0.75rem',
+    fontSize: '0.85em',
+    minWidth: '2.5rem',
+  },
   '&.cm-focused': { outline: 'none' },
 });
 
