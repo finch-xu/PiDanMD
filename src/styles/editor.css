@@ -87,6 +87,15 @@
   background: color-mix(in srgb, var(--ctp-surface0) 30%, transparent);
 }
 
+.markdown-body .table-wrapper {
+  overflow-x: auto;
+  margin: 1.2em 0;
+}
+
+.markdown-body .table-wrapper table {
+  margin: 0;
+}
+
 .markdown-body table {
   width: 100%;
   border-collapse: collapse;

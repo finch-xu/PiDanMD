@@ -50,6 +50,7 @@ const CODE_BLOCK_RE = /<pre><code class="language-(\w+)">([\s\S]*?)<\/code><\/pr
 const HEADING_RE = /<(h[1-6])>([\s\S]*?)<\/h[1-6]>/g;
 const HTML_TAG_RE = /<[^>]+>/g;
 const COLOR_CODE_RE = /<code>(#[0-9a-fA-F]{3,8})<\/code>/g;
+const TABLE_RE = /<table(?! class="frontmatter-table")(\b[^>]*)>[\s\S]*?<\/table>/g;
 
 function getPlainTextFromHtml(html: string): string {
   let prev = '';
@@ -73,6 +74,10 @@ function addColorSwatches(html: string): string {
   return html.replace(COLOR_CODE_RE, (_, color) => {
     return `<code><span class="color-swatch" style="background-color: ${color};"></span>${color}</code>`;
   });
+}
+
+function wrapTables(html: string): string {
+  return html.replace(TABLE_RE, (match) => `<div class="table-wrapper">${match}</div>`);
 }
 
 const HTML_ENTITY_MAP: Record<string, string> = {
@@ -138,6 +143,7 @@ export async function renderMarkdown(markdown: string, resolvedTheme?: string, f
 
   html = addHeadingIds(html);
   html = addColorSwatches(html);
+  html = wrapTables(html);
 
   const matches = [...html.matchAll(CODE_BLOCK_RE)];
   if (matches.length === 0) return fmHtml + html;
