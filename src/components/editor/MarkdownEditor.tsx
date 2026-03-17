@@ -1,5 +1,5 @@
 import { createCodeMirror, createEditorControlledValue } from 'solid-codemirror';
-import { EditorView, keymap } from '@codemirror/view';
+import { EditorView, keymap, lineNumbers } from '@codemirror/view';
 import { markdown } from '@codemirror/lang-markdown';
 import { defaultKeymap, indentWithTab } from '@codemirror/commands';
 import { content, setContent } from '~/stores/editor';
@@ -15,6 +15,7 @@ export function MarkdownEditor() {
     ...catppuccinTheme,
     keymap.of([indentWithTab, ...defaultKeymap]),
     EditorView.lineWrapping,
+    lineNumbers(),
   ]);
 
   createEditorControlledValue(editorView, () => content());
