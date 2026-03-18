@@ -94,7 +94,7 @@ jobs:
           echo "$ARTIFACTS" | jq -r '.[]' | tr -d '\r' | while read -r path; do
             [ -f "$path" ] || continue
             filename=$(basename "$path")
-            new_name=$(echo "$filename" | sed "s/_/-${OS}_/")
+            new_name=$(echo "$filename" | sed -e "s/_/-${OS}_/" -e "s/aarch64/arm64/g")
             cp "$path" "/tmp/${new_name}"
             gh release upload "$TAG" "/tmp/${new_name}" --clobber
           done
@@ -147,7 +147,7 @@ jobs:
           for rpm in src-tauri/target/release/bundle/rpm/*.rpm; do
             [ -f "$rpm" ] || continue
             filename=$(basename "$rpm")
-            new_name=$(echo "$filename" | sed "s/-/-fedora-/")
+            new_name=$(echo "$filename" | sed -e "s/-/-fedora-/" -e "s/aarch64/arm64/g")
             curl -sSL -X POST \
               -H "Authorization: token ${GITHUB_TOKEN}" \
               -H "Content-Type: application/octet-stream" \
