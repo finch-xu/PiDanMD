@@ -68,7 +68,7 @@ pnpm tauri build
 
 ## 内置字体
 
-本项目内置以下字体，详见 [THIRD_PARTY_LICENSES](THIRD_PARTY_LICENSES)。
+本项目内置以下字体，详见 [THIRD_PARTY_LICENSES](THIRD_PARTY_LICENSES.md)。
 
 | 字体 | 用途 | 许可证 |
 |------|------|--------|

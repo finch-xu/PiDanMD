@@ -68,7 +68,7 @@ The UI supports Simplified Chinese, Traditional Chinese, English, Japanese, and 
 
 ## Bundled Fonts
 
-This project bundles the following fonts. See [THIRD_PARTY_LICENSES](THIRD_PARTY_LICENSES) for details.
+This project bundles the following fonts. See [THIRD_PARTY_LICENSES](THIRD_PARTY_LICENSES.md) for details.
 
 | Font | Usage | License |
 |------|-------|---------|
