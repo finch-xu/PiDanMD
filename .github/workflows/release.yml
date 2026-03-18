@@ -94,7 +94,7 @@ jobs:
           echo "$ARTIFACTS" | jq -r '.[]' | tr -d '\r' | while read -r path; do
             [ -f "$path" ] || continue
             filename=$(basename "$path")
-            new_name=$(echo "$filename" | sed -e "s/_/-${OS}_/" -e "s/aarch64/arm64/g")
+            new_name=$(echo "$filename" | sed -e "s/_/-${OS}_/" -e "s/aarch64/arm64/g" -e "s/_x64/_x86_64/g" -e "s/_amd64/_x86_64/g")
             cp "$path" "/tmp/${new_name}"
             gh release upload "$TAG" "/tmp/${new_name}" --clobber
           done
