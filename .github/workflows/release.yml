@@ -51,7 +51,7 @@ jobs:
         if: matrix.platform == 'ubuntu-22.04' || matrix.platform == 'ubuntu-22.04-arm'
         run: |
           sudo apt-get update
-          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf libfontconfig1-dev
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf libfontconfig1-dev xdg-utils
 
       - uses: pnpm/action-setup@v4
 
@@ -91,7 +91,7 @@ jobs:
           TAG="${{ github.event.release.tag_name }}"
           OS="${{ matrix.os_name }}"
           ARTIFACTS='${{ steps.build.outputs.artifactPaths }}'
-          echo "$ARTIFACTS" | jq -r '.[]' | while read -r path; do
+          echo "$ARTIFACTS" | jq -r '.[]' | tr -d '\r' | while read -r path; do
             [ -f "$path" ] || continue
             filename=$(basename "$path")
             new_name=$(echo "$filename" | sed "s/_/-${OS}_/")
