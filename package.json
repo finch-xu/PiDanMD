@@ -21,6 +21,7 @@
     "clsx": "^2.1.1",
     "katex": "^0.16.38",
     "lucide-solid": "^0.577.0",
+    "mermaid": "^11.13.0",
     "rehype-katex": "^7.0.1",
     "rehype-sanitize": "^6.0.0",
     "rehype-stringify": "^10.0.1",
@@ -38,6 +39,7 @@
     "@tailwindcss/vite": "^4.2.1",
     "@tauri-apps/cli": "^2.10.1",
     "tailwindcss": "^4.2.1",
+    "type-fest": "^5.4.4",
     "typescript": "^5.9.3",
     "vite": "^7.3.1",
     "vite-plugin-solid": "^2.11.10"

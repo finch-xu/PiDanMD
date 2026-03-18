@@ -47,6 +47,18 @@ const SHIKI_THEME_MAP: Record<string, BundledTheme> = {
   dark: 'github-dark',
 };
 
+// Map app theme → Mermaid built-in theme
+type MermaidTheme = 'dark' | 'default';
+const MERMAID_THEME_MAP: Record<string, MermaidTheme> = {
+  mocha: 'dark',
+  latte: 'default',
+  frappe: 'dark',
+  macchiato: 'dark',
+  light: 'default',
+  dark: 'dark',
+};
+
+const MERMAID_BLOCK_RE = /<pre><code class="language-mermaid">([\s\S]*?)<\/code><\/pre>/g;
 const CODE_BLOCK_RE = /<pre><code class="language-(\w+)">([\s\S]*?)<\/code><\/pre>/g;
 const HEADING_RE = /<(h[1-6])>([\s\S]*?)<\/h[1-6]>/g;
 const HTML_TAG_RE = /<[^>]+>/g;
@@ -73,6 +85,39 @@ function addColorSwatches(html: string): string {
 
 function wrapTables(html: string): string {
   return html.replace(TABLE_RE, (match) => `<div class="table-wrapper">${match}</div>`);
+}
+
+let mermaidModule: typeof import('mermaid') | null = null;
+let lastMermaidTheme: MermaidTheme | null = null;
+
+async function renderMermaidBlocks(html: string, theme: string): Promise<string> {
+  const blocks = [...html.matchAll(MERMAID_BLOCK_RE)];
+  if (blocks.length === 0) return html;
+
+  if (!mermaidModule) {
+    mermaidModule = await import('mermaid');
+  }
+  const mermaid = mermaidModule.default;
+
+  const mermaidTheme = MERMAID_THEME_MAP[theme] ?? 'dark';
+  if (mermaidTheme !== lastMermaidTheme) {
+    mermaid.initialize({ startOnLoad: false, theme: mermaidTheme, securityLevel: 'strict' });
+    lastMermaidTheme = mermaidTheme;
+  }
+
+  // Render sequentially — mermaid manipulates DOM internally
+  for (const [fullMatch, encodedCode] of blocks) {
+    const code = decodeHtmlEntities(encodedCode);
+    try {
+      const { svg } = await mermaid.render(`mermaid-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`, code);
+      html = html.replace(fullMatch, () => `<div class="mermaid-diagram">${svg}</div>`);
+    } catch (e) {
+      console.warn('[Mermaid] render failed:', e);
+      const msg = e instanceof Error ? e.message : String(e);
+      html = html.replace(fullMatch, () => `<div class="mermaid-error"><pre>${escapeHtml(msg)}</pre></div>`);
+    }
+  }
+  return html;
 }
 
 const HTML_ENTITY_MAP: Record<string, string> = {
@@ -139,6 +184,7 @@ export async function renderMarkdown(markdown: string, resolvedTheme?: string, f
   html = addHeadingIds(html);
   html = addColorSwatches(html);
   html = wrapTables(html);
+  html = await renderMermaidBlocks(html, resolvedTheme ?? 'mocha');
 
   const matches = [...html.matchAll(CODE_BLOCK_RE)];
   if (matches.length === 0) return fmHtml + html;
