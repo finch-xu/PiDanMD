@@ -1,4 +1,4 @@
-import { For, Show, createMemo, onMount } from 'solid-js';
+import { For, Show, createMemo, createSignal, onMount } from 'solid-js';
 import { fileListVisible } from '~/stores/layout';
 import {
   workspaceState,
@@ -6,6 +6,8 @@ import {
   collectMarkdownFiles,
   selectFile,
   toggleFolder,
+  renameNode,
+  deleteNode,
   searchQuery,
   setSearchQuery,
   searchMarkdownFiles,
@@ -15,9 +17,9 @@ import {
   confirmCreatingFile,
 } from '~/stores/workspace';
 import type { FileNode } from '~/types/file-tree';
-import { loadFile } from '~/stores/editor';
+import { loadFile, filePath as editorFilePath, clearEditor, setFilePath } from '~/stores/editor';
 import { open } from '@tauri-apps/plugin-dialog';
-import { t, locale } from '~/lib/i18n';
+import { t, tWith, noteCount, locale } from '~/lib/i18n';
 import FileText from 'lucide-solid/icons/file-text';
 import FilePlus from 'lucide-solid/icons/file-plus';
 import FolderOpen from 'lucide-solid/icons/folder-open';
@@ -26,6 +28,7 @@ import ChevronRight from 'lucide-solid/icons/chevron-right';
 import Folder from 'lucide-solid/icons/folder';
 import Search from 'lucide-solid/icons/search';
 import X from 'lucide-solid/icons/x';
+import { ContextMenu } from '~/components/sidebar/ContextMenu';
 
 // --- Helpers ---
 
@@ -106,32 +109,66 @@ function TreeFileItem(props: {
   depth: number;
   isActive: boolean;
   onClick: (path: string) => void;
+  onContextMenu: (e: MouseEvent, node: FileNode) => void;
+  isRenaming: boolean;
+  renameValue: string;
+  onRenameChange: (v: string) => void;
+  onRenameConfirm: () => void;
+  onRenameCancel: () => void;
 }) {
   const displayName = () => props.file.name.replace(/\.md$/, '');
   const displayTitle = () => props.file.title || displayName();
 
   return (
-    <button
-      class="w-full text-left rounded-md px-2 py-1.5 transition-colors focus-visible:ring-1 focus-visible:ring-overlay1 focus-visible:outline-none file-item"
-      style={{
-        'padding-left': `${props.depth * 16 + 8}px`,
-        background: props.isActive
-          ? 'color-mix(in srgb, var(--ctp-overlay1) 15%, transparent)'
-          : 'transparent',
-      }}
-      classList={{ 'file-item-active': props.isActive }}
-      onClick={() => props.onClick(props.file.path)}
+    <Show
+      when={!props.isRenaming}
+      fallback={
+        <div
+          class="w-full px-2 py-1.5"
+          style={{ 'padding-left': `${props.depth * 16 + 8}px` }}
+        >
+          <input
+            ref={(el) => setTimeout(() => el.focus(), 0)}
+            class="w-full text-sm rounded px-1 py-0.5 outline-none"
+            style={{
+              background: 'var(--ctp-surface1)',
+              color: 'var(--ctp-text)',
+              border: '1px solid var(--ctp-overlay0)',
+            }}
+            value={props.renameValue}
+            onInput={(e) => props.onRenameChange(e.currentTarget.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') props.onRenameConfirm();
+              if (e.key === 'Escape') props.onRenameCancel();
+            }}
+            onBlur={() => props.onRenameConfirm()}
+          />
+        </div>
+      }
     >
-      <div
-        class="text-sm truncate font-medium"
-        style={{ color: props.isActive ? 'var(--ctp-text)' : 'var(--ctp-subtext0)' }}
+      <button
+        class="w-full text-left rounded-md px-2 py-1.5 transition-colors focus-visible:ring-1 focus-visible:ring-overlay1 focus-visible:outline-none file-item"
+        style={{
+          'padding-left': `${props.depth * 16 + 8}px`,
+          background: props.isActive
+            ? 'color-mix(in srgb, var(--ctp-overlay1) 15%, transparent)'
+            : 'transparent',
+        }}
+        classList={{ 'file-item-active': props.isActive }}
+        onClick={() => props.onClick(props.file.path)}
+        onContextMenu={(e) => props.onContextMenu(e, props.file)}
       >
-        {displayTitle()}
-      </div>
-      <div class="text-xs truncate" style={{ color: 'var(--ctp-overlay0)' }}>
-        {formatDate(props.file.modified)}
-      </div>
-    </button>
+        <div
+          class="text-sm truncate font-medium"
+          style={{ color: props.isActive ? 'var(--ctp-text)' : 'var(--ctp-subtext0)' }}
+        >
+          {displayTitle()}
+        </div>
+        <div class="text-xs truncate" style={{ color: 'var(--ctp-overlay0)' }}>
+          {formatDate(props.file.modified)}
+        </div>
+      </button>
+    </Show>
   );
 }
 
@@ -139,26 +176,61 @@ function TreeFolderItem(props: {
   node: FileNode;
   depth: number;
   onToggle: () => void;
+  onContextMenu: (e: MouseEvent, node: FileNode) => void;
+  isRenaming: boolean;
+  renameValue: string;
+  onRenameChange: (v: string) => void;
+  onRenameConfirm: () => void;
+  onRenameCancel: () => void;
 }) {
   const mdCount = () => countMdFiles(props.node.children);
 
   return (
-    <button
-      class="w-full text-left rounded-md px-2 py-1 flex items-center gap-1 select-none hover:bg-surface0/50 transition-colors"
-      style={{ 'padding-left': `${props.depth * 16 + 8}px` }}
-      onClick={props.onToggle}
+    <Show
+      when={!props.isRenaming}
+      fallback={
+        <div
+          class="w-full px-2 py-1 flex items-center gap-1"
+          style={{ 'padding-left': `${props.depth * 16 + 8}px` }}
+        >
+          <Folder size={14} style={{ color: 'var(--ctp-subtext0)', 'flex-shrink': '0' }} />
+          <input
+            ref={(el) => setTimeout(() => el.focus(), 0)}
+            class="flex-1 text-xs font-semibold rounded px-1 py-0.5 outline-none min-w-0"
+            style={{
+              background: 'var(--ctp-surface1)',
+              color: 'var(--ctp-text)',
+              border: '1px solid var(--ctp-overlay0)',
+            }}
+            value={props.renameValue}
+            onInput={(e) => props.onRenameChange(e.currentTarget.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') props.onRenameConfirm();
+              if (e.key === 'Escape') props.onRenameCancel();
+            }}
+            onBlur={() => props.onRenameConfirm()}
+          />
+        </div>
+      }
     >
-      <Show when={props.node.isExpanded} fallback={<ChevronRight size={14} style={{ color: 'var(--ctp-subtext0)', 'flex-shrink': '0' }} />}>
-        <ChevronDown size={14} style={{ color: 'var(--ctp-subtext0)', 'flex-shrink': '0' }} />
-      </Show>
-      <Folder size={14} style={{ color: 'var(--ctp-subtext0)', 'flex-shrink': '0' }} />
-      <span class="text-xs font-semibold truncate" style={{ color: 'var(--ctp-subtext1)' }}>
-        {props.node.name}
-      </span>
-      <span class="text-xs ml-auto flex-shrink-0" style={{ color: 'var(--ctp-overlay0)' }}>
-        {mdCount()}
-      </span>
-    </button>
+      <button
+        class="w-full text-left rounded-md px-2 py-1 flex items-center gap-1 select-none hover:bg-surface0/50 transition-colors"
+        style={{ 'padding-left': `${props.depth * 16 + 8}px` }}
+        onClick={props.onToggle}
+        onContextMenu={(e) => props.onContextMenu(e, props.node)}
+      >
+        <Show when={props.node.isExpanded} fallback={<ChevronRight size={14} style={{ color: 'var(--ctp-subtext0)', 'flex-shrink': '0' }} />}>
+          <ChevronDown size={14} style={{ color: 'var(--ctp-subtext0)', 'flex-shrink': '0' }} />
+        </Show>
+        <Folder size={14} style={{ color: 'var(--ctp-subtext0)', 'flex-shrink': '0' }} />
+        <span class="text-xs font-semibold truncate" style={{ color: 'var(--ctp-subtext1)' }}>
+          {props.node.name}
+        </span>
+        <span class="text-xs ml-auto flex-shrink-0" style={{ color: 'var(--ctp-overlay0)' }}>
+          {mdCount()}
+        </span>
+      </button>
+    </Show>
   );
 }
 
@@ -167,6 +239,12 @@ function TreeNode(props: {
   depth: number;
   selectedFile: string | null;
   onFileClick: (path: string) => void;
+  onContextMenu: (e: MouseEvent, node: FileNode) => void;
+  renamingPath: string | null;
+  renameValue: string;
+  onRenameChange: (v: string) => void;
+  onRenameConfirm: () => void;
+  onRenameCancel: () => void;
 }) {
   // Skip non-.md files and folders without .md descendants
   if (!hasMdFiles(props.node)) return null;
@@ -179,6 +257,12 @@ function TreeNode(props: {
         depth={props.depth}
         isActive={props.selectedFile === props.node.path}
         onClick={props.onFileClick}
+        onContextMenu={props.onContextMenu}
+        isRenaming={props.renamingPath === props.node.path}
+        renameValue={props.renameValue}
+        onRenameChange={props.onRenameChange}
+        onRenameConfirm={props.onRenameConfirm}
+        onRenameCancel={props.onRenameCancel}
       />
     );
   }
@@ -189,6 +273,12 @@ function TreeNode(props: {
         node={props.node}
         depth={props.depth}
         onToggle={() => toggleFolder(props.node.path)}
+        onContextMenu={props.onContextMenu}
+        isRenaming={props.renamingPath === props.node.path}
+        renameValue={props.renameValue}
+        onRenameChange={props.onRenameChange}
+        onRenameConfirm={props.onRenameConfirm}
+        onRenameCancel={props.onRenameCancel}
       />
       <Show when={props.node.isExpanded}>
         <Show when={props.node.isLoading}>
@@ -207,6 +297,12 @@ function TreeNode(props: {
                 depth={props.depth + 1}
                 selectedFile={props.selectedFile}
                 onFileClick={props.onFileClick}
+                onContextMenu={props.onContextMenu}
+                renamingPath={props.renamingPath}
+                renameValue={props.renameValue}
+                onRenameChange={props.onRenameChange}
+                onRenameConfirm={props.onRenameConfirm}
+                onRenameCancel={props.onRenameCancel}
               />
             )}
           </For>
@@ -222,6 +318,11 @@ function TreeNode(props: {
 // --- Main component ---
 
 export function FileListPane() {
+  const [contextMenu, setContextMenu] = createSignal<{ x: number; y: number; node: FileNode } | null>(null);
+  const [renamingPath, setRenamingPath] = createSignal<string | null>(null);
+  const [renameValue, setRenameValue] = createSignal('');
+  const [deleteTarget, setDeleteTarget] = createSignal<FileNode | null>(null);
+
   const handleOpen = async () => {
     try {
       const selected = await open({ directory: true });
@@ -239,6 +340,66 @@ export function FileListPane() {
   const handleFileClick = (path: string) => {
     selectFile(path);
     loadFile(path);
+  };
+
+  const handleContextMenu = (e: MouseEvent, node: FileNode) => {
+    e.preventDefault();
+    setContextMenu({ x: e.clientX, y: e.clientY, node });
+  };
+
+  const handleStartRename = () => {
+    const menu = contextMenu();
+    if (!menu) return;
+    setRenamingPath(menu.node.path);
+    setRenameValue(menu.node.name);
+  };
+
+  const handleRenameConfirm = async () => {
+    const path = renamingPath();
+    if (!path) return;
+    const newName = renameValue().trim();
+    if (!newName || newName === path.split('/').pop()) {
+      setRenamingPath(null);
+      return;
+    }
+    try {
+      const currentEditorPath = editorFilePath();
+      const newPath = await renameNode(path, newName);
+      // Sync editor state
+      if (currentEditorPath === path) {
+        setFilePath(newPath);
+      } else if (currentEditorPath?.startsWith(path + '/')) {
+        setFilePath(currentEditorPath.replace(path, newPath));
+      }
+    } catch (e) {
+      console.error('Failed to rename:', e);
+    }
+    setRenamingPath(null);
+  };
+
+  const handleRenameCancel = () => {
+    setRenamingPath(null);
+  };
+
+  const handleStartDelete = () => {
+    const menu = contextMenu();
+    if (!menu) return;
+    setDeleteTarget(menu.node);
+  };
+
+  const handleDeleteConfirm = async () => {
+    const target = deleteTarget();
+    if (!target) return;
+    try {
+      const currentEditorPath = editorFilePath();
+      const shouldClear = currentEditorPath === target.path
+        || (target.isDirectory && currentEditorPath?.startsWith(target.path + '/'));
+      await deleteNode(target.path, target.isDirectory);
+      if (shouldClear) clearEditor();
+    } catch (e) {
+      console.error('Failed to delete:', e);
+    }
+    setDeleteTarget(null);
   };
 
   return (
@@ -320,6 +481,12 @@ export function FileListPane() {
                       depth={0}
                       selectedFile={workspaceState.selectedFile}
                       onFileClick={handleFileClick}
+                      onContextMenu={handleContextMenu}
+                      renamingPath={renamingPath()}
+                      renameValue={renameValue()}
+                      onRenameChange={setRenameValue}
+                      onRenameConfirm={handleRenameConfirm}
+                      onRenameCancel={handleRenameCancel}
                     />
                   )}
                 </For>
@@ -345,6 +512,12 @@ export function FileListPane() {
                       depth={0}
                       isActive={workspaceState.selectedFile === file.path}
                       onClick={handleFileClick}
+                      onContextMenu={handleContextMenu}
+                      isRenaming={renamingPath() === file.path}
+                      renameValue={renameValue()}
+                      onRenameChange={setRenameValue}
+                      onRenameConfirm={handleRenameConfirm}
+                      onRenameCancel={handleRenameCancel}
                     />
                   )}
                 </For>
@@ -353,6 +526,59 @@ export function FileListPane() {
           </Show>
         </Show>
       </div>
+
+      {/* Context menu */}
+      <Show when={contextMenu()}>
+        {(menu) => (
+          <ContextMenu
+            x={menu().x}
+            y={menu().y}
+            onRename={handleStartRename}
+            onDelete={handleStartDelete}
+            onClose={() => setContextMenu(null)}
+          />
+        )}
+      </Show>
+
+      {/* Delete confirmation modal */}
+      <Show when={deleteTarget()}>
+        {(target) => (
+          <div
+            class="fixed inset-0 z-50 flex items-center justify-center"
+            style={{ background: 'rgba(0,0,0,0.5)' }}
+            onClick={() => setDeleteTarget(null)}
+          >
+            <div
+              class="rounded-xl p-5 shadow-xl max-w-xs w-full"
+              style={{ background: 'var(--ctp-base)', border: '1px solid var(--ctp-surface1)' }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <h3 class="text-sm font-semibold mb-2" style={{ color: 'var(--ctp-text)' }}>
+                {t('confirmDelete')}
+              </h3>
+              <p class="text-xs mb-4" style={{ color: 'var(--ctp-subtext0)' }}>
+                {tWith('deleteConfirmMessage', { name: target().name })}
+              </p>
+              <div class="flex justify-end gap-2">
+                <button
+                  class="px-3 py-1.5 text-xs rounded-md transition-colors"
+                  style={{ background: 'var(--ctp-surface0)', color: 'var(--ctp-text)' }}
+                  onClick={() => setDeleteTarget(null)}
+                >
+                  {t('cancel')}
+                </button>
+                <button
+                  class="px-3 py-1.5 text-xs rounded-md transition-colors"
+                  style={{ background: 'var(--ctp-red)', color: 'var(--ctp-base)' }}
+                  onClick={handleDeleteConfirm}
+                >
+                  {t('delete')}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </Show>
     </div>
   );
 }

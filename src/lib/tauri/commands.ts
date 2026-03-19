@@ -23,6 +23,14 @@ export async function listSystemFonts(): Promise<string[]> {
   return invoke('list_system_fonts');
 }
 
+export async function renameEntry(oldPath: string, newPath: string): Promise<void> {
+  return invoke('rename_entry', { oldPath, newPath });
+}
+
+export async function deleteEntry(path: string, isDirectory: boolean): Promise<void> {
+  return invoke('delete_entry', { path, isDirectory });
+}
+
 export async function createDirectory(path: string): Promise<void> {
   return invoke('create_directory', { path });
 }

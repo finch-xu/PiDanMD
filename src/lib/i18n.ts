@@ -67,6 +67,11 @@ const messages: Record<Locale, Record<string, string>> = {
     tools: '展开工具',
     copyToClipboard: '复制文本',
     copied: '已复制',
+    rename: '重命名',
+    delete: '删除',
+    confirmDelete: '确认删除',
+    deleteConfirmMessage: '确定要删除「{name}」吗？',
+    cancel: '取消',
   },
   'zh-TW': {
     appName: '皮蛋記',
@@ -126,6 +131,11 @@ const messages: Record<Locale, Record<string, string>> = {
     tools: '展開工具',
     copyToClipboard: '複製文本',
     copied: '已複製',
+    rename: '重新命名',
+    delete: '刪除',
+    confirmDelete: '確認刪除',
+    deleteConfirmMessage: '確定要刪除「{name}」嗎？',
+    cancel: '取消',
   },
   'en-US': {
     appName: 'PiDanMD',
@@ -185,6 +195,11 @@ const messages: Record<Locale, Record<string, string>> = {
     tools: 'Tools',
     copyToClipboard: 'Copy Text',
     copied: 'Copied',
+    rename: 'Rename',
+    delete: 'Delete',
+    confirmDelete: 'Confirm Delete',
+    deleteConfirmMessage: 'Delete "{name}"?',
+    cancel: 'Cancel',
   },
   'ja-JP': {
     appName: 'PiDanMD',
@@ -244,6 +259,11 @@ const messages: Record<Locale, Record<string, string>> = {
     tools: 'ツール',
     copyToClipboard: 'テキストをコピー',
     copied: 'コピーしました',
+    rename: '名前を変更',
+    delete: '削除',
+    confirmDelete: '削除を確認',
+    deleteConfirmMessage: '「{name}」を削除しますか？',
+    cancel: 'キャンセル',
   },
   'ko-KR': {
     appName: 'PiDanMD',
@@ -303,6 +323,11 @@ const messages: Record<Locale, Record<string, string>> = {
     tools: '도구',
     copyToClipboard: '텍스트 복사',
     copied: '복사됨',
+    rename: '이름 바꾸기',
+    delete: '삭제',
+    confirmDelete: '삭제 확인',
+    deleteConfirmMessage: '"{name}"을(를) 삭제하시겠습니까？',
+    cancel: '취소',
   },
 };
 
@@ -329,6 +354,14 @@ export function initLocaleFromConfig(config: AppConfig) {
 
 export function t(key: string): string {
   return messages[locale()][key] ?? key;
+}
+
+export function tWith(key: string, vars: Record<string, string>): string {
+  let result = messages[locale()][key] ?? key;
+  for (const [k, v] of Object.entries(vars)) {
+    result = result.replace(`{${k}}`, v);
+  }
+  return result;
 }
 
 // 带数字插值的笔记计数
