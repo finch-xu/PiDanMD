@@ -369,7 +369,7 @@ export function FileListPane() {
       if (currentEditorPath === path) {
         setFilePath(newPath);
       } else if (currentEditorPath?.startsWith(path + '/')) {
-        setFilePath(currentEditorPath.replace(path, newPath));
+        setFilePath(newPath + currentEditorPath.slice(path.length));
       }
     } catch (e) {
       console.error('Failed to rename:', e);

@@ -46,20 +46,16 @@ export function ContextMenu(props: ContextMenuProps) {
       }}
     >
       <button
-        class="w-full px-3 py-1.5 text-xs text-left flex items-center gap-2 transition-colors"
+        class="w-full px-3 py-1.5 text-xs text-left flex items-center gap-2 transition-colors hover:bg-surface1"
         style={{ color: 'var(--ctp-text)' }}
-        onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--ctp-surface1)')}
-        onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
         onClick={() => { props.onRename(); props.onClose(); }}
       >
         <Pencil size={14} />
         {t('rename')}
       </button>
       <button
-        class="w-full px-3 py-1.5 text-xs text-left flex items-center gap-2 transition-colors"
+        class="w-full px-3 py-1.5 text-xs text-left flex items-center gap-2 transition-colors hover:bg-surface1"
         style={{ color: 'var(--ctp-red)' }}
-        onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--ctp-surface1)')}
-        onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
         onClick={() => { props.onDelete(); props.onClose(); }}
       >
         <Trash2 size={14} />

@@ -130,7 +130,7 @@ async function renameNode(oldPath: string, newName: string): Promise<string> {
   await renameEntry(oldPath, newPath);
   if (state.selectedFile === oldPath) setState('selectedFile', newPath);
   if (state.selectedFile?.startsWith(oldPath + '/')) {
-    setState('selectedFile', state.selectedFile.replace(oldPath, newPath));
+    setState('selectedFile', newPath + state.selectedFile.slice(oldPath.length));
   }
   await refreshWorkspace();
   return newPath;
