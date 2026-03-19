@@ -1,7 +1,7 @@
 import { createSignal } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import type { FileNode } from '~/types/file-tree';
-import { listDirectory, createDirectory, getDefaultStorageDir, readFile, writeFile, openWorkspaceCommand, type FileEntry } from '~/lib/tauri/commands';
+import { listDirectory, createDirectory, getDefaultStorageDir, readFile, writeFile, openWorkspaceCommand, renameEntry, deleteEntry, type FileEntry } from '~/lib/tauri/commands';
 import { open as openDialog } from '@tauri-apps/plugin-dialog';
 
 interface WorkspaceState {
@@ -121,6 +121,27 @@ async function createFolder(name: string) {
   if (!base) return;
   const fullPath = base + '/' + name;
   await createDirectory(fullPath);
+  await refreshWorkspace();
+}
+
+async function renameNode(oldPath: string, newName: string): Promise<string> {
+  const parentDir = oldPath.substring(0, oldPath.lastIndexOf('/'));
+  const newPath = parentDir + '/' + newName;
+  await renameEntry(oldPath, newPath);
+  if (state.selectedFile === oldPath) setState('selectedFile', newPath);
+  if (state.selectedFile?.startsWith(oldPath + '/')) {
+    setState('selectedFile', state.selectedFile.replace(oldPath, newPath));
+  }
+  await refreshWorkspace();
+  return newPath;
+}
+
+async function deleteNode(path: string, isDirectory: boolean) {
+  await deleteEntry(path, isDirectory);
+  if (state.selectedFile === path) setState('selectedFile', null);
+  if (isDirectory && state.selectedFile?.startsWith(path + '/')) {
+    setState('selectedFile', null);
+  }
   await refreshWorkspace();
 }
 
@@ -383,6 +404,9 @@ export {
   initWorkspace,
   refreshWorkspace,
   createFolder,
+  renameNode,
+  deleteNode,
+  findNode,
   toggleFolder,
   selectFile,
   selectedFolder,

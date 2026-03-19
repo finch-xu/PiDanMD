@@ -134,6 +134,23 @@ pub fn copy_file(
 }
 
 #[tauri::command]
+pub fn rename_entry(old_path: String, new_path: String, state: State<Mutex<AppState>>) -> Result<(), String> {
+    let safe_old = validate_path(&old_path, &state)?;
+    let safe_new = validate_path(&new_path, &state)?;
+    fs::rename(&safe_old, &safe_new).map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+pub fn delete_entry(path: String, is_directory: bool, state: State<Mutex<AppState>>) -> Result<(), String> {
+    let safe_path = validate_path(&path, &state)?;
+    if is_directory {
+        fs::remove_dir_all(&safe_path).map_err(|e| e.to_string())
+    } else {
+        fs::remove_file(&safe_path).map_err(|e| e.to_string())
+    }
+}
+
+#[tauri::command]
 pub fn get_default_storage_dir(app: tauri::AppHandle) -> Result<String, String> {
     let data_dir = app.path().app_data_dir().map_err(|e| e.to_string())?;
     let storage = data_dir.join("workspace");

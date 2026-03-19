@@ -35,6 +35,12 @@ function toggleEditorMode() {
   setEditorMode((m) => (m === 'preview' ? 'edit' : 'preview'));
 }
 
+function clearEditor() {
+  setContentRaw('');
+  setFilePath(null);
+  setIsDirty(false);
+}
+
 async function saveFile() {
   const path = filePath();
   if (!path) return;
@@ -42,4 +48,4 @@ async function saveFile() {
   setIsDirty(false);
 }
 
-export { content, filePath, isDirty, isLoading, loadFile, setContent, editorMode, toggleEditorMode, saveFile };
+export { content, filePath, isDirty, isLoading, loadFile, setContent, editorMode, toggleEditorMode, saveFile, clearEditor, setFilePath };
