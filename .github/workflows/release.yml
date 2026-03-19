@@ -3,6 +3,11 @@ name: Release
 on:
   release:
     types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Release tag (e.g. v0.1.6)'
+        required: true
 
 jobs:
   build:
@@ -87,17 +92,28 @@ jobs:
         shell: bash
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ inputs.tag || github.event.release.tag_name }}
+          OS: ${{ matrix.os_name }}
+          ARTIFACTS: ${{ steps.build.outputs.artifactPaths }}
         run: |
-          TAG="${{ github.event.release.tag_name }}"
-          OS="${{ matrix.os_name }}"
-          ARTIFACTS='${{ steps.build.outputs.artifactPaths }}'
-          echo "$ARTIFACTS" | jq -r '.[]' | tr -d '\r' | while read -r path; do
-            [ -f "$path" ] || continue
+          count=0
+          while IFS= read -r path; do
+            if [ ! -f "$path" ]; then
+              echo "::warning::File not found: $path"
+              continue
+            fi
             filename=$(basename "$path")
             new_name=$(echo "$filename" | sed -e "s/_/-${OS}_/" -e "s/aarch64/arm64/g" -e "s/_x64/_x86_64/g" -e "s/_amd64/_x86_64/g")
             cp "$path" "/tmp/${new_name}"
             gh release upload "$TAG" "/tmp/${new_name}" --clobber
-          done
+            echo "Uploaded: ${new_name}"
+            count=$((count + 1))
+          done < <(echo "$ARTIFACTS" | jq -r '.[]' | tr -d '\r')
+          if [ "$count" -eq 0 ]; then
+            echo "::error::No artifacts were uploaded!"
+            exit 1
+          fi
+          echo "Total uploaded: $count"
 
   build-rpm:
     strategy:
@@ -141,9 +157,16 @@ jobs:
         shell: bash
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ inputs.tag || github.event.release.tag_name }}
           RELEASE_ID: ${{ github.event.release.id }}
           REPO: ${{ github.repository }}
         run: |
+          # For workflow_dispatch, RELEASE_ID is empty — resolve via API
+          if [ -z "$RELEASE_ID" ]; then
+            RELEASE_ID=$(gh api "repos/${REPO}/releases/tags/${TAG}" --jq '.id')
+            echo "Resolved RELEASE_ID=${RELEASE_ID} from tag ${TAG}"
+          fi
+          count=0
           for rpm in src-tauri/target/release/bundle/rpm/*.rpm; do
             [ -f "$rpm" ] || continue
             filename=$(basename "$rpm")
@@ -153,4 +176,11 @@ jobs:
               -H "Content-Type: application/octet-stream" \
               --data-binary "@${rpm}" \
               "https://uploads.github.com/repos/${REPO}/releases/${RELEASE_ID}/assets?name=${new_name}"
+            echo "Uploaded: ${new_name}"
+            count=$((count + 1))
           done
+          if [ "$count" -eq 0 ]; then
+            echo "::error::No RPM artifacts were uploaded!"
+            exit 1
+          fi
+          echo "Total uploaded: $count"
