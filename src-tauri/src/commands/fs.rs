@@ -1,3 +1,4 @@
+use base64::Engine;
 use serde::Serialize;
 use std::fs;
 use std::path::PathBuf;
@@ -99,6 +100,37 @@ pub fn write_file(path: String, content: String, state: State<Mutex<AppState>>) 
 pub fn create_directory(path: String, state: State<Mutex<AppState>>) -> Result<(), String> {
     let safe_path = validate_path(&path, &state)?;
     fs::create_dir_all(&safe_path).map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+pub fn write_binary_file(
+    path: String,
+    data: String,
+    state: State<Mutex<AppState>>,
+) -> Result<(), String> {
+    let safe_path = validate_path(&path, &state)?;
+    if let Some(parent) = safe_path.parent() {
+        fs::create_dir_all(parent).map_err(|e| e.to_string())?;
+    }
+    let bytes = base64::engine::general_purpose::STANDARD
+        .decode(&data)
+        .map_err(|e| format!("Base64 decode failed: {e}"))?;
+    fs::write(&safe_path, &bytes).map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+pub fn copy_file(
+    source: String,
+    destination: String,
+    state: State<Mutex<AppState>>,
+) -> Result<(), String> {
+    let src = PathBuf::from(&source);
+    let dest_path = validate_path(&destination, &state)?;
+    if let Some(parent) = dest_path.parent() {
+        fs::create_dir_all(parent).map_err(|e| e.to_string())?;
+    }
+    fs::copy(&src, &dest_path).map_err(|e| e.to_string())?;
+    Ok(())
 }
 
 #[tauri::command]

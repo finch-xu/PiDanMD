@@ -31,6 +31,14 @@ export async function getDefaultStorageDir(): Promise<string> {
   return invoke('get_default_storage_dir');
 }
 
+export async function writeBinaryFile(path: string, data: string): Promise<void> {
+  return invoke('write_binary_file', { path, data });
+}
+
+export async function copyFile(source: string, destination: string): Promise<void> {
+  return invoke('copy_file', { source, destination });
+}
+
 export async function openWorkspaceCommand(path: string): Promise<void> {
   return invoke('open_workspace', { path });
 }

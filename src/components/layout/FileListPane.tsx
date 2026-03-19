@@ -1,21 +1,25 @@
-import { For, Show, createMemo } from 'solid-js';
+import { For, Show, createMemo, onMount } from 'solid-js';
 import { fileListVisible } from '~/stores/layout';
 import {
   workspaceState,
   openWorkspace,
   collectMarkdownFiles,
   selectFile,
-  openSingleFile,
   toggleFolder,
   searchQuery,
   setSearchQuery,
   searchMarkdownFiles,
+  creatingInDir,
+  startCreatingFile,
+  cancelCreatingFile,
+  confirmCreatingFile,
 } from '~/stores/workspace';
 import type { FileNode } from '~/types/file-tree';
 import { loadFile } from '~/stores/editor';
 import { open } from '@tauri-apps/plugin-dialog';
-import { t, noteCount, locale } from '~/lib/i18n';
+import { t, locale } from '~/lib/i18n';
 import FileText from 'lucide-solid/icons/file-text';
+import FilePlus from 'lucide-solid/icons/file-plus';
 import FolderOpen from 'lucide-solid/icons/folder-open';
 import ChevronDown from 'lucide-solid/icons/chevron-down';
 import ChevronRight from 'lucide-solid/icons/chevron-right';
@@ -56,6 +60,43 @@ function sortedChildren(nodes?: FileNode[]): FileNode[] {
   const dirs = nodes.filter((n) => n.isDirectory).sort((a, b) => a.name.localeCompare(b.name));
   const files = nodes.filter((n) => !n.isDirectory).sort((a, b) => (b.modified ?? 0) - (a.modified ?? 0));
   return [...dirs, ...files];
+}
+
+// --- Inline new file input ---
+
+function NewFileInput(props: { depth: number }) {
+  let inputRef: HTMLInputElement | undefined;
+  let submitted = false;
+
+  const handleConfirm = async () => {
+    if (submitted) return;
+    submitted = true;
+    const val = inputRef?.value ?? '';
+    const path = await confirmCreatingFile(val);
+    if (path) await loadFile(path, 'edit');
+  };
+
+  onMount(() => inputRef?.focus());
+
+  return (
+    <div
+      style={{ 'padding-left': `${props.depth * 16 + 8}px` }}
+      class="flex items-center gap-0.5 px-2 py-1"
+    >
+      <FileText size={14} style={{ color: 'var(--ctp-subtext0)', 'flex-shrink': '0' }} />
+      <input
+        ref={inputRef}
+        class="flex-1 min-w-0 text-sm bg-transparent border-b border-overlay1 focus:border-blue focus:outline-none text-text placeholder-overlay0"
+        placeholder="filename"
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') handleConfirm();
+          if (e.key === 'Escape') cancelCreatingFile();
+        }}
+        onBlur={handleConfirm}
+      />
+      <span class="text-sm text-overlay0 shrink-0">.md</span>
+    </div>
+  );
 }
 
 // --- Tree components ---
@@ -169,6 +210,9 @@ function TreeNode(props: {
               />
             )}
           </For>
+          <Show when={creatingInDir() === props.node.path}>
+            <NewFileInput depth={props.depth + 1} />
+          </Show>
         </div>
       </Show>
     </>
@@ -190,8 +234,7 @@ export function FileListPane() {
   };
 
   const mdFiles = createMemo(() => collectMarkdownFiles(null));
-  const fileCount = createMemo(() => mdFiles().length);
-  const filteredFiles = createMemo(() => searchMarkdownFiles(searchQuery()));
+  const filteredFiles = createMemo(() => searchMarkdownFiles(searchQuery(), mdFiles()));
 
   const handleFileClick = (path: string) => {
     selectFile(path);
@@ -210,39 +253,14 @@ export function FileListPane() {
         transition: 'opacity 200ms ease',
       }}
     >
-      {/* Action bar */}
-      <div
-        class="px-3 py-2 flex items-center justify-between select-none shrink-0"
-      >
+      {/* Action bar: search + buttons */}
+      <div class="px-2 py-1.5 flex items-center gap-1 select-none shrink-0">
         <Show
           when={workspaceState.workspacePath}
-          fallback={<span class="text-xs text-overlay0">{t('workspaceNotOpened')}</span>}
+          fallback={<span class="text-xs text-overlay0 flex-1">{t('workspaceNotOpened')}</span>}
         >
-          <span class="text-xs text-overlay0">{noteCount(fileCount())}</span>
-        </Show>
-        <div class="flex items-center gap-0.5">
-          <button
-            class="w-6 h-6 flex items-center justify-center rounded-md text-overlay1 hover:text-text hover:bg-surface0 focus-visible:ring-1 focus-visible:ring-overlay1 focus-visible:outline-none transition-colors"
-            onClick={() => openSingleFile().then((p) => { if (p) loadFile(p); }).catch((e) => console.error('Failed to open file dialog:', e))}
-            title={t('openFile')}
-          >
-            <FileText size={16} />
-          </button>
-          <button
-            class="w-6 h-6 flex items-center justify-center rounded-md text-overlay1 hover:text-text hover:bg-surface0 focus-visible:ring-1 focus-visible:ring-overlay1 focus-visible:outline-none transition-colors"
-            onClick={handleOpen}
-            title={t('openDirectory')}
-          >
-            <FolderOpen size={16} />
-          </button>
-        </div>
-      </div>
-
-      {/* Search box */}
-      <Show when={workspaceState.workspacePath}>
-        <div class="px-2 pb-1 shrink-0">
           <div
-            class="flex items-center gap-1.5 px-2 py-1 rounded-md"
+            class="flex items-center gap-1.5 px-2 py-1 rounded-md flex-1 min-w-0"
             style={{ background: 'var(--ctp-surface0)' }}
           >
             <Search size={14} style={{ color: 'var(--ctp-overlay1)', 'flex-shrink': '0' }} />
@@ -263,8 +281,23 @@ export function FileListPane() {
               </button>
             </Show>
           </div>
-        </div>
-      </Show>
+        </Show>
+        <button
+          class="w-6 h-6 flex items-center justify-center rounded-md text-overlay1 hover:text-text hover:bg-surface0 focus-visible:ring-1 focus-visible:ring-overlay1 focus-visible:outline-none transition-colors disabled:opacity-30 disabled:pointer-events-none shrink-0"
+          onClick={() => startCreatingFile()}
+          disabled={!workspaceState.workspacePath}
+          title={t('newFile')}
+        >
+          <FilePlus size={16} />
+        </button>
+        <button
+          class="w-6 h-6 flex items-center justify-center rounded-md text-overlay1 hover:text-text hover:bg-surface0 focus-visible:ring-1 focus-visible:ring-overlay1 focus-visible:outline-none transition-colors shrink-0"
+          onClick={handleOpen}
+          title={t('openDirectory')}
+        >
+          <FolderOpen size={16} />
+        </button>
+      </div>
 
       {/* File tree */}
       <div class="flex-1 overflow-y-auto">
@@ -290,6 +323,9 @@ export function FileListPane() {
                     />
                   )}
                 </For>
+                <Show when={creatingInDir() === workspaceState.workspacePath}>
+                  <NewFileInput depth={0} />
+                </Show>
               </div>
             }
           >

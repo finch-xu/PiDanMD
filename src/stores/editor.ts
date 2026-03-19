@@ -8,14 +8,14 @@ const [isDirty, setIsDirty] = createSignal(false);
 const [isLoading, setIsLoading] = createSignal(false);
 const [editorMode, setEditorMode] = createSignal<'preview' | 'edit'>('preview');
 
-async function loadFile(path: string) {
+async function loadFile(path: string, initialMode: 'preview' | 'edit' = 'preview') {
   setIsLoading(true);
   try {
     const text = await readFile(path);
     setContentRaw(text);
     setFilePath(path);
     setIsDirty(false);
-    setEditorMode('preview');
+    setEditorMode(initialMode);
   } finally {
     setIsLoading(false);
   }

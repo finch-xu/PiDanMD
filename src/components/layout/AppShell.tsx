@@ -7,8 +7,8 @@ import { TocPane } from './TocPane';
 import { TitleBar } from './TitleBar';
 import { StatusBar } from './StatusBar';
 import { gridColumns } from '~/stores/layout';
-import { saveFile, filePath, loadFile } from '~/stores/editor';
-import { initWorkspace, openSingleFile, openWorkspace } from '~/stores/workspace';
+import { saveFile, filePath } from '~/stores/editor';
+import { initWorkspace, openWorkspace } from '~/stores/workspace';
 import { openSettingsWindow } from '~/lib/settings-window';
 
 export function AppShell() {
@@ -17,11 +17,6 @@ export function AppShell() {
 
     const unlisten = await listen<string>('menu-action', (event) => {
       switch (event.payload) {
-        case 'open-file':
-          openSingleFile().then((path) => {
-            if (path) loadFile(path);
-          }).catch((e) => console.error('Failed to open file dialog:', e));
-          break;
         case 'open-folder':
           open({ directory: true }).then((selected) => {
             if (selected) openWorkspace(selected as string);

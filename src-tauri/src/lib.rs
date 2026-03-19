@@ -17,6 +17,8 @@ pub fn run() {
             commands::fs::read_file,
             commands::fs::write_file,
             commands::fs::create_directory,
+            commands::fs::write_binary_file,
+            commands::fs::copy_file,
             commands::fs::get_default_storage_dir,
             commands::workspace::open_workspace,
             commands::fonts::list_system_fonts,

@@ -63,6 +63,7 @@ const messages: Record<Locale, Record<string, string>> = {
     confirmReset: '确认重置',
     searchPlaceholder: '搜索笔记…',
     noResults: '无匹配结果',
+    newFile: '新建文件',
   },
   'zh-TW': {
     appName: '皮蛋記',
@@ -118,6 +119,7 @@ const messages: Record<Locale, Record<string, string>> = {
     confirmReset: '確認重置',
     searchPlaceholder: '搜尋筆記…',
     noResults: '無匹配結果',
+    newFile: '新增檔案',
   },
   'en-US': {
     appName: 'PiDanMD',
@@ -173,6 +175,7 @@ const messages: Record<Locale, Record<string, string>> = {
     confirmReset: 'Confirm Reset',
     searchPlaceholder: 'Search notes…',
     noResults: 'No results',
+    newFile: 'New File',
   },
   'ja-JP': {
     appName: 'PiDanMD',
@@ -228,6 +231,7 @@ const messages: Record<Locale, Record<string, string>> = {
     confirmReset: 'リセットを確認',
     searchPlaceholder: 'ノートを検索…',
     noResults: '結果なし',
+    newFile: '新規ファイル',
   },
   'ko-KR': {
     appName: 'PiDanMD',
@@ -283,6 +287,7 @@ const messages: Record<Locale, Record<string, string>> = {
     confirmReset: '초기화 확인',
     searchPlaceholder: '노트 검색…',
     noResults: '결과 없음',
+    newFile: '새 파일',
   },
 };
 

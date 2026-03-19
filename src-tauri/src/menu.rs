@@ -26,12 +26,6 @@ pub fn build_menu(app: &App) -> tauri::Result<tauri::menu::Menu<Wry>> {
     // ── File submenu ──
     let file_menu = SubmenuBuilder::new(app, "File")
         .item(
-            &MenuItemBuilder::new("打开文件")
-                .id("open-file")
-                .accelerator("CmdOrCtrl+O")
-                .build(app)?,
-        )
-        .item(
             &MenuItemBuilder::new("打开文件夹")
                 .id("open-folder")
                 .accelerator("CmdOrCtrl+Shift+O")

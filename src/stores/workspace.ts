@@ -1,7 +1,7 @@
 import { createSignal } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import type { FileNode } from '~/types/file-tree';
-import { listDirectory, createDirectory, getDefaultStorageDir, readFile, openWorkspaceCommand, type FileEntry } from '~/lib/tauri/commands';
+import { listDirectory, createDirectory, getDefaultStorageDir, readFile, writeFile, openWorkspaceCommand, type FileEntry } from '~/lib/tauri/commands';
 import { open as openDialog } from '@tauri-apps/plugin-dialog';
 
 interface WorkspaceState {
@@ -88,10 +88,31 @@ async function initWorkspace() {
 async function refreshWorkspace() {
   const path = state.workspacePath;
   if (!path) return;
+
+  // 记住当前展开的文件夹
+  const expandedPaths = new Set<string>();
+  function collectExpanded(nodes: FileNode[]) {
+    for (const node of nodes) {
+      if (node.isDirectory && node.isExpanded) expandedPaths.add(node.path);
+      if (node.children) collectExpanded(node.children);
+    }
+  }
+  collectExpanded(state.tree);
+
   const entries = await listDirectory(path);
   const nodes = entriesToNodes(entries);
   await loadChildrenDeep(nodes, 2);
   await loadTitles(nodes);
+
+  // 恢复展开状态
+  function restoreExpanded(nodes: FileNode[]) {
+    for (const node of nodes) {
+      if (node.isDirectory && expandedPaths.has(node.path)) node.isExpanded = true;
+      if (node.children) restoreExpanded(node.children);
+    }
+  }
+  restoreExpanded(nodes);
+
   setState('tree', nodes);
 }
 
@@ -137,10 +158,9 @@ const [selectedFolder, setSelectedFolder] = createSignal<string | null>(null);
 
 const [searchQuery, setSearchQuery] = createSignal('');
 
-function searchMarkdownFiles(query: string): FileNode[] {
+function searchMarkdownFiles(query: string, allFiles: FileNode[]): FileNode[] {
   if (!query.trim()) return [];
   const q = query.toLowerCase();
-  const allFiles = collectMarkdownFiles(null);
   return allFiles.filter((f) => {
     const nameMatch = f.name.toLowerCase().includes(q);
     const titleMatch = f.title?.toLowerCase().includes(q);
@@ -276,6 +296,65 @@ function updateTreeNodes(
   });
 }
 
+// ── 内联创建文件 ──
+
+const [creatingInDir, setCreatingInDir] = createSignal<string | null>(null);
+
+function getCreationTargetDir(): string | null {
+  const ws = state.workspacePath;
+  if (!ws) return null;
+  const sel = state.selectedFile;
+  if (sel) return sel.substring(0, sel.lastIndexOf('/'));
+  return ws;
+}
+
+function startCreatingFile() {
+  const dir = getCreationTargetDir();
+  if (!dir) return;
+  const node = findNode(state.tree, dir);
+  if (node && node.isDirectory && !node.isExpanded) {
+    toggleFolder(dir);
+  }
+  setCreatingInDir(dir);
+}
+
+function cancelCreatingFile() {
+  setCreatingInDir(null);
+}
+
+async function confirmCreatingFile(name: string): Promise<string | null> {
+  const dir = creatingInDir();
+  if (!dir) return null;
+
+  const trimmed = name.trim();
+  if (!trimmed) {
+    setCreatingInDir(null);
+    return null;
+  }
+
+  const fileName = trimmed.endsWith('.md') ? trimmed : `${trimmed}.md`;
+  const fullPath = `${dir}/${fileName}`;
+
+  const parent = findNode(state.tree, dir);
+  const siblings = dir === state.workspacePath ? state.tree : parent?.children;
+  if (siblings?.some(n => n.name === fileName)) {
+    setCreatingInDir(null);
+    return null;
+  }
+
+  try {
+    await writeFile(fullPath, '');
+    await refreshWorkspace();
+    selectFile(fullPath);
+    setCreatingInDir(null);
+    return fullPath;
+  } catch (e) {
+    console.error('[workspace] Failed to create file:', e);
+    setCreatingInDir(null);
+    return null;
+  }
+}
+
 async function openSingleFile(): Promise<string | null> {
   try {
     const selected = await openDialog({
@@ -314,5 +393,9 @@ export {
   searchQuery,
   setSearchQuery,
   searchMarkdownFiles,
+  creatingInDir,
+  startCreatingFile,
+  cancelCreatingFile,
+  confirmCreatingFile,
 };
 export type { FileGroup };

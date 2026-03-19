@@ -7,7 +7,9 @@ import rehypeKatex from 'rehype-katex';
 import rehypeSanitize, { defaultSchema } from 'rehype-sanitize';
 import rehypeStringify from 'rehype-stringify';
 import { codeToHtml, type BundledTheme } from 'shiki';
+import { convertFileSrc } from '@tauri-apps/api/core';
 import { headingToId } from './heading-id';
+import { resolvePath, dirname } from '~/lib/utils/path';
 
 // Extend default sanitization schema to allow KaTeX and code block classes
 const sanitizeSchema = {
@@ -64,6 +66,7 @@ const HEADING_RE = /<(h[1-6])>([\s\S]*?)<\/h[1-6]>/g;
 const HTML_TAG_RE = /<[^>]+>/g;
 const COLOR_CODE_RE = /<code>(#[0-9a-fA-F]{3,8})<\/code>/g;
 const TABLE_RE = /<table(?! class="frontmatter-table")[^>]*>[\s\S]*?<\/table>/g;
+const IMG_SRC_RE = /<img([^>]*?)\ssrc="([^"]+)"([^>]*?)>/g;
 
 function getPlainTextFromHtml(html: string): string {
   return decodeHtmlEntities(html.replace(HTML_TAG_RE, ''));
@@ -166,10 +169,22 @@ function renderFrontmatterTable(fields: Record<string, string>): string {
   return `<table class="frontmatter-table"><tbody>${rows}</tbody></table>`;
 }
 
-export async function renderMarkdown(markdown: string, resolvedTheme?: string, fileName?: string): Promise<string> {
+function resolveImageSrcs(html: string, currentFilePath: string): string {
+  const dir = dirname(currentFilePath);
+  return html.replace(IMG_SRC_RE, (match, before, src, after) => {
+    if (/^(https?:|data:|\/)/i.test(src)) return match;
+    const decoded = decodeHtmlEntities(src);
+    const absolute = resolvePath(dir, decoded);
+    const assetUrl = convertFileSrc(absolute);
+    return `<img${before} src="${assetUrl}"${after}>`;
+  });
+}
+
+export async function renderMarkdown(markdown: string, resolvedTheme?: string, filePath?: string): Promise<string> {
   let fmHtml = '';
   let md = markdown;
 
+  const fileName = filePath?.split('/').pop();
   if (fileName === 'SKILL.md') {
     const { frontmatter, body } = extractFrontmatter(markdown);
     if (frontmatter) {
@@ -184,6 +199,9 @@ export async function renderMarkdown(markdown: string, resolvedTheme?: string, f
   html = addHeadingIds(html);
   html = addColorSwatches(html);
   html = wrapTables(html);
+  if (filePath) {
+    html = resolveImageSrcs(html, filePath);
+  }
   html = await renderMermaidBlocks(html, resolvedTheme ?? 'mocha');
 
   const matches = [...html.matchAll(CODE_BLOCK_RE)];
