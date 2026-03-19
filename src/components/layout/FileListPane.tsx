@@ -7,6 +7,9 @@ import {
   selectFile,
   openSingleFile,
   toggleFolder,
+  searchQuery,
+  setSearchQuery,
+  searchMarkdownFiles,
 } from '~/stores/workspace';
 import type { FileNode } from '~/types/file-tree';
 import { loadFile } from '~/stores/editor';
@@ -17,6 +20,8 @@ import FolderOpen from 'lucide-solid/icons/folder-open';
 import ChevronDown from 'lucide-solid/icons/chevron-down';
 import ChevronRight from 'lucide-solid/icons/chevron-right';
 import Folder from 'lucide-solid/icons/folder';
+import Search from 'lucide-solid/icons/search';
+import X from 'lucide-solid/icons/x';
 
 // --- Helpers ---
 
@@ -186,6 +191,7 @@ export function FileListPane() {
 
   const mdFiles = createMemo(() => collectMarkdownFiles(null));
   const fileCount = createMemo(() => mdFiles().length);
+  const filteredFiles = createMemo(() => searchMarkdownFiles(searchQuery()));
 
   const handleFileClick = (path: string) => {
     selectFile(path);
@@ -232,6 +238,34 @@ export function FileListPane() {
         </div>
       </div>
 
+      {/* Search box */}
+      <Show when={workspaceState.workspacePath}>
+        <div class="px-2 pb-1 shrink-0">
+          <div
+            class="flex items-center gap-1.5 px-2 py-1 rounded-md"
+            style={{ background: 'var(--ctp-surface0)' }}
+          >
+            <Search size={14} style={{ color: 'var(--ctp-overlay1)', 'flex-shrink': '0' }} />
+            <input
+              type="text"
+              placeholder={t('searchPlaceholder')}
+              value={searchQuery()}
+              onInput={(e) => setSearchQuery(e.currentTarget.value)}
+              class="flex-1 bg-transparent text-xs outline-none min-w-0"
+              style={{ color: 'var(--ctp-text)' }}
+            />
+            <Show when={searchQuery()}>
+              <button
+                class="flex items-center justify-center rounded hover:bg-surface1/50 transition-colors"
+                onClick={() => setSearchQuery('')}
+              >
+                <X size={12} style={{ color: 'var(--ctp-overlay1)' }} />
+              </button>
+            </Show>
+          </div>
+        </div>
+      </Show>
+
       {/* File tree */}
       <div class="flex-1 overflow-y-auto">
         <Show
@@ -242,18 +276,45 @@ export function FileListPane() {
             </div>
           }
         >
-          <div class="pt-1 flex flex-col gap-0.5">
-            <For each={workspaceState.tree}>
-              {(node) => (
-                <TreeNode
-                  node={node}
-                  depth={0}
-                  selectedFile={workspaceState.selectedFile}
-                  onFileClick={handleFileClick}
-                />
-              )}
-            </For>
-          </div>
+          <Show
+            when={searchQuery()}
+            fallback={
+              <div class="pt-1 flex flex-col gap-0.5">
+                <For each={workspaceState.tree}>
+                  {(node) => (
+                    <TreeNode
+                      node={node}
+                      depth={0}
+                      selectedFile={workspaceState.selectedFile}
+                      onFileClick={handleFileClick}
+                    />
+                  )}
+                </For>
+              </div>
+            }
+          >
+            <Show
+              when={filteredFiles().length > 0}
+              fallback={
+                <div class="px-3 py-8 text-xs text-overlay0 text-center">
+                  {t('noResults')}
+                </div>
+              }
+            >
+              <div class="pt-1 flex flex-col gap-0.5">
+                <For each={filteredFiles()}>
+                  {(file) => (
+                    <TreeFileItem
+                      file={file}
+                      depth={0}
+                      isActive={workspaceState.selectedFile === file.path}
+                      onClick={handleFileClick}
+                    />
+                  )}
+                </For>
+              </div>
+            </Show>
+          </Show>
         </Show>
       </div>
     </div>

@@ -135,6 +135,19 @@ function selectFile(path: string) {
 
 const [selectedFolder, setSelectedFolder] = createSignal<string | null>(null);
 
+const [searchQuery, setSearchQuery] = createSignal('');
+
+function searchMarkdownFiles(query: string): FileNode[] {
+  if (!query.trim()) return [];
+  const q = query.toLowerCase();
+  const allFiles = collectMarkdownFiles(null);
+  return allFiles.filter((f) => {
+    const nameMatch = f.name.toLowerCase().includes(q);
+    const titleMatch = f.title?.toLowerCase().includes(q);
+    return nameMatch || titleMatch;
+  });
+}
+
 function selectFolder(path: string | null) {
   setSelectedFolder(path);
 }
@@ -298,5 +311,8 @@ export {
   collectMarkdownFiles,
   collectMarkdownFilesByGroup,
   openSingleFile,
+  searchQuery,
+  setSearchQuery,
+  searchMarkdownFiles,
 };
 export type { FileGroup };
