@@ -64,6 +64,9 @@ const messages: Record<Locale, Record<string, string>> = {
     searchPlaceholder: '搜索笔记…',
     noResults: '无匹配结果',
     newFile: '新建文件',
+    tools: '展开工具',
+    copyToClipboard: '复制文本',
+    copied: '已复制',
   },
   'zh-TW': {
     appName: '皮蛋記',
@@ -120,6 +123,9 @@ const messages: Record<Locale, Record<string, string>> = {
     searchPlaceholder: '搜尋筆記…',
     noResults: '無匹配結果',
     newFile: '新增檔案',
+    tools: '展開工具',
+    copyToClipboard: '複製文本',
+    copied: '已複製',
   },
   'en-US': {
     appName: 'PiDanMD',
@@ -176,6 +182,9 @@ const messages: Record<Locale, Record<string, string>> = {
     searchPlaceholder: 'Search notes…',
     noResults: 'No results',
     newFile: 'New File',
+    tools: 'Tools',
+    copyToClipboard: 'Copy Text',
+    copied: 'Copied',
   },
   'ja-JP': {
     appName: 'PiDanMD',
@@ -232,6 +241,9 @@ const messages: Record<Locale, Record<string, string>> = {
     searchPlaceholder: 'ノートを検索…',
     noResults: '結果なし',
     newFile: '新規ファイル',
+    tools: 'ツール',
+    copyToClipboard: 'テキストをコピー',
+    copied: 'コピーしました',
   },
   'ko-KR': {
     appName: 'PiDanMD',
@@ -288,6 +300,9 @@ const messages: Record<Locale, Record<string, string>> = {
     searchPlaceholder: '노트 검색…',
     noResults: '결과 없음',
     newFile: '새 파일',
+    tools: '도구',
+    copyToClipboard: '텍스트 복사',
+    copied: '복사됨',
   },
 };
 

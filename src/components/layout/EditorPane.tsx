@@ -4,6 +4,7 @@ import { formatMarkdown } from '~/lib/editor/format-markdown';
 import { layoutMode, cycleLayoutMode, type LayoutMode } from '~/stores/layout';
 import { openSettingsWindow } from '~/lib/settings-window';
 import { t } from '~/lib/i18n';
+import { createDropdown } from '~/lib/utils/dropdown';
 import { MarkdownViewer } from '~/components/editor/MarkdownViewer';
 import { MarkdownEditor } from '~/components/editor/MarkdownEditor';
 import { EditorPlaceholder } from '~/components/editor/EditorPlaceholder';
@@ -15,6 +16,8 @@ import Columns2 from 'lucide-solid/icons/columns-2';
 import Columns3 from 'lucide-solid/icons/columns-3';
 import TextAlignStart from 'lucide-solid/icons/text-align-start';
 import ChartColumn from 'lucide-solid/icons/chart-column';
+import ListChevronsUpDown from 'lucide-solid/icons/list-chevrons-up-down';
+import ClipboardCopy from 'lucide-solid/icons/clipboard-copy';
 
 function LayoutIcon(props: { mode: LayoutMode }) {
   return (
@@ -52,40 +55,15 @@ function estimateTokens(text: string): number {
 }
 
 export function EditorPane() {
-  const [statsOpen, setStatsOpen] = createSignal(false);
-  let statsRef: HTMLDivElement | undefined;
+  const stats = createDropdown();
+  const tools = createDropdown();
 
-  function handleStatsClickOutside(e: MouseEvent) {
-    if (statsRef && !statsRef.contains(e.target as Node)) {
-      setStatsOpen(false);
-      stopStatsListening();
-    }
-  }
+  const [copied, setCopied] = createSignal(false);
+  let copiedTimer: ReturnType<typeof setTimeout> | undefined;
 
-  function handleStatsKeyDown(e: KeyboardEvent) {
-    if (e.key === 'Escape') {
-      setStatsOpen(false);
-      stopStatsListening();
-    }
-  }
-
-  const startStatsListening = () => {
-    document.addEventListener('mousedown', handleStatsClickOutside);
-    document.addEventListener('keydown', handleStatsKeyDown);
-  };
-  const stopStatsListening = () => {
-    document.removeEventListener('mousedown', handleStatsClickOutside);
-    document.removeEventListener('keydown', handleStatsKeyDown);
-  };
-
-  onCleanup(stopStatsListening);
-
-  function toggleStats() {
-    const next = !statsOpen();
-    setStatsOpen(next);
-    if (next) startStatsListening();
-    else stopStatsListening();
-  }
+  onCleanup(() => {
+    if (copiedTimer !== undefined) clearTimeout(copiedTimer);
+  });
 
   const wordCount = () => content().split(/[\s\n]+/).filter(Boolean).length;
   const charCount = () => content().replace(/\s/g, '').length;
@@ -121,15 +99,15 @@ export function EditorPane() {
           >
             <FileType size={16} />
           </button>
-          <div ref={statsRef} class="relative">
+          <div ref={stats.setRef} class="relative">
             <button
               class={btnClass}
-              onClick={toggleStats}
+              onClick={stats.toggle}
               title={t('stats')}
             >
               <ChartColumn size={16} />
             </button>
-            <Show when={statsOpen()}>
+            <Show when={stats.isOpen()}>
               <div class="absolute top-full right-0 mt-1 w-48 rounded-lg border border-surface1 bg-mantle shadow-xl z-50 p-3">
                 <div class="space-y-1.5 text-sm">
                   <div class="flex justify-between"><span class="text-subtext0">{t('words')}</span><span class="text-text">{wordCount()}</span></div>
@@ -137,6 +115,38 @@ export function EditorPane() {
                   <div class="flex justify-between"><span class="text-subtext0">{t('lines')}</span><span class="text-text">{lineCount()}</span></div>
                   <div class="flex justify-between"><span class="text-subtext0">Token</span><span class="text-text">≈ {estimateTokens(content())}</span></div>
                 </div>
+              </div>
+            </Show>
+          </div>
+          <div ref={tools.setRef} class="relative">
+            <button
+              class={btnClass}
+              onClick={tools.toggle}
+              title={t('tools')}
+            >
+              <ListChevronsUpDown size={16} />
+            </button>
+            <Show when={tools.isOpen()}>
+              <div class="absolute top-full right-0 mt-1 rounded-lg border border-surface1 bg-mantle shadow-xl z-50 p-2">
+                <button
+                  class="flex items-center gap-2 w-full px-2 py-1.5 rounded-md text-sm text-text hover:bg-surface0 transition-colors whitespace-nowrap"
+                  onClick={async () => {
+                    try {
+                      await navigator.clipboard.writeText(content());
+                      if (copiedTimer !== undefined) clearTimeout(copiedTimer);
+                      setCopied(true);
+                      copiedTimer = setTimeout(() => {
+                        setCopied(false);
+                        copiedTimer = undefined;
+                      }, 1500);
+                    } catch (e) {
+                      console.error('Copy failed:', e);
+                    }
+                  }}
+                >
+                  <ClipboardCopy size={14} />
+                  <span>{copied() ? t('copied') : t('copyToClipboard')}</span>
+                </button>
               </div>
             </Show>
           </div>
