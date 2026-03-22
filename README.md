@@ -21,6 +21,16 @@
   <img src="public/screenshot.png" width="720" />
 </p>
 
+## 已实现功能
+
+- **实时预览** — 一键切换预览，拒绝左右分栏。
+- **多渲染模式** — 内置标准 Markdown、skills、Hexo、Jekyll、Hugo 渲染，博客写作开箱即用
+- **GFM + 数学公式 + 代码高亮** — 支持 GitHub Flavored Markdown、KaTeX 公式、Shiki 语法高亮与 Mermaid 图表
+- **原生跨平台** — 基于 Tauri 2，安装包体积小、启动快，覆盖 macOS / Windows / Linux / x86_64 / ARM
+- **多语言支持** — 简体中文、繁體中文、English、日本語、한국어，自动跟随系统语言
+- **精心排版** — 内置霞鹜文楷 + Cascadia Code NF，中英文混排美观舒适
+- **文件树 + 大纲** — 侧栏文件管理与目录导航，轻松组织项目文档。
+
 ## 平台支持
 
 | 操作系统 | 架构 | 最低版本 | 安装格式 |
@@ -59,10 +69,6 @@ pnpm tauri dev
 ```bash
 pnpm tauri build
 ```
-
-## 语言支持
-
-界面支持简体中文、繁體中文、English、日本語、한국어，可在设置中切换，也会自动跟随系统语言。
 
 ## 内置字体
 

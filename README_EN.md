@@ -21,6 +21,16 @@
   <img src="public/screenshot.png" width="720" />
 </p>
 
+## Features
+
+- **Live Preview** — One-click preview toggle, no split panes.
+- **Multiple Rendering Modes** — Built-in Standard Markdown, Skills, Hexo, Jekyll, and Hugo rendering, ready for blog writing out of the box
+- **GFM + Math + Syntax Highlighting** — GitHub Flavored Markdown, KaTeX equations, Shiki syntax highlighting, and Mermaid diagrams
+- **Native Cross-Platform** — Built on Tauri 2 with small bundle size and fast startup, covering macOS / Windows / Linux  / x86_64 / ARM
+- **Multilingual UI** — Simplified Chinese, Traditional Chinese, English, Japanese, Korean with automatic system language detection
+- **Crafted Typography** — Bundled LXGW WenKai + Cascadia Code NF for beautiful CJK and Latin mixed typesetting
+- **File Tree + Outline** — Sidebar file management and heading navigation for easy project organization.
+
 ## Platform Support
 
 | OS | Architecture | Minimum Version | Format |
@@ -59,10 +69,6 @@ pnpm tauri dev
 ```bash
 pnpm tauri build
 ```
-
-## Language Support
-
-The UI supports Simplified Chinese, Traditional Chinese, English, Japanese, and Korean. You can switch languages in settings, or let it follow the system language automatically.
 
 ## Bundled Fonts
 
