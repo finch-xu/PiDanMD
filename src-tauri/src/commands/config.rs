@@ -27,7 +27,6 @@ pub struct FontConfig {
     pub ui: FontEntry,
     pub body: FontEntry,
     pub code: FontEntry,
-    pub symbol: String,
 }
 
 impl Default for FontConfig {
@@ -45,7 +44,6 @@ impl Default for FontConfig {
                 family: "Cascadia Code NF".into(),
                 size: 16,
             },
-            symbol: "Noto Color Emoji".into(),
         }
     }
 }

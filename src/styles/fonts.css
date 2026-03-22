@@ -16,14 +16,3 @@
   font-display: swap;
 }
 
-@font-face {
-  font-family: 'Noto Color Emoji';
-  src: url('/fonts/NotoColorEmoji-Regular.ttf') format('truetype');
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Noto Sans Symbols';
-  src: url('/fonts/NotoSansSymbols-Regular.ttf') format('truetype');
-  font-display: swap;
-}

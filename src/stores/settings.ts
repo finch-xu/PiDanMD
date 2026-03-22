@@ -14,7 +14,6 @@ export interface Settings {
   uiFont: string;
   bodyFont: string;
   codeFont: string;
-  symbolFont: string;
   uiFontSize: number;
   bodyFontSize: number;
   codeFontSize: number;
@@ -80,7 +79,6 @@ const DEFAULTS: Settings = {
   uiFont: 'LXGW WenKai Screen',
   bodyFont: 'LXGW WenKai Screen',
   codeFont: 'Cascadia Code NF',
-  symbolFont: 'Noto Color Emoji',
   uiFontSize: 16,
   bodyFontSize: 16,
   codeFontSize: 16,
@@ -97,18 +95,6 @@ function resolveDataTheme(theme: Theme): string {
   return theme;
 }
 
-// ── Symbol Font Helper ────────────────────────
-
-function withSymbolFont(fontCss: string, symbolFont: string): string {
-  if (symbolFont === 'system') return fontCss;
-  const safeSymbol = escapeCssFontName(symbolFont);
-  const match = fontCss.match(/,\s*(serif|sans-serif|monospace)\s*$/);
-  if (match) {
-    return fontCss.replace(match[0], `, '${safeSymbol}'${match[0]}`);
-  }
-  return `${fontCss}, '${safeSymbol}'`;
-}
-
 // ── CSS Variable Injection ─────────────────────
 
 function applySettings(s: Settings) {
@@ -117,8 +103,8 @@ function applySettings(s: Settings) {
   root.dataset.theme = resolveDataTheme(s.theme);
 
   root.style.setProperty('--app-ui-font', fontToCss(s.uiFont, BUILTIN_TEXT_FONTS));
-  root.style.setProperty('--editor-font-body', withSymbolFont(fontToCss(s.bodyFont, BUILTIN_TEXT_FONTS), s.symbolFont));
-  root.style.setProperty('--editor-font-heading', withSymbolFont(headingFontCss(s.bodyFont), s.symbolFont));
+  root.style.setProperty('--editor-font-body', fontToCss(s.bodyFont, BUILTIN_TEXT_FONTS));
+  root.style.setProperty('--editor-font-heading', headingFontCss(s.bodyFont));
   root.style.setProperty('--editor-font-code', fontToCss(s.codeFont, BUILTIN_CODE_FONTS));
   root.style.setProperty('--app-ui-font-size', `${s.uiFontSize}px`);
   root.style.setProperty('--editor-font-size', String(s.bodyFontSize));
@@ -141,7 +127,6 @@ export function initSettingsFromConfig(config: AppConfig) {
     bodyFontSize: config.font.body.size,
     codeFont: config.font.code.family,
     codeFontSize: config.font.code.size,
-    symbolFont: config.font.symbol ?? 'Noto Color Emoji',
     lineHeight: config.reading.lineHeight as LineHeight,
     contentWidth: config.reading.contentWidth as ContentWidth,
   };
@@ -162,7 +147,6 @@ function updateSettings(patch: Partial<Settings>) {
     c.font.ui = { family: next.uiFont, size: next.uiFontSize };
     c.font.body = { family: next.bodyFont, size: next.bodyFontSize };
     c.font.code = { family: next.codeFont, size: next.codeFontSize };
-    c.font.symbol = next.symbolFont;
     c.reading.lineHeight = next.lineHeight;
     c.reading.contentWidth = next.contentWidth;
   });
