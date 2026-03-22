@@ -15,7 +15,6 @@ export interface AppConfig {
     ui: FontEntry;
     body: FontEntry;
     code: FontEntry;
-    symbol: string;
   };
   reading: {
     lineHeight: string;

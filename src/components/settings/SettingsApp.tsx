@@ -9,7 +9,6 @@ import {
   resetToDefaults,
   BUILTIN_TEXT_FONTS,
   BUILTIN_CODE_FONTS,
-  type BuiltinFont,
   type LineHeight,
   type ContentWidth,
 } from '~/stores/settings';
@@ -152,12 +151,6 @@ function ReadingPane() {
 
 /* ── Pane: 字体 ── */
 function TypographyPane() {
-  const symbolFonts = (): BuiltinFont[] => [
-    { name: 'Noto Color Emoji', label: 'Noto Color Emoji', css: "'Noto Color Emoji'" },
-    { name: 'Noto Sans Symbols', label: 'Noto Sans Symbols', css: "'Noto Sans Symbols'" },
-    { name: 'system', label: t('followSystem'), css: '' },
-  ];
-
   return (
     <div>
       <SectionHeader title={t('typography')} />
@@ -219,18 +212,6 @@ function TypographyPane() {
           </div>
         </SettingsRow>
 
-        <SettingsRow label={t('symbolLabel')} border={false}>
-          <div class="w-48">
-            <FontDropdown
-              label=""
-              value={settings().symbolFont}
-              builtinFonts={symbolFonts()}
-              onChange={(v) => updateSettings({ symbolFont: v })}
-              type="text"
-              showSystemFonts={false}
-            />
-          </div>
-        </SettingsRow>
       </SettingsCard>
     </div>
   );
