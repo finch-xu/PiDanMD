@@ -1,4 +1,4 @@
-import { createSignal, For, Switch, Match, type JSX } from 'solid-js';
+import { createSignal, For, Show, Switch, Match, type JSX } from 'solid-js';
 import { ThemeSwatches } from './controls/ThemeSwatches';
 import { FontDropdown } from './controls/FontDropdown';
 import { SegmentedControl } from './controls/SegmentedControl';
@@ -30,10 +30,28 @@ function FontIcon() {
 /* ── SettingsCard: 卡片分组容器 ── */
 function SettingsCard(props: { children: JSX.Element; class?: string }) {
   return (
-    <div class={`rounded-xl bg-surface0/25 px-4 py-3 ${props.class ?? ''}`}>
+    <div class={`rounded-xl bg-base border border-surface0/60 shadow-sm px-6 py-1 ${props.class ?? ''}`}>
       {props.children}
     </div>
   );
+}
+
+/* ── SettingsRow: 标签 + 控件行 ── */
+function SettingsRow(props: { label?: string; children: JSX.Element; border?: boolean }) {
+  return (
+    <div
+      class="flex items-center justify-between py-4"
+      classList={{ 'border-b border-surface0/40': props.border !== false }}
+    >
+      {props.label && <span class="text-sm font-medium text-subtext1">{props.label}</span>}
+      {props.children}
+    </div>
+  );
+}
+
+/* ── SectionHeader: 分区标题 ── */
+function SectionHeader(props: { title: string }) {
+  return <h2 class="text-lg font-semibold text-text mb-5">{props.title}</h2>;
 }
 
 type TabId = 'basic' | 'theme' | 'reading' | 'typography';
@@ -50,28 +68,27 @@ function BasicPane() {
   const [confirming, setConfirming] = createSignal(false);
 
   return (
-    <div class="space-y-3">
+    <div>
+      <SectionHeader title={t('basic')} />
       <SettingsCard>
-        <SegmentedControl<Locale>
-          label={t('language')}
-          value={locale()}
-          options={[
-            { value: 'zh-CN', label: '简体' },
-            { value: 'zh-TW', label: '繁體' },
-            { value: 'en-US', label: 'EN' },
-            { value: 'ja-JP', label: '日本語' },
-            { value: 'ko-KR', label: '한국어' },
-          ]}
-          onChange={(v) => setLocale(v)}
-          minWidth="280px"
-        />
-      </SettingsCard>
-
-      <SettingsCard class="pt-2">
-        <div class="flex items-center justify-between">
-          <span class="text-sm text-subtext1">{t('resetConfig')}</span>
+        <SettingsRow label={t('language')}>
+          <SegmentedControl<Locale>
+            label=""
+            value={locale()}
+            options={[
+              { value: 'zh-CN', label: '简体' },
+              { value: 'zh-TW', label: '繁體' },
+              { value: 'en-US', label: 'EN' },
+              { value: 'ja-JP', label: '日本語' },
+              { value: 'ko-KR', label: '한국어' },
+            ]}
+            onChange={(v) => setLocale(v)}
+            minWidth="280px"
+          />
+        </SettingsRow>
+        <SettingsRow label={t('resetConfig')} border={false}>
           <button
-            class="px-3 py-1.5 text-sm rounded-md transition-colors bg-surface0/50 text-subtext1 hover:bg-red/20 hover:text-red"
+            class="text-sm text-red font-medium px-4 py-2 hover:bg-red/10 rounded-lg transition-colors"
             onClick={async () => {
               if (!confirming()) { setConfirming(true); return; }
               await resetToDefaults();
@@ -80,7 +97,7 @@ function BasicPane() {
           >
             {confirming() ? t('confirmReset') : t('resetConfig')}
           </button>
-        </div>
+        </SettingsRow>
       </SettingsCard>
     </div>
   );
@@ -89,20 +106,24 @@ function BasicPane() {
 /* ── Pane: 主题 ── */
 function ThemePane() {
   return (
-    <SettingsCard>
-      <ThemeSwatches />
-    </SettingsCard>
+    <div>
+      <SectionHeader title={t('theme')} />
+      <SettingsCard class="py-4">
+        <ThemeSwatches />
+      </SettingsCard>
+    </div>
   );
 }
 
 /* ── Pane: 阅读 ── */
 function ReadingPane() {
   return (
-    <SettingsCard>
-      <div class="divide-y divide-surface0/40">
-        <div class="pb-3">
+    <div>
+      <SectionHeader title={t('reading')} />
+      <SettingsCard>
+        <SettingsRow label={t('contentWidth')}>
           <SegmentedControl<ContentWidth>
-            label={t('contentWidth')}
+            label=""
             value={settings().contentWidth}
             options={[
               { value: 'narrow', label: t('narrow') },
@@ -111,10 +132,10 @@ function ReadingPane() {
             ]}
             onChange={(v) => updateSettings({ contentWidth: v })}
           />
-        </div>
-        <div class="pt-3">
+        </SettingsRow>
+        <SettingsRow label={t('lineHeight')} border={false}>
           <SegmentedControl<LineHeight>
-            label={t('lineHeight')}
+            label=""
             value={settings().lineHeight}
             options={[
               { value: 'compact', label: t('compact') },
@@ -123,9 +144,9 @@ function ReadingPane() {
             ]}
             onChange={(v) => updateSettings({ lineHeight: v })}
           />
-        </div>
-      </div>
-    </SettingsCard>
+        </SettingsRow>
+      </SettingsCard>
+    </div>
   );
 }
 
@@ -138,69 +159,68 @@ function TypographyPane() {
   ];
 
   return (
-    <SettingsCard>
-      <div class="divide-y divide-surface0/40">
-        {/* 界面字体 + 字号 */}
-        <div class="flex items-center gap-4 -mx-1 px-1 rounded-lg hover:bg-surface0/15 py-2.5">
-          <span class="text-sm text-subtext1 w-14 shrink-0">{t('uiLabel')}</span>
-          <div class="flex-1">
-            <FontDropdown
-              label=""
-              value={settings().uiFont}
-              builtinFonts={BUILTIN_TEXT_FONTS}
-              onChange={(v) => updateSettings({ uiFont: v })}
-              type="text"
+    <div>
+      <SectionHeader title={t('typography')} />
+      <SettingsCard>
+        <SettingsRow label={t('uiLabel')}>
+          <div class="flex items-center gap-3">
+            <div class="w-48">
+              <FontDropdown
+                label=""
+                value={settings().uiFont}
+                builtinFonts={BUILTIN_TEXT_FONTS}
+                onChange={(v) => updateSettings({ uiFont: v })}
+                type="text"
+              />
+            </div>
+            <NumberStepper
+              value={settings().uiFontSize}
+              min={12} max={24} step={1}
+              onChange={(v) => updateSettings({ uiFontSize: v })}
             />
           </div>
-          <NumberStepper
-            value={settings().uiFontSize}
-            min={12} max={24} step={1}
-            onChange={(v) => updateSettings({ uiFontSize: v })}
-          />
-        </div>
+        </SettingsRow>
 
-        {/* 内容字体 + 字号 */}
-        <div class="flex items-center gap-4 -mx-1 px-1 rounded-lg hover:bg-surface0/15 py-2.5">
-          <span class="text-sm text-subtext1 w-14 shrink-0">{t('bodyLabel')}</span>
-          <div class="flex-1">
-            <FontDropdown
-              label=""
-              value={settings().bodyFont}
-              builtinFonts={BUILTIN_TEXT_FONTS}
-              onChange={(v) => updateSettings({ bodyFont: v })}
-              type="text"
+        <SettingsRow label={t('bodyLabel')}>
+          <div class="flex items-center gap-3">
+            <div class="w-48">
+              <FontDropdown
+                label=""
+                value={settings().bodyFont}
+                builtinFonts={BUILTIN_TEXT_FONTS}
+                onChange={(v) => updateSettings({ bodyFont: v })}
+                type="text"
+              />
+            </div>
+            <NumberStepper
+              value={settings().bodyFontSize}
+              min={12} max={24} step={1}
+              onChange={(v) => updateSettings({ bodyFontSize: v })}
             />
           </div>
-          <NumberStepper
-            value={settings().bodyFontSize}
-            min={12} max={24} step={1}
-            onChange={(v) => updateSettings({ bodyFontSize: v })}
-          />
-        </div>
+        </SettingsRow>
 
-        {/* 代码字体 + 字号 */}
-        <div class="flex items-center gap-4 -mx-1 px-1 rounded-lg hover:bg-surface0/15 py-2.5">
-          <span class="text-sm text-subtext1 w-14 shrink-0">{t('codeLabel')}</span>
-          <div class="flex-1">
-            <FontDropdown
-              label=""
-              value={settings().codeFont}
-              builtinFonts={BUILTIN_CODE_FONTS}
-              onChange={(v) => updateSettings({ codeFont: v })}
-              type="code"
+        <SettingsRow label={t('codeLabel')}>
+          <div class="flex items-center gap-3">
+            <div class="w-48">
+              <FontDropdown
+                label=""
+                value={settings().codeFont}
+                builtinFonts={BUILTIN_CODE_FONTS}
+                onChange={(v) => updateSettings({ codeFont: v })}
+                type="code"
+              />
+            </div>
+            <NumberStepper
+              value={settings().codeFontSize}
+              min={10} max={22} step={1}
+              onChange={(v) => updateSettings({ codeFontSize: v })}
             />
           </div>
-          <NumberStepper
-            value={settings().codeFontSize}
-            min={10} max={22} step={1}
-            onChange={(v) => updateSettings({ codeFontSize: v })}
-          />
-        </div>
+        </SettingsRow>
 
-        {/* 符号字体 */}
-        <div class="flex items-center gap-4 -mx-1 px-1 rounded-lg hover:bg-surface0/15 py-2.5">
-          <span class="text-sm text-subtext1 w-14 shrink-0">{t('symbolLabel')}</span>
-          <div class="flex-1">
+        <SettingsRow label={t('symbolLabel')} border={false}>
+          <div class="w-48">
             <FontDropdown
               label=""
               value={settings().symbolFont}
@@ -210,9 +230,9 @@ function TypographyPane() {
               showSystemFonts={false}
             />
           </div>
-        </div>
-      </div>
-    </SettingsCard>
+        </SettingsRow>
+      </SettingsCard>
+    </div>
   );
 }
 
@@ -221,26 +241,28 @@ export function SettingsApp() {
   const [activeTab, setActiveTab] = createSignal<TabId>('basic');
 
   return (
-    <div class="h-screen flex overflow-hidden">
+    <div class="h-screen flex overflow-hidden bg-mantle">
       {/* 左侧边栏 */}
-      <nav class="w-44 shrink-0 bg-mantle px-2 flex flex-col">
+      <nav class="w-56 shrink-0 bg-mantle border-r border-surface0/40 px-3 flex flex-col">
         {/* 品牌区 */}
-        <div class="flex items-center gap-2.5 px-3 pt-8 pb-4">
-          <img src="/logo.png" alt="logo" class="w-7 h-7 rounded-lg" />
-          <span class="text-sm font-semibold text-text">{t('appName')}</span>
+        <div class="flex items-center gap-3 px-3 pt-8 pb-6">
+          <div class="bg-base rounded-lg shadow-sm border border-surface0/60 p-1">
+            <img src="/logo.png" alt="logo" class="w-7 h-7 rounded" />
+          </div>
+          <span class="text-base font-semibold text-text tracking-wide">{t('appName')}</span>
         </div>
 
         <div class="border-t border-surface0/40 mx-2 mb-2" />
 
         {/* 导航按钮 */}
-        <div class="space-y-0.5">
+        <div class="space-y-1">
           <For each={tabs}>
             {(tab) => (
               <button
-                class="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-colors"
+                class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all duration-200"
                 classList={{
-                  'text-text font-medium bg-surface0/60': activeTab() === tab.id,
-                  'text-subtext1 hover:bg-surface0/50 hover:text-text': activeTab() !== tab.id,
+                  'text-text font-medium bg-base shadow-sm border border-surface0/60': activeTab() === tab.id,
+                  'text-subtext1 hover:bg-surface0/50 hover:text-text border border-transparent': activeTab() !== tab.id,
                 }}
                 onClick={() => setActiveTab(tab.id)}
               >
@@ -258,13 +280,21 @@ export function SettingsApp() {
       </nav>
 
       {/* 右侧内容区 */}
-      <main class="flex-1 overflow-y-auto px-7 py-6">
-        <Switch>
-          <Match when={activeTab() === 'basic'}><BasicPane /></Match>
-          <Match when={activeTab() === 'theme'}><ThemePane /></Match>
-          <Match when={activeTab() === 'reading'}><ReadingPane /></Match>
-          <Match when={activeTab() === 'typography'}><TypographyPane /></Match>
-        </Switch>
+      <main class="flex-1 overflow-y-auto px-8 py-8 bg-mantle/80">
+        <div class="max-w-2xl mx-auto">
+          <Show when={activeTab()} keyed>
+            {(tab) => (
+              <div class="animate-[settings-enter_0.25s_ease-out]">
+                <Switch>
+                  <Match when={tab === 'basic'}><BasicPane /></Match>
+                  <Match when={tab === 'theme'}><ThemePane /></Match>
+                  <Match when={tab === 'reading'}><ReadingPane /></Match>
+                  <Match when={tab === 'typography'}><TypographyPane /></Match>
+                </Switch>
+              </div>
+            )}
+          </Show>
+        </div>
       </main>
     </div>
   );

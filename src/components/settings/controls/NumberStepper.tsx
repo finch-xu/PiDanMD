@@ -21,7 +21,7 @@ export function NumberStepper(props: Props) {
   }
 
   const btnClass = (disabled: boolean) =>
-    `w-6 h-6 flex items-center justify-center rounded-md text-xs transition-colors focus-visible:ring-1 focus-visible:ring-overlay1 focus-visible:outline-none ${
+    `w-7 h-7 flex items-center justify-center rounded-md text-xs transition-colors focus-visible:ring-1 focus-visible:ring-overlay1 focus-visible:outline-none ${
       disabled
         ? 'text-overlay0 cursor-not-allowed'
         : 'text-subtext1 hover:text-text hover:bg-surface1'
@@ -29,7 +29,7 @@ export function NumberStepper(props: Props) {
 
   return (
     <div
-      class="flex items-center gap-0.5 rounded-lg bg-crust p-0.5 shrink-0"
+      class="flex items-center gap-0.5 rounded-lg bg-base border border-surface0 p-0.5 h-[34px] shrink-0"
       role="group"
       aria-label={props.label ?? t('fontSizeAdjust')}
     >
@@ -42,7 +42,7 @@ export function NumberStepper(props: Props) {
         <Minus size={12} strokeWidth={1.5} />
       </button>
       <span
-        class="w-7 text-center text-xs text-text font-medium tabular-nums select-none"
+        class="w-9 text-center text-xs text-text font-medium tabular-nums select-none"
         aria-live="polite"
       >
         {props.value}

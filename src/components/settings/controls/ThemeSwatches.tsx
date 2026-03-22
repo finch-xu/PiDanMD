@@ -89,7 +89,7 @@ function MiniPreview(props: { colors: ThemeColors; split?: boolean; splitColors?
 export function ThemeSwatches() {
   return (
     <div>
-      <span class="text-sm text-subtext1 mb-3 block">{t('theme')}</span>
+      <span class="text-xs font-semibold text-overlay0 uppercase tracking-wider mb-4 block">{t('theme')}</span>
 
       {/* System themes: 3 large buttons */}
       <div class="grid grid-cols-3 gap-3 mb-5">
@@ -105,9 +105,9 @@ export function ThemeSwatches() {
                 aria-label={t.label}
               >
                 <div
-                  class="w-full aspect-[4/3] rounded-xl overflow-hidden border transition-all duration-150 group-focus-visible:ring-2 group-focus-visible:ring-overlay1"
+                  class="w-full aspect-video rounded-xl overflow-hidden border-2 transition-all duration-150 group-focus-visible:ring-2 group-focus-visible:ring-overlay1"
                   classList={{
-                    'ring-2 ring-overlay1 border-overlay1': isActive(),
+                    'border-overlay1 ring-2 ring-overlay1/10 scale-[1.02] shadow-md': isActive(),
                     'border-surface0 hover:scale-[1.02]': !isActive(),
                   }}
                 >
@@ -129,7 +129,7 @@ export function ThemeSwatches() {
       </div>
 
       {/* Catppuccin themes */}
-      <span class="text-xs text-overlay1 mb-2.5 block">Catppuccin</span>
+      <span class="text-xs font-semibold text-overlay0 uppercase tracking-wider mb-4 block">Catppuccin</span>
       <div class="grid grid-cols-4 gap-3">
         <For each={getCatppuccinThemes()}>
           {(t) => {
@@ -142,9 +142,9 @@ export function ThemeSwatches() {
                 aria-label={t.label}
               >
                 <div
-                  class="w-full aspect-[4/3] rounded-xl overflow-hidden border transition-all duration-150 group-focus-visible:ring-2 group-focus-visible:ring-overlay1"
+                  class="w-full aspect-video rounded-xl overflow-hidden border-2 transition-all duration-150 group-focus-visible:ring-2 group-focus-visible:ring-overlay1"
                   classList={{
-                    'ring-2 ring-overlay1 border-overlay1': isActive(),
+                    'border-overlay1 ring-2 ring-overlay1/10 scale-[1.02] shadow-md': isActive(),
                     'border-surface0 hover:scale-[1.02]': !isActive(),
                   }}
                 >

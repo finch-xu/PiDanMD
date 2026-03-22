@@ -12,31 +12,21 @@ interface Props<T> {
 }
 
 export function SegmentedControl<T extends string>(props: Props<T>) {
-  const activeIndex = () => props.options.findIndex((o) => o.value === props.value);
-  const count = () => props.options.length;
-
   return (
     <div class="flex items-center justify-between">
       {props.label && <span id={`seg-label-${props.label}`} class="text-sm text-subtext1">{props.label}</span>}
       <div
-        class="relative flex rounded-lg p-0.5 bg-crust"
+        class="flex rounded-lg p-1 gap-1 bg-crust/60 border border-surface0/50"
         style={{ 'min-width': props.minWidth ?? '160px' }}
         role="radiogroup"
         aria-labelledby={props.label ? `seg-label-${props.label}` : undefined}
       >
-        {/* Sliding indicator */}
-        <div
-          class="absolute top-0.5 bottom-0.5 rounded-md transition-transform duration-200 ease-out bg-surface1 shadow-[0_1px_3px_rgba(0,0,0,0.3)]"
-          style={{
-            width: `${100 / count()}%`,
-            transform: `translateX(${activeIndex() * 100}%)`,
-          }}
-        />
-        {/* Options */}
         {props.options.map((opt) => (
           <button
-            class={`relative z-10 flex-1 text-xs py-1.5 text-center rounded-md transition-colors duration-150 focus-visible:ring-1 focus-visible:ring-overlay1 focus-visible:outline-none ${
-              props.value === opt.value ? 'text-text font-semibold' : 'text-subtext0 hover:text-subtext1'
+            class={`flex-1 text-xs py-1.5 text-center rounded-md transition-colors duration-150 focus-visible:ring-1 focus-visible:ring-overlay1 focus-visible:outline-none ${
+              props.value === opt.value
+                ? 'bg-surface1 shadow-sm text-text font-medium'
+                : 'text-subtext0 hover:text-subtext1 hover:bg-surface0/50'
             }`}
             role="radio"
             aria-checked={props.value === opt.value}
