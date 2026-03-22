@@ -55,6 +55,7 @@ impl Default for FontConfig {
 pub struct ReadingConfig {
     pub line_height: String,
     pub content_width: String,
+    pub rendering_mode: String,
 }
 
 impl Default for ReadingConfig {
@@ -62,6 +63,7 @@ impl Default for ReadingConfig {
         Self {
             line_height: "comfortable".into(),
             content_width: "standard".into(),
+            rendering_mode: "default".into(),
         }
     }
 }

@@ -1,12 +1,18 @@
 import { createSignal } from 'solid-js';
 import { readFile, writeFile } from '~/lib/tauri/commands';
 import { debounce } from '~/lib/utils/debounce';
+import type { AppConfig } from '~/lib/config-persistence';
+import { updateAndSave } from '~/lib/config-persistence';
 
 const [content, setContentRaw] = createSignal('');
 const [filePath, setFilePath] = createSignal<string | null>(null);
 const [isDirty, setIsDirty] = createSignal(false);
 const [isLoading, setIsLoading] = createSignal(false);
 const [editorMode, setEditorMode] = createSignal<'preview' | 'edit'>('preview');
+
+export type RenderingMode = 'default' | 'hexo' | 'jekyll' | 'hugo' | 'skill';
+const VALID_MODES: RenderingMode[] = ['default', 'hexo', 'jekyll', 'hugo', 'skill'];
+const [renderingMode, setRenderingModeRaw] = createSignal<RenderingMode>('default');
 
 async function loadFile(path: string, initialMode: 'preview' | 'edit' = 'preview') {
   setIsLoading(true);
@@ -48,4 +54,14 @@ async function saveFile() {
   setIsDirty(false);
 }
 
-export { content, filePath, isDirty, isLoading, loadFile, setContent, editorMode, toggleEditorMode, saveFile, clearEditor, setFilePath };
+export function initRenderingModeFromConfig(config: AppConfig) {
+  const mode = config.reading.renderingMode as RenderingMode;
+  if (VALID_MODES.includes(mode)) setRenderingModeRaw(mode);
+}
+
+export function setRenderingMode(mode: RenderingMode) {
+  setRenderingModeRaw(mode);
+  updateAndSave((c) => { c.reading.renderingMode = mode; });
+}
+
+export { content, filePath, isDirty, isLoading, loadFile, setContent, editorMode, toggleEditorMode, saveFile, clearEditor, setFilePath, renderingMode };

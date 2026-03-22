@@ -9,10 +9,12 @@ async function main() {
   const { initLocaleFromConfig } = await import('~/lib/i18n');
   const { initSettingsFromConfig } = await import('~/stores/settings');
   const { initLayoutFromConfig } = await import('~/stores/layout');
+  const { initRenderingModeFromConfig } = await import('~/stores/editor');
 
   initLocaleFromConfig(config);
   initSettingsFromConfig(config);
   initLayoutFromConfig(config);
+  initRenderingModeFromConfig(config);
 
   const App = (await import('./App')).default;
   render(() => <App />, document.getElementById('root')!);

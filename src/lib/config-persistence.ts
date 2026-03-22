@@ -20,6 +20,7 @@ export interface AppConfig {
   reading: {
     lineHeight: string;
     contentWidth: string;
+    renderingMode: string;
   };
 }
 
