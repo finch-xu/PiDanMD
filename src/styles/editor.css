@@ -208,6 +208,192 @@
   word-break: break-word;
 }
 
+/* ── Blog Front Matter Card (shared: Hexo/Jekyll/Hugo) ── */
+
+.markdown-body .blog-frontmatter {
+  margin-bottom: 2em;
+  padding: 1.25rem 1.5rem;
+  background: color-mix(in srgb, var(--ctp-surface0) 40%, transparent);
+  border: 1px solid var(--ctp-surface1);
+  border-radius: 8px;
+}
+
+.markdown-body .blog-fm-title {
+  font-size: calc(var(--editor-font-size, 16) * 1.6 * 1px);
+  font-weight: 600;
+  color: var(--ctp-text);
+  margin: 0 0 0.5em;
+  line-height: 1.3;
+}
+
+.markdown-body .blog-fm-meta {
+  font-size: 0.875em;
+  color: var(--ctp-subtext0);
+  margin-bottom: 0.75em;
+}
+
+.markdown-body .blog-fm-tags,
+.markdown-body .blog-fm-categories {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4em;
+  margin-top: 0.5em;
+}
+
+.markdown-body .blog-tag-pill {
+  display: inline-block;
+  padding: 0.15em 0.6em;
+  border-radius: 999px;
+  font-size: 0.8em;
+  background: color-mix(in srgb, var(--ctp-blue) 15%, transparent);
+  color: var(--ctp-blue);
+  font-family: var(--editor-font-code);
+}
+
+.markdown-body .blog-category-pill {
+  display: inline-block;
+  padding: 0.15em 0.6em;
+  border-radius: 999px;
+  font-size: 0.8em;
+  background: color-mix(in srgb, var(--ctp-mauve) 15%, transparent);
+  color: var(--ctp-mauve);
+  font-family: var(--editor-font-code);
+}
+
+.markdown-body .blog-fm-fields {
+  margin-top: 0.75em;
+  font-size: 0.85em;
+  color: var(--ctp-subtext0);
+}
+
+.markdown-body .blog-fm-field-key {
+  font-family: var(--editor-font-code);
+  color: var(--ctp-mauve);
+  margin-right: 0.5em;
+}
+
+/* ── Hexo Codeblock Title ── */
+
+.markdown-body .hexo-codeblock-title {
+  background: var(--ctp-surface1);
+  color: var(--ctp-subtext1);
+  font-family: var(--editor-font-code);
+  font-size: 0.8em;
+  padding: 0.3em 1em;
+  border-radius: 6px 6px 0 0;
+  border: 1px solid var(--ctp-surface0);
+  border-bottom: none;
+  margin-top: 1.2em;
+  margin-bottom: 0;
+}
+
+.markdown-body .hexo-codeblock-title + pre {
+  margin-top: 0;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+
+/* ── Hexo Pullquote ── */
+
+.markdown-body .hexo-pullquote {
+  border-left: 3px solid var(--ctp-mauve);
+  padding: 0.75em 1.25em;
+  margin: 1.2em 0;
+  font-style: italic;
+  color: var(--ctp-subtext1);
+  background: color-mix(in srgb, var(--ctp-mauve) 5%, transparent);
+  border-radius: 0 6px 6px 0;
+  white-space: pre-wrap;
+}
+
+/* ── Blog YouTube Card (shared: Hexo/Hugo) ── */
+
+.markdown-body .blog-youtube-card {
+  margin: 1.2em 0;
+  padding: 1rem;
+  background: var(--ctp-mantle);
+  border: 1px solid var(--ctp-surface0);
+  border-radius: 6px;
+  text-align: center;
+}
+
+.markdown-body .blog-youtube-card a {
+  color: var(--ctp-subtext0);
+  text-decoration: none;
+  font-size: 0.95em;
+}
+
+.markdown-body .blog-youtube-card:hover {
+  border-color: var(--ctp-red);
+}
+
+.markdown-body .blog-youtube-card:hover a {
+  color: var(--ctp-red);
+}
+
+.markdown-body .blog-youtube-icon {
+  margin-right: 0.4em;
+}
+
+/* ── Blog Iframe Card (Hexo) ── */
+
+.markdown-body .blog-iframe-card {
+  margin: 1.2em 0;
+  padding: 0.75rem 1rem;
+  background: var(--ctp-mantle);
+  border: 1px solid var(--ctp-surface0);
+  border-radius: 6px;
+}
+
+.markdown-body .blog-iframe-card a {
+  color: var(--ctp-blue);
+  text-decoration: none;
+  font-size: 0.875em;
+}
+
+.markdown-body .blog-iframe-card:hover {
+  border-color: var(--ctp-blue);
+}
+
+/* ── Hugo Figure ── */
+
+.markdown-body .blog-figure {
+  margin: 1.2em 0;
+  text-align: center;
+}
+
+.markdown-body .blog-figure img {
+  max-width: 100%;
+  border-radius: 6px;
+}
+
+.markdown-body .blog-figcaption {
+  margin-top: 0.5em;
+  font-size: 0.85em;
+  color: var(--ctp-subtext0);
+  font-style: italic;
+}
+
+/* ── Blog Gist Card (Hugo) ── */
+
+.markdown-body .blog-gist-card {
+  margin: 1.2em 0;
+  padding: 0.75rem 1rem;
+  background: var(--ctp-mantle);
+  border: 1px solid var(--ctp-surface0);
+  border-radius: 6px;
+}
+
+.markdown-body .blog-gist-card a {
+  color: var(--ctp-blue);
+  text-decoration: none;
+  font-size: 0.875em;
+}
+
+.markdown-body .blog-gist-card:hover {
+  border-color: var(--ctp-blue);
+}
+
 /* CodeMirror editor wrapper */
 .cm-editor-wrapper {
   width: 100%;

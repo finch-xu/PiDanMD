@@ -1,5 +1,5 @@
 import { createSignal, createEffect } from 'solid-js';
-import { content, filePath, loadFile } from '~/stores/editor';
+import { content, filePath, loadFile, renderingMode } from '~/stores/editor';
 import { resolvedTheme } from '~/stores/settings';
 import { renderMarkdown } from '~/lib/editor/render-markdown';
 import { extractHeadings } from '~/lib/editor/toc-extractor';
@@ -51,10 +51,11 @@ export function MarkdownViewer() {
   createEffect(() => {
     const md = content();
     const theme = resolvedTheme(); // Track theme changes
+    const mode = renderingMode(); // Track rendering mode changes
     if (!md) return;
 
     const version = ++renderVersion;
-    renderMarkdown(md, theme, filePath() ?? undefined).then((result) => {
+    renderMarkdown(md, theme, filePath() ?? undefined, mode).then((result) => {
       if (version === renderVersion) {
         setHtml(result);
       }

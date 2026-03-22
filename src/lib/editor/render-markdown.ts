@@ -19,7 +19,7 @@ const sanitizeSchema = {
     ...defaultSchema.attributes,
     code: [...(defaultSchema.attributes?.code ?? []), 'className'],
     span: [...(defaultSchema.attributes?.span ?? []), 'className', 'style'],
-    div: [...(defaultSchema.attributes?.div ?? []), 'className', 'style'],
+    div: [...(defaultSchema.attributes?.div ?? []), 'className', 'style', 'data-id', 'data-src', 'data-width', 'data-height', 'data-user', 'data-file'],
     math: ['xmlns'],
     annotation: ['encoding'],
   },
@@ -180,12 +180,26 @@ function resolveImageSrcs(html: string, currentFilePath: string): string {
   });
 }
 
-export async function renderMarkdown(markdown: string, resolvedTheme?: string, filePath?: string): Promise<string> {
+export async function renderMarkdown(markdown: string, resolvedTheme?: string, filePath?: string, renderingMode?: string): Promise<string> {
   let fmHtml = '';
   let md = markdown;
 
-  const fileName = filePath?.split('/').pop();
-  if (fileName === 'SKILL.md') {
+  if (renderingMode === 'hexo') {
+    const { preprocessHexo } = await import('./hexo-preprocessor');
+    const result = preprocessHexo(md, filePath);
+    fmHtml = result.frontmatterHtml;
+    md = result.body;
+  } else if (renderingMode === 'jekyll') {
+    const { preprocessJekyll } = await import('./jekyll-preprocessor');
+    const result = preprocessJekyll(md);
+    fmHtml = result.frontmatterHtml;
+    md = result.body;
+  } else if (renderingMode === 'hugo') {
+    const { preprocessHugo } = await import('./hugo-preprocessor');
+    const result = preprocessHugo(md);
+    fmHtml = result.frontmatterHtml;
+    md = result.body;
+  } else if (renderingMode === 'skill') {
     const { frontmatter, body } = extractFrontmatter(markdown);
     if (frontmatter) {
       fmHtml = renderFrontmatterTable(frontmatter);
@@ -223,6 +237,14 @@ export async function renderMarkdown(markdown: string, resolvedTheme?: string, f
 
   for (const { fullMatch, result: replacement } of highlighted) {
     html = html.replace(fullMatch, replacement);
+  }
+
+  if (renderingMode === 'hexo') {
+    const { postprocessHexo } = await import('./hexo-preprocessor');
+    html = postprocessHexo(html);
+  } else if (renderingMode === 'hugo') {
+    const { postprocessHugo } = await import('./hugo-preprocessor');
+    html = postprocessHugo(html);
   }
 
   return fmHtml + html;
