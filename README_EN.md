@@ -24,13 +24,14 @@
 
 ## Features
 
-- **Live Preview** — One-click preview toggle, no split panes.
+- **Dual Editor Modes** — WYSIWYG (Tiptap) + Source editing (CodeMirror 6), switch with one click
 - **Multiple Rendering Modes** — Built-in Standard Markdown, Skills, Hexo, Jekyll, and Hugo rendering, ready for blog writing out of the box
-- **GFM + Math + Syntax Highlighting** — GitHub Flavored Markdown, KaTeX equations, Shiki syntax highlighting, and Mermaid diagrams
-- **Native Cross-Platform** — Built on Tauri 2 with small bundle size and fast startup, covering macOS / Windows / Linux  / x86_64 / ARM
+- **Multi-Theme System** — Independent theme selection for light / dark mode with semantic design tokens
+- **GFM + Math + Syntax Highlighting** — GitHub Flavored Markdown, KaTeX equations, syntax highlighting, and Mermaid diagrams
+- **Native Cross-Platform** — Built on Tauri 2 with small bundle size and fast startup, covering macOS / Windows / Linux / x86_64 / ARM
 - **Multilingual UI** — Simplified Chinese, Traditional Chinese, English, Japanese, Korean with automatic system language detection
 - **Crafted Typography** — Bundled LXGW WenKai + Cascadia Code NF for beautiful CJK and Latin mixed typesetting
-- **File Tree + Outline** — Sidebar file management and heading navigation for easy project organization.
+- **File Tree + Outline + Status Bar** — Sidebar file management, document outline navigation, and status bar showing word count and cursor position
 
 ## Platform Support
 
@@ -47,12 +48,12 @@
 |-------|-----------|
 | Desktop Framework | Tauri 2 |
 | Frontend Framework | React 19 |
-| Editor Engine | Tiptap 3 (ProseMirror) |
+| Editor Engine | Tiptap 3 (ProseMirror) + CodeMirror 6 |
 | UI Components | shadcn/ui (New York) |
 | State Management | Zustand |
 | Styling | Tailwind CSS 4 |
 | Icons | Lucide React |
-| Build Tool | Vite |
+| Build Tool | Vite 7 |
 | Languages | TypeScript 5 + Rust |
 
 ## Prerequisites
@@ -112,12 +113,13 @@ PiDanMD/
 ├── src/                    # Frontend source (React + TypeScript)
 │   ├── components/ui/      # Shared UI components (shadcn/ui)
 │   ├── features/           # Feature modules
-│   │   ├── editor/         # Tiptap editor
+│   │   ├── editor/         # Tiptap editor + CodeMirror source editor + status bar
+│   │   ├── outline/        # Document outline panel
 │   │   ├── settings/       # Settings dialog
 │   │   ├── sidebar/        # File sidebar
 │   │   └── titlebar/       # Custom title bar
 │   ├── stores/             # Zustand state management
-│   ├── lib/                # Utilities (Tauri commands, i18n, config)
+│   ├── lib/                # Utilities (Tauri commands, i18n, themes, config)
 │   ├── hooks/              # React hooks
 │   ├── styles/             # Editor styles
 │   ├── App.tsx             # Root component
@@ -125,6 +127,7 @@ PiDanMD/
 ├── src-tauri/              # Rust backend (Tauri 2)
 │   ├── src/
 │   │   ├── commands/       # Tauri commands (file ops, config, fonts)
+│   │   ├── error.rs        # Typed error handling
 │   │   ├── menu.rs         # App menu
 │   │   └── state.rs        # App state
 │   └── tauri.conf.json     # Tauri config
@@ -140,8 +143,6 @@ This project bundles the following fonts. See [THIRD_PARTY_LICENSES](THIRD_PARTY
 |------|-------|---------|
 | LXGW WenKai Screen | Body / UI | SIL OFL 1.1 |
 | Cascadia Code NF | Code | SIL OFL 1.1 |
-| Noto Color Emoji | Emoji | SIL OFL 1.1 + Apache 2.0 |
-| Noto Sans Symbols | Symbols | SIL OFL 1.1 |
 
 ## License Audit
 
