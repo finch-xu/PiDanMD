@@ -1,7 +1,7 @@
 <p align="right"><a href="README.md">中文</a></p>
 
 <p align="center">
-  <img src="public/logo.png" width="80" />
+  <img src="assets/logo.png" width="80" />
 </p>
 
 <h1 align="center">PiDanMD</h1>
@@ -19,7 +19,7 @@
 <p align="center">A lightweight and elegant cross-platform Markdown editor for macOS, Windows, and Linux. Features live preview, GFM, math equations, syntax highlighting, and ships with the beautiful LXGW WenKai font out of the box.</p>
 
 <p align="center">
-  <img src="public/screenshot.png" width="720" />
+  <img src="assets/screenshot.png" width="720" />
 </p>
 
 ## Features
