@@ -49,7 +49,7 @@ function SegmentedControl({
   onChange: (v: string) => void;
 }) {
   return (
-    <div className="flex rounded-lg bg-zinc-100 p-0.5 dark:bg-zinc-700">
+    <div className="flex rounded-lg bg-muted p-0.5">
       {options.map((opt) => (
         <button
           key={opt.value}
@@ -57,7 +57,7 @@ function SegmentedControl({
           className={cn(
             "rounded-md px-3 py-1 text-xs font-medium transition-colors",
             value === opt.value
-              ? "bg-white text-foreground shadow-sm dark:bg-zinc-600"
+              ? "bg-background text-foreground shadow-sm"
               : "text-muted-foreground hover:text-foreground"
           )}
         >

@@ -39,7 +39,7 @@ export function ShortcutsTab() {
                     {i > 0 && (
                       <span className="mx-0.5 text-xs text-muted-foreground">+</span>
                     )}
-                    <kbd className="inline-flex h-5 min-w-[20px] items-center justify-center rounded border border-zinc-300 bg-zinc-50 px-1.5 text-[10px] font-medium text-zinc-700 shadow-sm dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-300">
+                    <kbd className="inline-flex h-5 min-w-[20px] items-center justify-center rounded border border-border bg-muted px-1.5 text-[10px] font-medium text-muted-foreground shadow-sm">
                       {key}
                     </kbd>
                   </span>

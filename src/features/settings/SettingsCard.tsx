@@ -8,7 +8,7 @@ interface SettingsCardProps {
 
 export function SettingsCard({ title, children, className }: SettingsCardProps) {
   return (
-    <div className={cn("rounded-xl bg-zinc-50 p-4 dark:bg-zinc-800/50", className)}>
+    <div className={cn("rounded-xl bg-muted p-4", className)}>
       {title && (
         <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
           {title}

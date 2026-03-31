@@ -43,7 +43,7 @@ export function SettingsDialog() {
     <Dialog open={open} onOpenChange={(v) => (v ? undefined : closeSettings())}>
       <DialogContent className="max-w-2xl p-0 overflow-hidden">
         {/* Arc-style capsule tab navigation */}
-        <div className="flex justify-center gap-1 border-b bg-zinc-50 px-6 pt-5 pb-3 dark:bg-zinc-900/50">
+        <div className="flex justify-center gap-1 border-b bg-muted px-6 pt-5 pb-3">
           {TABS.map((tab) => (
             <button
               key={tab}
@@ -51,7 +51,7 @@ export function SettingsDialog() {
               className={cn(
                 "rounded-full px-4 py-1.5 text-sm font-medium transition-colors",
                 activeTab === tab
-                  ? "bg-white text-foreground shadow-sm dark:bg-zinc-800"
+                  ? "bg-background text-foreground shadow-sm"
                   : "text-muted-foreground hover:text-foreground"
               )}
             >
