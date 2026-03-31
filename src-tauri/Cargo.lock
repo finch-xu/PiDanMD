@@ -2723,18 +2723,17 @@ dependencies = [
 
 [[package]]
 name = "pidanmd"
-version = "0.1.9"
+version = "0.2.0"
 dependencies = [
- "base64 0.22.1",
- "dirs",
  "font-kit",
  "serde",
- "serde_json",
  "serde_yaml",
  "tauri",
  "tauri-build",
  "tauri-plugin-dialog",
  "tauri-plugin-opener",
+ "thiserror 2.0.18",
+ "tokio",
 ]
 
 [[package]]

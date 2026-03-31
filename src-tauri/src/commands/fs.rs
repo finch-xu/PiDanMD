@@ -57,10 +57,21 @@ pub async fn list_directory(
 ) -> Result<Vec<FileEntry>, AppError> {
     let canonical = resolve_path(&path)?;
 
-    // Auto-set workspace path — the frontend's "open workspace" IS listing a directory.
+    // Only set workspace path when it is unset or the listed directory is NOT
+    // a subdirectory of the current workspace (i.e. user opened a new workspace).
+    // Expanding a subfolder must NOT overwrite the workspace root.
     {
         let mut app_state = state.lock().await;
-        app_state.workspace_path = Some(canonical.clone());
+        let should_update = match &app_state.workspace_path {
+            None => true,
+            Some(ws) => match std::fs::canonicalize(ws) {
+                Ok(ws_c) => !canonical.starts_with(&ws_c),
+                Err(_) => true,
+            },
+        };
+        if should_update {
+            app_state.workspace_path = Some(canonical.clone());
+        }
     }
 
     let mut reader = tokio::fs::read_dir(&canonical).await?;
