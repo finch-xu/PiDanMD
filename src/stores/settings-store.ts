@@ -1,7 +1,13 @@
 import { create } from "zustand";
 import { updateAndSave, resetConfig, type AppConfig } from "~/lib/storage";
+import {
+  type Appearance,
+  LIGHT_THEMES,
+  DARK_THEMES,
+  getTheme,
+  type ThemeDefinition,
+} from "~/lib/themes";
 
-export type Theme = "system" | "light" | "dark";
 export type LineHeight = "compact" | "comfortable" | "loose";
 export type ContentWidth = "narrow" | "standard" | "wide";
 
@@ -50,42 +56,28 @@ function fontToCss(name: string, builtinList: BuiltinFont[]): string {
   return `'${name.replace(/'/g, "\\'")}', sans-serif`;
 }
 
-function resolveThemeClass(theme: Theme): "light" | "dark" {
-  if (theme === "system") {
+function resolveMode(appearance: Appearance): "light" | "dark" {
+  if (appearance === "system") {
     return window.matchMedia("(prefers-color-scheme: dark)").matches
       ? "dark"
       : "light";
   }
-  return theme;
+  return appearance;
 }
 
-interface SettingsState {
-  theme: Theme;
-  uiFont: string;
-  bodyFont: string;
-  codeFont: string;
-  uiFontSize: number;
-  bodyFontSize: number;
-  codeFontSize: number;
-  lineHeight: LineHeight;
-  contentWidth: ContentWidth;
-  resolvedTheme: "light" | "dark";
+// ── Apply theme CSS variables to DOM ──
 
-  initFromConfig: (config: AppConfig) => void;
-  setTheme: (theme: Theme) => void;
-  setUiFont: (font: string) => void;
-  setBodyFont: (font: string) => void;
-  setCodeFont: (font: string) => void;
-  setUiFontSize: (size: number) => void;
-  setBodyFontSize: (size: number) => void;
-  setCodeFontSize: (size: number) => void;
-  setLineHeight: (lh: LineHeight) => void;
-  setContentWidth: (cw: ContentWidth) => void;
-  resetToDefaults: () => Promise<void>;
+function applyThemeToDOM(theme: ThemeDefinition) {
+  const root = document.documentElement;
+  for (const [key, value] of Object.entries(theme.vars)) {
+    root.style.setProperty(key, value);
+  }
 }
 
-function applyToDOM(state: {
-  theme: Theme;
+function applySettingsToDOM(state: {
+  appearance: Appearance;
+  lightTheme: string;
+  darkTheme: string;
   uiFont: string;
   bodyFont: string;
   codeFont: string;
@@ -96,9 +88,19 @@ function applyToDOM(state: {
   contentWidth: ContentWidth;
 }) {
   const root = document.documentElement;
-  const resolved = resolveThemeClass(state.theme);
-  root.classList.toggle("dark", resolved === "dark");
+  const mode = resolveMode(state.appearance);
 
+  // Toggle dark class
+  root.classList.toggle("dark", mode === "dark");
+
+  // Apply the appropriate theme
+  const themeId = mode === "dark" ? state.darkTheme : state.lightTheme;
+  const theme = getTheme(themeId);
+  if (theme) {
+    applyThemeToDOM(theme);
+  }
+
+  // Font & reading settings
   root.style.setProperty(
     "--app-ui-font",
     fontToCss(state.uiFont, BUILTIN_TEXT_FONTS)
@@ -125,7 +127,9 @@ function applyToDOM(state: {
 }
 
 function persistSettings(state: {
-  theme: Theme;
+  appearance: Appearance;
+  lightTheme: string;
+  darkTheme: string;
   uiFont: string;
   bodyFont: string;
   codeFont: string;
@@ -136,7 +140,9 @@ function persistSettings(state: {
   contentWidth: ContentWidth;
 }) {
   updateAndSave((c) => {
-    c.theme = state.theme;
+    c.appearance = state.appearance;
+    c.lightTheme = state.lightTheme;
+    c.darkTheme = state.darkTheme;
     c.font.ui = { family: state.uiFont, size: state.uiFontSize };
     c.font.body = { family: state.bodyFont, size: state.bodyFontSize };
     c.font.code = { family: state.codeFont, size: state.codeFontSize };
@@ -145,31 +151,72 @@ function persistSettings(state: {
   });
 }
 
+// ── Store ──
+
+interface SettingsState {
+  appearance: Appearance;
+  lightTheme: string;
+  darkTheme: string;
+  resolvedMode: "light" | "dark";
+
+  uiFont: string;
+  bodyFont: string;
+  codeFont: string;
+  uiFontSize: number;
+  bodyFontSize: number;
+  codeFontSize: number;
+  lineHeight: LineHeight;
+  contentWidth: ContentWidth;
+
+  initFromConfig: (config: AppConfig) => void;
+  setAppearance: (appearance: Appearance) => void;
+  setLightTheme: (id: string) => void;
+  setDarkTheme: (id: string) => void;
+  setUiFont: (font: string) => void;
+  setBodyFont: (font: string) => void;
+  setCodeFont: (font: string) => void;
+  setUiFontSize: (size: number) => void;
+  setBodyFontSize: (size: number) => void;
+  setCodeFontSize: (size: number) => void;
+  setLineHeight: (lh: LineHeight) => void;
+  setContentWidth: (cw: ContentWidth) => void;
+  resetToDefaults: () => Promise<void>;
+}
+
 export const useSettingsStore = create<SettingsState>((set, get) => {
   // Listen for system theme changes
   window
     .matchMedia("(prefers-color-scheme: dark)")
     .addEventListener("change", () => {
       const state = get();
-      if (state.theme === "system") {
-        const resolved = resolveThemeClass("system");
-        document.documentElement.classList.toggle("dark", resolved === "dark");
-        set({ resolvedTheme: resolved });
+      if (state.appearance === "system") {
+        const mode = resolveMode("system");
+        set({ resolvedMode: mode });
+        applySettingsToDOM(state);
       }
     });
 
   const update = (patch: Partial<SettingsState>) => {
     set(patch);
     const state = get();
-    applyToDOM(state);
+    // Recompute resolved mode if appearance changed
+    if ("appearance" in patch) {
+      const mode = resolveMode(state.appearance);
+      set({ resolvedMode: mode });
+    }
+    applySettingsToDOM(state);
     persistSettings(state);
   };
 
   // Initial values are empty placeholders — the real defaults live in the
   // Rust backend (AppConfig::default in config.rs). They get populated by
-  // initFromConfig() during app startup. This keeps a single source of truth.
+  // initFromConfig() during app startup.
   return {
-    theme: "system" as Theme,
+    appearance: "system" as Appearance,
+    lightTheme: "default-light",
+    darkTheme: "default-dark",
+    resolvedMode: resolveMode("system"),
+
     uiFont: "",
     bodyFont: "",
     codeFont: "",
@@ -178,11 +225,16 @@ export const useSettingsStore = create<SettingsState>((set, get) => {
     codeFontSize: 0,
     lineHeight: "comfortable" as LineHeight,
     contentWidth: "standard" as ContentWidth,
-    resolvedTheme: resolveThemeClass("system"),
 
     initFromConfig: (config) => {
+      const appearance = (config.appearance as Appearance) || "system";
+      const lightTheme = config.lightTheme || "default-light";
+      const darkTheme = config.darkTheme || "default-dark";
       const state = {
-        theme: (config.theme as Theme) || "system",
+        appearance,
+        lightTheme,
+        darkTheme,
+        resolvedMode: resolveMode(appearance),
         uiFont: config.font.ui.family,
         bodyFont: config.font.body.family,
         codeFont: config.font.code.family,
@@ -190,17 +242,16 @@ export const useSettingsStore = create<SettingsState>((set, get) => {
         bodyFontSize: config.font.body.size,
         codeFontSize: config.font.code.size,
         lineHeight: (config.reading.lineHeight as LineHeight) || "comfortable",
-        contentWidth:
-          (config.reading.contentWidth as ContentWidth) || "standard",
-        resolvedTheme: resolveThemeClass(
-          (config.theme as Theme) || "system"
-        ),
+        contentWidth: (config.reading.contentWidth as ContentWidth) || "standard",
       };
       set(state);
-      applyToDOM(state);
+      applySettingsToDOM(state);
     },
 
-    setTheme: (theme) => update({ theme, resolvedTheme: resolveThemeClass(theme) }),
+    setAppearance: (appearance) =>
+      update({ appearance, resolvedMode: resolveMode(appearance) }),
+    setLightTheme: (lightTheme) => update({ lightTheme }),
+    setDarkTheme: (darkTheme) => update({ darkTheme }),
     setUiFont: (uiFont) => update({ uiFont }),
     setBodyFont: (bodyFont) => update({ bodyFont }),
     setCodeFont: (codeFont) => update({ codeFont }),
@@ -216,3 +267,7 @@ export const useSettingsStore = create<SettingsState>((set, get) => {
     },
   };
 });
+
+// Re-export for convenience
+export { LIGHT_THEMES, DARK_THEMES } from "~/lib/themes";
+export type { Appearance } from "~/lib/themes";

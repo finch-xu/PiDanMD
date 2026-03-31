@@ -74,7 +74,9 @@ impl Default for ReadingConfig {
 #[derive(Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase", default)]
 pub struct AppConfig {
-    pub theme: String,
+    pub appearance: String,
+    pub light_theme: String,
+    pub dark_theme: String,
     pub locale: String,
     pub layout: String,
     pub font: FontConfig,
@@ -84,7 +86,9 @@ pub struct AppConfig {
 impl Default for AppConfig {
     fn default() -> Self {
         Self {
-            theme: "system".into(),
+            appearance: "system".into(),
+            light_theme: "default-light".into(),
+            dark_theme: "default-dark".into(),
             locale: "zh-CN".into(),
             layout: "files".into(),
             font: FontConfig::default(),

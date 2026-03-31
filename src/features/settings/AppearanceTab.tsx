@@ -4,25 +4,39 @@ import {
   useSettingsStore,
   BUILTIN_TEXT_FONTS,
   BUILTIN_CODE_FONTS,
-  type Theme,
+  LIGHT_THEMES,
+  DARK_THEMES,
+  type Appearance,
 } from "~/stores/settings-store";
 import { listSystemFonts } from "~/lib/tauri";
+import type { ThemeDefinition } from "~/lib/themes";
 import { Select, SelectItem } from "~/components/ui/select";
 import { Button } from "~/components/ui/button";
 import { SettingsCard, SettingsRow } from "./SettingsCard";
 import { cn } from "~/lib/utils";
 import { Sun, Moon, Monitor, Minus, Plus } from "lucide-react";
 
-const THEMES: { value: Theme; icon: React.ComponentType<{ className?: string }> }[] = [
-  { value: "system", icon: Monitor },
-  { value: "light", icon: Sun },
-  { value: "dark", icon: Moon },
+// ── Appearance Mode Selector ──
+
+const APPEARANCES: {
+  value: Appearance;
+  icon: React.ComponentType<{ className?: string }>;
+  labelKey: string;
+}[] = [
+  { value: "light", icon: Sun, labelKey: "lightTheme" },
+  { value: "dark", icon: Moon, labelKey: "darkTheme" },
+  { value: "system", icon: Monitor, labelKey: "followSystem" },
 ];
 
 export function AppearanceTab() {
   const t = useT();
-  const theme = useSettingsStore((s) => s.theme);
-  const setTheme = useSettingsStore((s) => s.setTheme);
+  const appearance = useSettingsStore((s) => s.appearance);
+  const lightTheme = useSettingsStore((s) => s.lightTheme);
+  const darkTheme = useSettingsStore((s) => s.darkTheme);
+  const setAppearance = useSettingsStore((s) => s.setAppearance);
+  const setLightTheme = useSettingsStore((s) => s.setLightTheme);
+  const setDarkTheme = useSettingsStore((s) => s.setDarkTheme);
+
   const uiFont = useSettingsStore((s) => s.uiFont);
   const bodyFont = useSettingsStore((s) => s.bodyFont);
   const codeFont = useSettingsStore((s) => s.codeFont);
@@ -61,27 +75,51 @@ export function AppearanceTab() {
 
   return (
     <div className="space-y-4">
-      {/* Theme */}
+      {/* Appearance Mode */}
       <SettingsCard title={t("theme")}>
         <div className="flex gap-2">
-          {THEMES.map(({ value, icon: Icon }) => (
+          {APPEARANCES.map(({ value, icon: Icon, labelKey }) => (
             <button
               key={value}
-              onClick={() => setTheme(value)}
+              onClick={() => setAppearance(value)}
               className={cn(
                 "flex flex-1 items-center justify-center gap-2 rounded-lg py-2.5 text-sm font-medium transition-colors",
-                theme === value
-                  ? "bg-amber-500 text-white shadow-sm"
-                  : "bg-white text-muted-foreground hover:text-foreground dark:bg-zinc-700"
+                appearance === value
+                  ? "bg-primary text-primary-foreground shadow-sm"
+                  : "bg-secondary text-muted-foreground hover:text-foreground"
               )}
             >
               <Icon className="h-4 w-4" />
-              {value === "system"
-                ? t("followSystem")
-                : value === "light"
-                ? t("lightTheme")
-                : t("darkTheme")}
+              {t(labelKey)}
             </button>
+          ))}
+        </div>
+      </SettingsCard>
+
+      {/* Light Theme Picker */}
+      <SettingsCard title={t("lightTheme")}>
+        <div className="flex gap-2">
+          {LIGHT_THEMES.map((theme) => (
+            <ThemeCard
+              key={theme.id}
+              theme={theme}
+              selected={lightTheme === theme.id}
+              onClick={() => setLightTheme(theme.id)}
+            />
+          ))}
+        </div>
+      </SettingsCard>
+
+      {/* Dark Theme Picker */}
+      <SettingsCard title={t("darkTheme")}>
+        <div className="flex gap-2">
+          {DARK_THEMES.map((theme) => (
+            <ThemeCard
+              key={theme.id}
+              theme={theme}
+              selected={darkTheme === theme.id}
+              onClick={() => setDarkTheme(theme.id)}
+            />
           ))}
         </div>
       </SettingsCard>
@@ -116,6 +154,50 @@ export function AppearanceTab() {
     </div>
   );
 }
+
+// ── Theme Card Component ──
+
+function ThemeCard({
+  theme,
+  selected,
+  onClick,
+}: {
+  theme: ThemeDefinition;
+  selected: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className={cn(
+        "flex flex-1 flex-col items-center gap-2 rounded-xl p-3 transition-all",
+        selected
+          ? "ring-2 ring-primary bg-accent"
+          : "bg-secondary hover:bg-accent/50"
+      )}
+    >
+      {/* Preview swatch */}
+      <div
+        className="h-16 w-full rounded-lg border shadow-sm flex items-end p-2"
+        style={{ backgroundColor: theme.preview.bg }}
+      >
+        <div className="flex gap-1">
+          <div
+            className="h-1.5 w-8 rounded-full"
+            style={{ backgroundColor: theme.preview.fg }}
+          />
+          <div
+            className="h-1.5 w-5 rounded-full"
+            style={{ backgroundColor: theme.preview.accent }}
+          />
+        </div>
+      </div>
+      <span className="text-xs font-medium">{theme.name}</span>
+    </button>
+  );
+}
+
+// ── Font Row Component ──
 
 function FontRow({
   label,

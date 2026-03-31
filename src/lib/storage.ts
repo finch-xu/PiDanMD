@@ -6,7 +6,9 @@ export interface FontEntry {
 }
 
 export interface AppConfig {
-  theme: string;
+  appearance: string;
+  lightTheme: string;
+  darkTheme: string;
   locale: string;
   layout: string;
   font: {
