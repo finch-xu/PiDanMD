@@ -37,11 +37,9 @@
 | 操作系统 | 架构 | 最低版本 | 安装格式 |
 |---------|------|---------|---------|
 | macOS | ARM64 (Apple Silicon) | macOS 14.6 (Sonoma) | `.dmg` |
-| macOS | x64 (Intel) | macOS 14.6 (Sonoma) | `.dmg` |
 | Windows | x64 | Windows 10 (1803+) | `.msi` `.exe` |
 | Windows | ARM64 | Windows 11 | `.msi` `.exe` |
-| Linux | x64 | Ubuntu 22.04 / Fedora 40+ / glibc 2.35+ | `.deb` `.rpm` `.AppImage` |
-| Linux | ARM64 | Ubuntu 22.04 / Fedora 40+ / glibc 2.35+ | `.deb` `.rpm` `.AppImage` |
+| Linux | x64 | Ubuntu 22.04 / glibc 2.35+ | `.deb` |
 
 ## 技术选型
 

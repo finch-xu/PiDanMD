@@ -15,31 +15,24 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          # macOS
+          # macOS ARM (Apple Silicon)
           - platform: macos-latest
             args: --target aarch64-apple-darwin
-            rust_targets: aarch64-apple-darwin,x86_64-apple-darwin
+            rust_targets: aarch64-apple-darwin
             os_name: macos
-          - platform: macos-latest
-            args: --target x86_64-apple-darwin
-            rust_targets: aarch64-apple-darwin,x86_64-apple-darwin
-            os_name: macos
-          # Windows
+          # Windows x64
           - platform: windows-latest
             args: --target x86_64-pc-windows-msvc
             rust_targets: ''
             os_name: windows
+          # Windows ARM
           - platform: windows-latest
             args: --target aarch64-pc-windows-msvc
             rust_targets: aarch64-pc-windows-msvc
             os_name: windows
-          # Linux (deb + AppImage only)
+          # Linux x64 (deb only)
           - platform: ubuntu-22.04
-            args: '--bundles deb appimage'
-            rust_targets: ''
-            os_name: linux
-          - platform: ubuntu-22.04-arm
-            args: '--bundles deb appimage'
+            args: '--bundles deb'
             rust_targets: ''
             os_name: linux
 
@@ -53,7 +46,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Install Linux dependencies
-        if: matrix.platform == 'ubuntu-22.04' || matrix.platform == 'ubuntu-22.04-arm'
+        if: matrix.platform == 'ubuntu-22.04'
         run: |
           sudo apt-get update
           sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf libfontconfig1-dev xdg-utils
@@ -111,76 +104,6 @@ jobs:
           done < <(echo "$ARTIFACTS" | jq -r '.[]' | tr -d '\r')
           if [ "$count" -eq 0 ]; then
             echo "::error::No artifacts were uploaded!"
-            exit 1
-          fi
-          echo "Total uploaded: $count"
-
-  build-rpm:
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - runner: ubuntu-22.04
-          - runner: ubuntu-22.04-arm
-
-    runs-on: ${{ matrix.runner }}
-    container:
-      image: fedora:40
-
-    permissions:
-      contents: write
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Install dependencies
-        run: |
-          dnf group install -y "C Development Tools and Libraries"
-          dnf install -y \
-            webkit2gtk4.1-devel openssl-devel libappindicator-gtk3-devel \
-            librsvg2-devel patchelf fontconfig-devel \
-            nodejs npm curl file pkg-config git
-
-      - uses: dtolnay/rust-toolchain@stable
-
-      - uses: swatinem/rust-cache@v2
-        with:
-          workspaces: './src-tauri -> target'
-
-      - name: Install pnpm and build
-        run: |
-          npm install -g pnpm
-          pnpm install
-          pnpm tauri build --bundles rpm
-
-      - name: Upload RPM to release
-        shell: bash
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          TAG: ${{ inputs.tag || github.event.release.tag_name }}
-          RELEASE_ID: ${{ github.event.release.id }}
-          REPO: ${{ github.repository }}
-        run: |
-          # For workflow_dispatch, RELEASE_ID is empty — resolve via API
-          if [ -z "$RELEASE_ID" ]; then
-            RELEASE_ID=$(gh api "repos/${REPO}/releases/tags/${TAG}" --jq '.id')
-            echo "Resolved RELEASE_ID=${RELEASE_ID} from tag ${TAG}"
-          fi
-          count=0
-          for rpm in src-tauri/target/release/bundle/rpm/*.rpm; do
-            [ -f "$rpm" ] || continue
-            filename=$(basename "$rpm")
-            new_name=$(echo "$filename" | sed -e "s/-/-fedora-/" -e "s/aarch64/arm64/g")
-            curl -sSL -X POST \
-              -H "Authorization: token ${GITHUB_TOKEN}" \
-              -H "Content-Type: application/octet-stream" \
-              --data-binary "@${rpm}" \
-              "https://uploads.github.com/repos/${REPO}/releases/${RELEASE_ID}/assets?name=${new_name}"
-            echo "Uploaded: ${new_name}"
-            count=$((count + 1))
-          done
-          if [ "$count" -eq 0 ]; then
-            echo "::error::No RPM artifacts were uploaded!"
             exit 1
           fi
           echo "Total uploaded: $count"

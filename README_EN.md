@@ -37,11 +37,9 @@
 | OS | Architecture | Minimum Version | Format |
 |----|-------------|----------------|--------|
 | macOS | ARM64 (Apple Silicon) | macOS 14.6 (Sonoma) | `.dmg` |
-| macOS | x64 (Intel) | macOS 14.6 (Sonoma) | `.dmg` |
 | Windows | x64 | Windows 10 (1803+) | `.msi` `.exe` |
 | Windows | ARM64 | Windows 11 | `.msi` `.exe` |
-| Linux | x64 | Ubuntu 22.04 / Fedora 40+ / glibc 2.35+ | `.deb` `.rpm` `.AppImage` |
-| Linux | ARM64 | Ubuntu 22.04 / Fedora 40+ / glibc 2.35+ | `.deb` `.rpm` `.AppImage` |
+| Linux | x64 | Ubuntu 22.04 / glibc 2.35+ | `.deb` |
 
 ## Tech Stack
 
