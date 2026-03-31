@@ -165,16 +165,19 @@ export const useSettingsStore = create<SettingsState>((set, get) => {
     persistSettings(state);
   };
 
+  // Initial values are empty placeholders — the real defaults live in the
+  // Rust backend (AppConfig::default in config.rs). They get populated by
+  // initFromConfig() during app startup. This keeps a single source of truth.
   return {
-    theme: "system",
-    uiFont: "LXGW WenKai Screen",
-    bodyFont: "LXGW WenKai Screen",
-    codeFont: "Cascadia Code NF",
-    uiFontSize: 14,
-    bodyFontSize: 16,
-    codeFontSize: 14,
-    lineHeight: "comfortable",
-    contentWidth: "standard",
+    theme: "system" as Theme,
+    uiFont: "",
+    bodyFont: "",
+    codeFont: "",
+    uiFontSize: 0,
+    bodyFontSize: 0,
+    codeFontSize: 0,
+    lineHeight: "comfortable" as LineHeight,
+    contentWidth: "standard" as ContentWidth,
     resolvedTheme: resolveThemeClass("system"),
 
     initFromConfig: (config) => {

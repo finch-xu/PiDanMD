@@ -4,6 +4,10 @@ use std::path::PathBuf;
 use tauri::Manager;
 
 // ── Config Structs ──────────────────────────────
+//
+// These are the **single source of truth** for all default values.
+// The frontend loads config from the backend on startup and does not
+// carry its own defaults.
 
 #[derive(Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase", default)]
@@ -34,7 +38,7 @@ impl Default for FontConfig {
         Self {
             ui: FontEntry {
                 family: "LXGW WenKai Screen".into(),
-                size: 16,
+                size: 14,
             },
             body: FontEntry {
                 family: "LXGW WenKai Screen".into(),
@@ -42,7 +46,7 @@ impl Default for FontConfig {
             },
             code: FontEntry {
                 family: "Cascadia Code NF".into(),
-                size: 16,
+                size: 14,
             },
         }
     }
@@ -88,45 +92,11 @@ impl Default for AppConfig {
     }
 }
 
-// ── Default from YAML ───────────────────────────
-
-const DEFAULT_CONFIG_YAML: &str = include_str!("../../config.default.yaml");
-
-fn default_from_yaml() -> AppConfig {
-    serde_yaml::from_str(DEFAULT_CONFIG_YAML).unwrap_or_default()
-}
-
 // ── Config Path ─────────────────────────────────
 
 fn config_path(app: &tauri::AppHandle) -> Result<PathBuf, String> {
     let dir = app.path().app_config_dir().map_err(|e| e.to_string())?;
     Ok(dir.join("config.yaml"))
-}
-
-/// 旧配置路径（~/.config/pidanmd/config.yaml），用于一次性迁移
-fn legacy_config_path() -> Option<PathBuf> {
-    dirs::home_dir().map(|h| h.join(".config").join("pidanmd").join("config.yaml"))
-}
-
-/// 若旧路径存在配置文件且新路径不存在，则迁移过来并删除旧文件
-fn migrate_legacy_config(app: &tauri::AppHandle) {
-    let new_path = match config_path(app) {
-        Ok(p) => p,
-        Err(_) => return,
-    };
-    if new_path.exists() {
-        return;
-    }
-    if let Some(old_path) = legacy_config_path() {
-        if old_path.exists() {
-            if let Some(parent) = new_path.parent() {
-                let _ = fs::create_dir_all(parent);
-            }
-            if fs::copy(&old_path, &new_path).is_ok() {
-                let _ = fs::remove_file(&old_path);
-            }
-        }
-    }
 }
 
 // ── Config I/O ─────────────────────────────────
@@ -144,18 +114,17 @@ fn save_config_inner(path: &PathBuf, config: &AppConfig) -> Result<(), String> {
 
 #[tauri::command]
 pub fn load_config(app: tauri::AppHandle) -> AppConfig {
-    migrate_legacy_config(&app);
     let path = match config_path(&app) {
         Ok(p) => p,
-        Err(_) => return default_from_yaml(),
+        Err(_) => return AppConfig::default(),
     };
 
     let config = fs::read_to_string(&path)
         .ok()
         .and_then(|c| serde_yaml::from_str::<AppConfig>(&c).ok())
-        .unwrap_or_else(default_from_yaml);
+        .unwrap_or_default();
 
-    // 首次创建或补充新字段，都回写一次
+    // Write back to ensure any new fields are persisted
     let _ = save_config_inner(&path, &config);
     config
 }
@@ -169,7 +138,7 @@ pub fn save_config(app: tauri::AppHandle, config: AppConfig) -> Result<(), Strin
 #[tauri::command]
 pub fn reset_config(app: tauri::AppHandle) -> Result<AppConfig, String> {
     let path = config_path(&app)?;
-    let config = default_from_yaml();
+    let config = AppConfig::default();
     save_config_inner(&path, &config)?;
     Ok(config)
 }

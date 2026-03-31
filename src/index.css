@@ -122,7 +122,7 @@ body {
   background-color: var(--background);
   color: var(--foreground);
   font-family: var(--app-ui-font, -apple-system, BlinkMacSystemFont, "PingFang SC", "Noto Sans SC", "Segoe UI", sans-serif);
-  font-size: var(--app-ui-font-size, 14px);
+  font-size: var(--app-ui-font-size, 14px); /* fallback matches Rust AppConfig default */
   overflow: hidden;
   margin: 0;
   -webkit-font-smoothing: antialiased;
