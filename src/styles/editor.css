@@ -1,410 +1,222 @@
-.markdown-body {
-  padding: 1rem 1.5rem;
-  line-height: var(--editor-line-height-body, 1.9);
-  color: var(--ctp-text);
-  font-family: var(--editor-font-body, 'Source Han Serif', 'Noto Serif CJK SC', Georgia, serif);
-  font-weight: 400;
-  font-size: calc(var(--editor-font-size, 16) * 1px);
+/* ── Tiptap / ProseMirror Content Styles ── */
+
+.tiptap-editor {
+  flex: 1;
+  overflow-y: auto;
+  padding: 2rem;
 }
 
-.markdown-body > :first-child {
-  margin-top: 0;
+.tiptap-editor .ProseMirror {
+  max-width: var(--editor-content-width, 700px);
+  margin: 0 auto;
+  font-family: var(--editor-font-body, serif);
+  font-size: var(--editor-font-size, 16px);
+  line-height: var(--editor-line-height, 1.9);
+  color: var(--foreground);
+  outline: none;
+  min-height: 100%;
 }
 
-.markdown-body h1, .markdown-body h2, .markdown-body h3,
-.markdown-body h4, .markdown-body h5, .markdown-body h6 {
-  font-family: var(--editor-font-heading, 'Source Han Sans', 'Noto Sans CJK SC', 'Inter', sans-serif);
-  font-weight: 500;
-  color: var(--ctp-text);
-  margin-top: 1.8em;
-  margin-bottom: 0.6em;
+.tiptap-editor .ProseMirror > * + * {
+  margin-top: 0.75em;
+}
+
+/* Placeholder */
+.tiptap-editor .ProseMirror p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  color: var(--muted-foreground);
+  pointer-events: none;
+  height: 0;
+  opacity: 0.5;
+}
+
+/* Headings */
+.tiptap-editor .ProseMirror h1 {
+  font-size: 2em;
+  font-weight: 700;
+  line-height: 1.3;
+  margin-top: 1.5em;
+  margin-bottom: 0.5em;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 0.3em;
+}
+
+.tiptap-editor .ProseMirror h2 {
+  font-size: 1.5em;
+  font-weight: 600;
+  line-height: 1.35;
+  margin-top: 1.3em;
+  margin-bottom: 0.4em;
+}
+
+.tiptap-editor .ProseMirror h3 {
+  font-size: 1.25em;
+  font-weight: 600;
   line-height: 1.4;
+  margin-top: 1.2em;
+  margin-bottom: 0.3em;
 }
 
-.markdown-body h1 { font-size: calc(var(--editor-font-size, 16) * 1.8 * 1px); }
-.markdown-body h2 { font-size: calc(var(--editor-font-size, 16) * 1.5 * 1px); border-bottom: 1px solid var(--ctp-surface0); padding-bottom: 0.3em; }
-.markdown-body h3 { font-size: calc(var(--editor-font-size, 16) * 1.25 * 1px); }
-.markdown-body h4 { font-size: calc(var(--editor-font-size, 16) * 1.1 * 1px); }
-
-.markdown-body p { margin-bottom: 1.2em; }
-
-.markdown-body a {
-  color: var(--ctp-blue);
-  text-decoration: none;
-  border-bottom: 1px solid transparent;
-  transition: border-color 0.2s;
-}
-.markdown-body a:hover {
-  border-bottom-color: var(--ctp-blue);
+.tiptap-editor .ProseMirror h4,
+.tiptap-editor .ProseMirror h5,
+.tiptap-editor .ProseMirror h6 {
+  font-size: 1.1em;
+  font-weight: 600;
+  margin-top: 1em;
+  margin-bottom: 0.3em;
 }
 
-.markdown-body code {
-  font-family: var(--editor-font-code, 'JetBrains Mono', 'Fira Code', monospace);
-  font-size: 0.875em;
-  background: var(--ctp-surface0);
-  padding: 0.15em 0.4em;
-  border-radius: 2px;
-}
-
-.markdown-body .color-swatch {
-  display: inline-block;
-  width: 0.75em;
-  height: 0.75em;
-  border-radius: 2px;
-  margin-right: 0.35em;
-  vertical-align: middle;
-  border: 1px solid var(--ctp-overlay0);
-  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.1);
-}
-
-.markdown-body pre {
-  background: var(--ctp-mantle);
-  padding: 1rem 1.25rem;
-  overflow-x: auto;
-  margin: 1.2em 0;
-  border: 1px solid var(--ctp-surface0);
-  border-radius: 6px;
-}
-
-/* Override Shiki-generated pre inline styles to match our design tokens */
-.markdown-body pre.shiki {
-  border: 1px solid var(--ctp-surface0);
-  border-radius: 6px;
-}
-
-.markdown-body pre code {
-  background: none;
-  padding: 0;
-  font-size: calc(var(--editor-code-font-size, 14) * 1px);
-  line-height: var(--editor-line-height-code, 1.6);
-}
-
-.markdown-body blockquote {
-  border-left: 3px solid var(--ctp-overlay1);
-  padding: 0.5em 1em;
-  margin: 1.2em 0;
-  color: var(--ctp-subtext1);
-  background: color-mix(in srgb, var(--ctp-surface0) 30%, transparent);
-}
-
-.markdown-body .table-wrapper {
-  overflow-x: auto;
-  margin: 1.2em 0;
-}
-
-.markdown-body .table-wrapper table {
+/* Paragraphs */
+.tiptap-editor .ProseMirror p {
   margin: 0;
 }
 
-.markdown-body table {
-  width: 100%;
-  border-collapse: collapse;
-  margin: 1.2em 0;
+/* Links */
+.tiptap-editor .ProseMirror a {
+  color: oklch(0.55 0.15 250);
+  text-decoration: underline;
+  text-underline-offset: 2px;
 }
 
-.markdown-body th, .markdown-body td {
-  border: 1px solid var(--ctp-surface0);
+.dark .tiptap-editor .ProseMirror a {
+  color: oklch(0.7 0.15 250);
+}
+
+/* Blockquote */
+.tiptap-editor .ProseMirror blockquote {
+  border-left: 3px solid var(--border);
+  padding-left: 1em;
+  color: var(--muted-foreground);
+  margin: 1em 0;
+}
+
+/* Code (inline) */
+.tiptap-editor .ProseMirror code {
+  font-family: var(--editor-font-code, monospace);
+  font-size: 0.875em;
+  background: oklch(0.95 0 0);
+  border-radius: 4px;
+  padding: 0.15em 0.3em;
+}
+
+.dark .tiptap-editor .ProseMirror code {
+  background: oklch(0.25 0 0);
+}
+
+/* Code Block */
+.tiptap-editor .ProseMirror pre {
+  font-family: var(--editor-font-code, monospace);
+  font-size: var(--editor-code-font-size, 14px);
+  background: oklch(0.97 0 0);
+  border-radius: 8px;
+  padding: 1em;
+  overflow-x: auto;
+  margin: 1em 0;
+  line-height: 1.6;
+}
+
+.dark .tiptap-editor .ProseMirror pre {
+  background: oklch(0.18 0 0);
+}
+
+.tiptap-editor .ProseMirror pre code {
+  background: none;
+  padding: 0;
+  border-radius: 0;
+  font-size: inherit;
+}
+
+/* Lists */
+.tiptap-editor .ProseMirror ul {
+  list-style-type: disc;
+  padding-left: 1.5em;
+}
+
+.tiptap-editor .ProseMirror ol {
+  list-style-type: decimal;
+  padding-left: 1.5em;
+}
+
+.tiptap-editor .ProseMirror li {
+  margin: 0.25em 0;
+}
+
+.tiptap-editor .ProseMirror li > p {
+  margin: 0;
+}
+
+/* Task List */
+.tiptap-editor .ProseMirror ul[data-type="taskList"] {
+  list-style: none;
+  padding-left: 0;
+}
+
+.tiptap-editor .ProseMirror ul[data-type="taskList"] li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5em;
+}
+
+.tiptap-editor .ProseMirror ul[data-type="taskList"] li label {
+  margin-top: 0.25em;
+}
+
+.tiptap-editor .ProseMirror ul[data-type="taskList"] li[data-checked="true"] > div > p {
+  text-decoration: line-through;
+  opacity: 0.6;
+}
+
+/* Horizontal Rule */
+.tiptap-editor .ProseMirror hr {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 2em 0;
+}
+
+/* Images */
+.tiptap-editor .ProseMirror img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  margin: 1em 0;
+}
+
+/* Tables */
+.tiptap-editor .ProseMirror table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1em 0;
+}
+
+.tiptap-editor .ProseMirror th,
+.tiptap-editor .ProseMirror td {
+  border: 1px solid var(--border);
   padding: 0.5em 0.75em;
   text-align: left;
 }
 
-.markdown-body th {
-  background: var(--ctp-surface0);
-  font-weight: 500;
-}
-
-.markdown-body tr:nth-child(even) {
-  background: color-mix(in srgb, var(--ctp-surface0) 20%, transparent);
-}
-
-.markdown-body ul, .markdown-body ol {
-  padding-left: 1.5em;
-  margin-bottom: 1.2em;
-}
-
-.markdown-body li {
-  margin-bottom: 0.3em;
-}
-
-.markdown-body hr {
-  border: none;
-  border-top: 1px solid var(--ctp-surface0);
-  margin: 2em 0;
-}
-
-.markdown-body img {
-  max-width: 100%;
-  border: 1px solid var(--ctp-surface0);
-}
-
-.markdown-body .katex-display {
-  overflow-x: auto;
-  padding: 0.5em 0;
-}
-
-/* Mermaid diagram container */
-.markdown-body .mermaid-diagram {
-  margin: 1.2em 0;
-  display: flex;
-  justify-content: center;
-  overflow-x: auto;
-}
-.markdown-body .mermaid-diagram svg {
-  max-width: 100%;
-  height: auto;
-}
-
-/* Mermaid error display */
-.markdown-body .mermaid-error {
-  margin: 1.2em 0;
-  padding: 1rem 1.25rem;
-  background: color-mix(in srgb, var(--ctp-red) 10%, var(--ctp-mantle));
-  border: 1px solid color-mix(in srgb, var(--ctp-red) 30%, var(--ctp-surface0));
-  border-radius: 6px;
-  color: var(--ctp-red);
-}
-.markdown-body .mermaid-error pre {
-  background: none;
-  border: none;
-  padding: 0;
-  margin: 0;
-  color: inherit;
-  font-size: 0.875em;
-  white-space: pre-wrap;
-}
-
-/* SKILL.md frontmatter table */
-.markdown-body .frontmatter-table {
-  width: auto;
-  margin-bottom: 1.5em;
-  border: 1px solid var(--ctp-surface1);
-  border-radius: 6px;
-  overflow: hidden;
-  font-size: 0.875em;
-}
-
-.markdown-body .frontmatter-table td {
-  border: none;
-  border-bottom: 1px solid var(--ctp-surface0);
-  padding: 0.5em 1em;
-  vertical-align: top;
-}
-
-.markdown-body .frontmatter-table tr:last-child td {
-  border-bottom: none;
-}
-
-.markdown-body .frontmatter-table .fm-key {
-  font-family: var(--editor-font-code, 'JetBrains Mono', 'Fira Code', monospace);
-  color: var(--ctp-mauve);
-  white-space: nowrap;
-  font-weight: 500;
-  background: color-mix(in srgb, var(--ctp-surface0) 50%, transparent);
-  width: 1%;
-}
-
-.markdown-body .frontmatter-table .fm-value {
-  color: var(--ctp-subtext0);
-  word-break: break-word;
-}
-
-/* ── Blog Front Matter Card (shared: Hexo/Jekyll/Hugo) ── */
-
-.markdown-body .blog-frontmatter {
-  margin-bottom: 2em;
-  padding: 1.25rem 1.5rem;
-  background: color-mix(in srgb, var(--ctp-surface0) 40%, transparent);
-  border: 1px solid var(--ctp-surface1);
-  border-radius: 8px;
-}
-
-.markdown-body .blog-fm-title {
-  font-size: calc(var(--editor-font-size, 16) * 1.6 * 1px);
+.tiptap-editor .ProseMirror th {
+  background: oklch(0.97 0 0);
   font-weight: 600;
-  color: var(--ctp-text);
-  margin: 0 0 0.5em;
-  line-height: 1.3;
 }
 
-.markdown-body .blog-fm-meta {
-  font-size: 0.875em;
-  color: var(--ctp-subtext0);
-  margin-bottom: 0.75em;
+.dark .tiptap-editor .ProseMirror th {
+  background: oklch(0.2 0 0);
 }
 
-.markdown-body .blog-fm-tags,
-.markdown-body .blog-fm-categories {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.4em;
-  margin-top: 0.5em;
+/* Highlight */
+.tiptap-editor .ProseMirror mark {
+  background-color: oklch(0.9 0.12 90);
+  border-radius: 2px;
+  padding: 0.05em 0.1em;
 }
 
-.markdown-body .blog-tag-pill {
-  display: inline-block;
-  padding: 0.15em 0.6em;
-  border-radius: 999px;
-  font-size: 0.8em;
-  background: color-mix(in srgb, var(--ctp-blue) 15%, transparent);
-  color: var(--ctp-blue);
-  font-family: var(--editor-font-code);
+.dark .tiptap-editor .ProseMirror mark {
+  background-color: oklch(0.45 0.12 90);
 }
 
-.markdown-body .blog-category-pill {
-  display: inline-block;
-  padding: 0.15em 0.6em;
-  border-radius: 999px;
-  font-size: 0.8em;
-  background: color-mix(in srgb, var(--ctp-mauve) 15%, transparent);
-  color: var(--ctp-mauve);
-  font-family: var(--editor-font-code);
-}
-
-.markdown-body .blog-fm-fields {
-  margin-top: 0.75em;
-  font-size: 0.85em;
-  color: var(--ctp-subtext0);
-}
-
-.markdown-body .blog-fm-field-key {
-  font-family: var(--editor-font-code);
-  color: var(--ctp-mauve);
-  margin-right: 0.5em;
-}
-
-/* ── Hexo Codeblock Title ── */
-
-.markdown-body .hexo-codeblock-title {
-  background: var(--ctp-surface1);
-  color: var(--ctp-subtext1);
-  font-family: var(--editor-font-code);
-  font-size: 0.8em;
-  padding: 0.3em 1em;
-  border-radius: 6px 6px 0 0;
-  border: 1px solid var(--ctp-surface0);
-  border-bottom: none;
-  margin-top: 1.2em;
-  margin-bottom: 0;
-}
-
-.markdown-body .hexo-codeblock-title + pre {
-  margin-top: 0;
-  border-top-left-radius: 0;
-  border-top-right-radius: 0;
-}
-
-/* ── Hexo Pullquote ── */
-
-.markdown-body .hexo-pullquote {
-  border-left: 3px solid var(--ctp-mauve);
-  padding: 0.75em 1.25em;
-  margin: 1.2em 0;
-  font-style: italic;
-  color: var(--ctp-subtext1);
-  background: color-mix(in srgb, var(--ctp-mauve) 5%, transparent);
-  border-radius: 0 6px 6px 0;
-  white-space: pre-wrap;
-}
-
-/* ── Blog YouTube Card (shared: Hexo/Hugo) ── */
-
-.markdown-body .blog-youtube-card {
-  margin: 1.2em 0;
-  padding: 1rem;
-  background: var(--ctp-mantle);
-  border: 1px solid var(--ctp-surface0);
-  border-radius: 6px;
-  text-align: center;
-}
-
-.markdown-body .blog-youtube-card a {
-  color: var(--ctp-subtext0);
-  text-decoration: none;
-  font-size: 0.95em;
-}
-
-.markdown-body .blog-youtube-card:hover {
-  border-color: var(--ctp-red);
-}
-
-.markdown-body .blog-youtube-card:hover a {
-  color: var(--ctp-red);
-}
-
-.markdown-body .blog-youtube-icon {
-  margin-right: 0.4em;
-}
-
-/* ── Blog Iframe Card (Hexo) ── */
-
-.markdown-body .blog-iframe-card {
-  margin: 1.2em 0;
-  padding: 0.75rem 1rem;
-  background: var(--ctp-mantle);
-  border: 1px solid var(--ctp-surface0);
-  border-radius: 6px;
-}
-
-.markdown-body .blog-iframe-card a {
-  color: var(--ctp-blue);
-  text-decoration: none;
-  font-size: 0.875em;
-}
-
-.markdown-body .blog-iframe-card:hover {
-  border-color: var(--ctp-blue);
-}
-
-/* ── Hugo Figure ── */
-
-.markdown-body .blog-figure {
-  margin: 1.2em 0;
-  text-align: center;
-}
-
-.markdown-body .blog-figure img {
-  max-width: 100%;
-  border-radius: 6px;
-}
-
-.markdown-body .blog-figcaption {
-  margin-top: 0.5em;
-  font-size: 0.85em;
-  color: var(--ctp-subtext0);
-  font-style: italic;
-}
-
-/* ── Blog Gist Card (Hugo) ── */
-
-.markdown-body .blog-gist-card {
-  margin: 1.2em 0;
-  padding: 0.75rem 1rem;
-  background: var(--ctp-mantle);
-  border: 1px solid var(--ctp-surface0);
-  border-radius: 6px;
-}
-
-.markdown-body .blog-gist-card a {
-  color: var(--ctp-blue);
-  text-decoration: none;
-  font-size: 0.875em;
-}
-
-.markdown-body .blog-gist-card:hover {
-  border-color: var(--ctp-blue);
-}
-
-/* CodeMirror editor wrapper */
-.cm-editor-wrapper {
-  width: 100%;
-  height: 100%;
-}
-
-.cm-editor-wrapper .cm-editor {
-  height: 100%;
-}
-
-.cm-editor-wrapper .cm-scroller {
-  overflow: auto;
-  font-family: var(--editor-font-body, 'Source Han Serif', 'Noto Serif CJK SC', Georgia, serif);
+/* Selection */
+.tiptap-editor .ProseMirror ::selection {
+  background-color: oklch(0.82 0.12 83 / 0.35);
 }
