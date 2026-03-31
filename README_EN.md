@@ -10,7 +10,8 @@
   <img src="https://img.shields.io/github/v/release/finch-xu/PiDanMD?color=blue&label=version" />
   <img src="https://img.shields.io/badge/license-MIT-green" />
   <img src="https://img.shields.io/badge/Tauri-2-24C8D8?logo=tauri&logoColor=white" />
-  <img src="https://img.shields.io/badge/SolidJS-1.9-2C4F7C?logo=solid&logoColor=white" />
+  <img src="https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=white" />
+  <img src="https://img.shields.io/badge/Tiptap-3-1a1a2e?logo=tiptap&logoColor=white" />
   <img src="https://img.shields.io/badge/Rust-1.80+-DEA584?logo=rust&logoColor=white" />
   <img src="https://img.shields.io/badge/Tailwind_CSS-4-06B6D4?logo=tailwindcss&logoColor=white" />
 </p>
@@ -47,27 +48,90 @@
 | Layer | Technology |
 |-------|-----------|
 | Desktop Framework | Tauri 2 |
-| Frontend Framework | SolidJS |
-| Editor Engine | CodeMirror 6 |
-| Markdown Rendering | unified (remark + rehype) |
-| Syntax Highlighting | Shiki |
-| Math Equations | KaTeX |
+| Frontend Framework | React 19 |
+| Editor Engine | Tiptap 3 (ProseMirror) |
+| UI Components | shadcn/ui (New York) |
+| State Management | Zustand |
 | Styling | Tailwind CSS 4 |
-| Icons | Lucide |
+| Icons | Lucide React |
+| Build Tool | Vite |
+| Languages | TypeScript 5 + Rust |
+
+## Prerequisites
+
+- [Rust](https://rustup.rs/) (stable 1.80+)
+- [Node.js](https://nodejs.org/) (v18+)
+- [pnpm](https://pnpm.io/) (v10+)
+- Platform-specific Tauri 2 dependencies, see [Tauri docs](https://v2.tauri.app/start/prerequisites/)
 
 ## Development
 
-Prerequisites: [Rust](https://rustup.rs/) and [pnpm](https://pnpm.io/).
-
 ```bash
+# 1. Install frontend dependencies
 pnpm install
+
+# 2. Start dev mode (frontend HMR + Rust auto-recompile)
 pnpm tauri dev
 ```
+
+In dev mode, the Vite dev server runs at `http://localhost:5173` and the Tauri window loads from it automatically. Frontend changes hot-reload instantly; Rust changes trigger an automatic recompile and app restart.
+
+To debug frontend only (without the Tauri desktop window):
+
+```bash
+pnpm dev
+```
+
+Then open `http://localhost:5173` in a browser (note: Tauri API calls won't work — this is only for debugging UI layout and styles).
 
 ## Build
 
 ```bash
+# Build installer for the current platform
 pnpm tauri build
+```
+
+Build artifacts are located at `src-tauri/target/release/bundle/`:
+
+| Platform | Output |
+|----------|--------|
+| macOS | `.dmg`, `.app` |
+| Windows | `.msi`, `.exe` (NSIS) |
+| Linux | `.deb`, `.rpm`, `.AppImage` |
+
+To build frontend only (without desktop packaging):
+
+```bash
+pnpm build
+```
+
+Output goes to the `dist/` directory.
+
+## Project Structure
+
+```
+PiDanMD/
+├── src/                    # Frontend source (React + TypeScript)
+│   ├── components/ui/      # Shared UI components (shadcn/ui)
+│   ├── features/           # Feature modules
+│   │   ├── editor/         # Tiptap editor
+│   │   ├── settings/       # Settings dialog
+│   │   ├── sidebar/        # File sidebar
+│   │   └── titlebar/       # Custom title bar
+│   ├── stores/             # Zustand state management
+│   ├── lib/                # Utilities (Tauri commands, i18n, config)
+│   ├── hooks/              # React hooks
+│   ├── styles/             # Editor styles
+│   ├── App.tsx             # Root component
+│   └── main.tsx            # Entry point
+├── src-tauri/              # Rust backend (Tauri 2)
+│   ├── src/
+│   │   ├── commands/       # Tauri commands (file ops, config, fonts)
+│   │   ├── menu.rs         # App menu
+│   │   └── state.rs        # App state
+│   └── tauri.conf.json     # Tauri config
+├── public/                 # Static assets (logo, fonts)
+└── package.json
 ```
 
 ## Bundled Fonts
