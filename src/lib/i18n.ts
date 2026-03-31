@@ -76,6 +76,8 @@ const messages: Record<Locale, Record<string, string>> = {
     modeSkill: "Skill",
     startWriting: "开始写作…",
     focus: "专注",
+    sourceMode: "源码模式",
+    wysiwygMode: "所见即所得",
   },
   "zh-TW": {
     appName: "皮蛋記",
@@ -148,6 +150,8 @@ const messages: Record<Locale, Record<string, string>> = {
     modeSkill: "Skill",
     startWriting: "開始寫作…",
     focus: "專注",
+    sourceMode: "原始碼模式",
+    wysiwygMode: "所見即所得",
   },
   "en-US": {
     appName: "PiDanMD",
@@ -220,6 +224,8 @@ const messages: Record<Locale, Record<string, string>> = {
     modeSkill: "Skill",
     startWriting: "Start writing…",
     focus: "Focus",
+    sourceMode: "Source Mode",
+    wysiwygMode: "Rich Text",
   },
   "ja-JP": {
     appName: "PiDanMD",
@@ -292,6 +298,8 @@ const messages: Record<Locale, Record<string, string>> = {
     modeSkill: "Skill",
     startWriting: "書き始めましょう…",
     focus: "フォーカス",
+    sourceMode: "ソースモード",
+    wysiwygMode: "リッチテキスト",
   },
   "ko-KR": {
     appName: "PiDanMD",
@@ -364,6 +372,8 @@ const messages: Record<Locale, Record<string, string>> = {
     modeSkill: "Skill",
     startWriting: "글쓰기 시작…",
     focus: "집중",
+    sourceMode: "소스 모드",
+    wysiwygMode: "리치 텍스트",
   },
 };
 

@@ -4,6 +4,8 @@ import { useEditorStore } from "./stores/editor-store";
 import { TitleBar } from "./features/titlebar/TitleBar";
 import { Sidebar } from "./features/sidebar/Sidebar";
 import { Editor } from "./features/editor/Editor";
+import { DocumentOutline } from "./features/outline/DocumentOutline";
+import { StatusBar } from "./features/editor/StatusBar";
 import { SettingsDialog } from "./features/settings/SettingsDialog";
 import { useTauriEvent } from "./hooks/use-tauri";
 import { useWorkspaceStore } from "./stores/workspace-store";
@@ -64,13 +66,16 @@ export function App() {
         style={{
           display: "grid",
           gridTemplateColumns: gridColumns,
+          gridTemplateRows: "1fr",
           transition: "grid-template-columns 200ms ease",
         }}
       >
         {showSidebar && <Sidebar />}
         <Editor />
+        {layoutMode === "reading" && <DocumentOutline />}
       </div>
 
+      <StatusBar />
       <SettingsDialog />
     </div>
   );

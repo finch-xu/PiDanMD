@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useCallback, useRef } from "react";
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Placeholder from "@tiptap/extension-placeholder";
@@ -13,18 +13,27 @@ import { TableRow } from "@tiptap/extension-table-row";
 import { TableCell } from "@tiptap/extension-table-cell";
 import { TableHeader } from "@tiptap/extension-table-header";
 import { Markdown } from "@tiptap/markdown";
+import CodeBlockLowlight from "@tiptap/extension-code-block-lowlight";
+import { common, createLowlight } from "lowlight";
 import { useEditorStore } from "~/stores/editor-store";
 import { useT } from "~/lib/i18n";
 import { Toolbar } from "./Toolbar";
 import { BubbleMenuBar } from "./BubbleMenu";
+import { SourceEditor } from "./SourceEditor";
 import "~/styles/editor.css";
+
+const lowlight = createLowlight(common);
 
 export function Editor() {
   const t = useT();
   const content = useEditorStore((s) => s.content);
   const filePath = useEditorStore((s) => s.filePath);
   const isLoading = useEditorStore((s) => s.isLoading);
+  const editorMode = useEditorStore((s) => s.editorMode);
   const setContent = useEditorStore((s) => s.setContent);
+
+  // Guard: prevent onUpdate from writing back to store during programmatic setContent
+  const isSyncingRef = useRef(false);
 
   const editor = useEditor({
     extensions: [
@@ -54,11 +63,13 @@ export function Editor() {
       TableRow,
       TableCell,
       TableHeader,
+      CodeBlockLowlight.configure({ lowlight }),
       Markdown,
     ],
     content: "",
     onUpdate: ({ editor }) => {
-      const md = (editor.storage.markdown as { getMarkdown?: () => string })?.getMarkdown?.() ?? editor.getText();
+      if (isSyncingRef.current) return;
+      const md = editor.getMarkdown();
       setContent(md);
     },
     editorProps: {
@@ -68,13 +79,35 @@ export function Editor() {
     },
   });
 
-  // When a new file is loaded, update editor content
+  // Sync content between Tiptap and store on file load or mode switch
   useEffect(() => {
-    if (editor && filePath && !isLoading) {
-      editor.commands.setContent(content);
+    if (!editor || !filePath || isLoading) return;
+
+    if (editorMode === "wysiwyg") {
+      // Entering WYSIWYG: parse markdown into Tiptap
+      isSyncingRef.current = true;
+      editor.commands.setContent(content, { contentType: "markdown" });
+      requestAnimationFrame(() => {
+        isSyncingRef.current = false;
+      });
+    } else {
+      // Entering Source: serialize Tiptap content to markdown for source editor
+      const freshMd = editor.getMarkdown();
+      // Guard: never overwrite valid store content with empty Tiptap output
+      if (freshMd || !content) {
+        useEditorStore.setState({ content: freshMd, isDirty: false });
+      }
     }
+    // content intentionally excluded: onUpdate handles user typing sync
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [editor, filePath]);
+  }, [editor, filePath, editorMode, isLoading]);
+
+  const handleSourceChange = useCallback(
+    (value: string) => {
+      setContent(value);
+    },
+    [setContent]
+  );
 
   if (!filePath) {
     return <EditorPlaceholder />;
@@ -88,8 +121,16 @@ export function Editor() {
     );
   }
 
+  if (editorMode === "source") {
+    return (
+      <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+        <SourceEditor content={content} onChange={handleSourceChange} />
+      </div>
+    );
+  }
+
   return (
-    <div className="flex flex-1 flex-col overflow-hidden">
+    <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
       <Toolbar editor={editor} />
       <div className="tiptap-editor">
         {editor && <BubbleMenuBar editor={editor} />}

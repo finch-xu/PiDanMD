@@ -31,7 +31,7 @@ export function Sidebar() {
   const folderName = workspacePath?.split("/").pop() ?? t("workspaceNotOpened");
 
   return (
-    <div className="flex h-full flex-col border-r bg-sidebar">
+    <div className="flex h-full flex-col overflow-hidden border-r bg-sidebar">
       {/* Header */}
       <div className="flex h-11 items-center justify-between border-b px-3">
         <span className="truncate text-sm font-medium text-sidebar-foreground">
@@ -71,7 +71,7 @@ export function Sidebar() {
       </div>
 
       {/* File Tree */}
-      <ScrollArea className="flex-1 px-1">
+      <ScrollArea className="min-h-0 flex-1 px-1">
         {!workspacePath ? (
           <EmptyState />
         ) : searchQuery.trim() ? (

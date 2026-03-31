@@ -220,3 +220,145 @@
 .tiptap-editor .ProseMirror ::selection {
   background-color: oklch(0.82 0.12 83 / 0.35);
 }
+
+/* ── Syntax Highlighting (lowlight / highlight.js) ── */
+
+/* — Light theme — */
+
+.tiptap-editor .ProseMirror pre code .hljs-keyword,
+.tiptap-editor .ProseMirror pre code .hljs-selector-tag,
+.tiptap-editor .ProseMirror pre code .hljs-literal,
+.tiptap-editor .ProseMirror pre code .hljs-section,
+.tiptap-editor .ProseMirror pre code .hljs-type {
+  color: oklch(0.5 0.2 350);
+}
+
+.tiptap-editor .ProseMirror pre code .hljs-string,
+.tiptap-editor .ProseMirror pre code .hljs-regexp,
+.tiptap-editor .ProseMirror pre code .hljs-selector-id {
+  color: oklch(0.45 0.12 25);
+}
+
+.tiptap-editor .ProseMirror pre code .hljs-comment,
+.tiptap-editor .ProseMirror pre code .hljs-quote {
+  color: oklch(0.55 0.02 120);
+  font-style: italic;
+}
+
+.tiptap-editor .ProseMirror pre code .hljs-number,
+.tiptap-editor .ProseMirror pre code .hljs-meta,
+.tiptap-editor .ProseMirror pre code .hljs-operator {
+  color: oklch(0.5 0.15 250);
+}
+
+.tiptap-editor .ProseMirror pre code .hljs-title,
+.tiptap-editor .ProseMirror pre code .hljs-function,
+.tiptap-editor .ProseMirror pre code .hljs-selector-class {
+  color: oklch(0.5 0.15 310);
+}
+
+.tiptap-editor .ProseMirror pre code .hljs-built_in,
+.tiptap-editor .ProseMirror pre code .hljs-name,
+.tiptap-editor .ProseMirror pre code .hljs-tag {
+  color: oklch(0.55 0.15 55);
+}
+
+.tiptap-editor .ProseMirror pre code .hljs-variable,
+.tiptap-editor .ProseMirror pre code .hljs-template-variable,
+.tiptap-editor .ProseMirror pre code .hljs-template-tag {
+  color: oklch(0.5 0.12 250);
+}
+
+.tiptap-editor .ProseMirror pre code .hljs-attr,
+.tiptap-editor .ProseMirror pre code .hljs-attribute,
+.tiptap-editor .ProseMirror pre code .hljs-property {
+  color: oklch(0.55 0.1 250);
+}
+
+.tiptap-editor .ProseMirror pre code .hljs-punctuation {
+  color: oklch(0.45 0 0);
+}
+
+.tiptap-editor .ProseMirror pre code .hljs-addition {
+  color: oklch(0.4 0.15 150);
+  background-color: oklch(0.95 0.05 150);
+}
+
+.tiptap-editor .ProseMirror pre code .hljs-deletion {
+  color: oklch(0.45 0.18 25);
+  background-color: oklch(0.95 0.05 25);
+}
+
+.tiptap-editor .ProseMirror pre code .hljs-emphasis {
+  font-style: italic;
+}
+
+.tiptap-editor .ProseMirror pre code .hljs-strong {
+  font-weight: bold;
+}
+
+/* — Dark theme — */
+
+.dark .tiptap-editor .ProseMirror pre code .hljs-keyword,
+.dark .tiptap-editor .ProseMirror pre code .hljs-selector-tag,
+.dark .tiptap-editor .ProseMirror pre code .hljs-literal,
+.dark .tiptap-editor .ProseMirror pre code .hljs-section,
+.dark .tiptap-editor .ProseMirror pre code .hljs-type {
+  color: oklch(0.68 0.12 250);
+}
+
+.dark .tiptap-editor .ProseMirror pre code .hljs-string,
+.dark .tiptap-editor .ProseMirror pre code .hljs-regexp,
+.dark .tiptap-editor .ProseMirror pre code .hljs-selector-id {
+  color: oklch(0.7 0.1 50);
+}
+
+.dark .tiptap-editor .ProseMirror pre code .hljs-comment,
+.dark .tiptap-editor .ProseMirror pre code .hljs-quote {
+  color: oklch(0.52 0.1 140);
+  font-style: italic;
+}
+
+.dark .tiptap-editor .ProseMirror pre code .hljs-number,
+.dark .tiptap-editor .ProseMirror pre code .hljs-meta,
+.dark .tiptap-editor .ProseMirror pre code .hljs-operator {
+  color: oklch(0.78 0.1 140);
+}
+
+.dark .tiptap-editor .ProseMirror pre code .hljs-title,
+.dark .tiptap-editor .ProseMirror pre code .hljs-function,
+.dark .tiptap-editor .ProseMirror pre code .hljs-selector-class {
+  color: oklch(0.82 0.1 95);
+}
+
+.dark .tiptap-editor .ProseMirror pre code .hljs-built_in,
+.dark .tiptap-editor .ProseMirror pre code .hljs-name,
+.dark .tiptap-editor .ProseMirror pre code .hljs-tag {
+  color: oklch(0.72 0.12 180);
+}
+
+.dark .tiptap-editor .ProseMirror pre code .hljs-variable,
+.dark .tiptap-editor .ProseMirror pre code .hljs-template-variable,
+.dark .tiptap-editor .ProseMirror pre code .hljs-template-tag {
+  color: oklch(0.65 0.12 310);
+}
+
+.dark .tiptap-editor .ProseMirror pre code .hljs-attr,
+.dark .tiptap-editor .ProseMirror pre code .hljs-attribute,
+.dark .tiptap-editor .ProseMirror pre code .hljs-property {
+  color: oklch(0.76 0.1 220);
+}
+
+.dark .tiptap-editor .ProseMirror pre code .hljs-punctuation {
+  color: oklch(0.65 0 0);
+}
+
+.dark .tiptap-editor .ProseMirror pre code .hljs-addition {
+  color: oklch(0.7 0.12 150);
+  background-color: oklch(0.25 0.05 150);
+}
+
+.dark .tiptap-editor .ProseMirror pre code .hljs-deletion {
+  color: oklch(0.7 0.12 25);
+  background-color: oklch(0.25 0.05 25);
+}

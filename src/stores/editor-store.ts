@@ -1,16 +1,20 @@
 import { create } from "zustand";
 import { readFile, writeFile } from "~/lib/tauri";
 
+type EditorMode = "wysiwyg" | "source";
+
 interface EditorState {
   content: string;
   filePath: string | null;
   isDirty: boolean;
   isLoading: boolean;
+  editorMode: EditorMode;
 
   loadFile: (path: string) => Promise<void>;
   setContent: (content: string) => void;
   saveFile: () => Promise<void>;
   clearEditor: () => void;
+  toggleEditorMode: () => void;
 }
 
 let saveTimer: ReturnType<typeof setTimeout> | null = null;
@@ -20,15 +24,26 @@ export const useEditorStore = create<EditorState>((set, get) => ({
   filePath: null,
   isDirty: false,
   isLoading: false,
+  editorMode: "wysiwyg" as EditorMode,
 
   loadFile: async (path) => {
-    set({ isLoading: true });
+    // Save current dirty file before switching
+    const { isDirty } = get();
+    if (isDirty) await get().saveFile();
+
+    // Cancel any pending auto-save from the previous file
+    if (saveTimer) { clearTimeout(saveTimer); saveTimer = null; }
+
+    // Set loading state — do NOT clear content (isLoading prevents effects from acting)
+    set({ filePath: path, isLoading: true, isDirty: false });
     try {
       const text = await readFile(path);
-      set({ content: text, filePath: path, isDirty: false, isLoading: false });
+      if (get().filePath !== path) return; // stale: user clicked another file
+      set({ content: text, isDirty: false, isLoading: false });
     } catch (e) {
       console.error("Failed to load file:", e);
-      set({ isLoading: false });
+      if (get().filePath !== path) return;
+      set({ content: "", filePath: null, isDirty: false, isLoading: false });
     }
   },
 
@@ -43,8 +58,8 @@ export const useEditorStore = create<EditorState>((set, get) => ({
   },
 
   saveFile: async () => {
-    const { filePath, content, isDirty } = get();
-    if (!filePath || !isDirty) return;
+    const { filePath, content, isDirty, isLoading } = get();
+    if (!filePath || !isDirty || isLoading) return;
     try {
       await writeFile(filePath, content);
       set({ isDirty: false });
@@ -55,6 +70,10 @@ export const useEditorStore = create<EditorState>((set, get) => ({
 
   clearEditor: () => {
     if (saveTimer) clearTimeout(saveTimer);
-    set({ content: "", filePath: null, isDirty: false, isLoading: false });
+    set({ content: "", filePath: null, isDirty: false, isLoading: false, editorMode: "wysiwyg" });
+  },
+
+  toggleEditorMode: () => {
+    set((s) => ({ editorMode: s.editorMode === "wysiwyg" ? "source" : "wysiwyg" }));
   },
 }));
