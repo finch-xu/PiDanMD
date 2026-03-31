@@ -1,7 +1,8 @@
 use serde::{Deserialize, Serialize};
-use std::fs;
 use std::path::PathBuf;
 use tauri::Manager;
+
+use crate::error::AppError;
 
 // ── Config Structs ──────────────────────────────
 //
@@ -94,51 +95,54 @@ impl Default for AppConfig {
 
 // ── Config Path ─────────────────────────────────
 
-fn config_path(app: &tauri::AppHandle) -> Result<PathBuf, String> {
-    let dir = app.path().app_config_dir().map_err(|e| e.to_string())?;
+fn config_path(app: &tauri::AppHandle) -> Result<PathBuf, AppError> {
+    let dir = app
+        .path()
+        .app_config_dir()
+        .map_err(|e| AppError::Io(std::io::Error::new(std::io::ErrorKind::NotFound, e.to_string())))?;
     Ok(dir.join("config.yaml"))
 }
 
 // ── Config I/O ─────────────────────────────────
 
-fn save_config_inner(path: &PathBuf, config: &AppConfig) -> Result<(), String> {
+async fn save_config_inner(path: &PathBuf, config: &AppConfig) -> Result<(), AppError> {
     if let Some(parent) = path.parent() {
-        fs::create_dir_all(parent).map_err(|e| e.to_string())?;
+        tokio::fs::create_dir_all(parent).await?;
     }
-    let yaml = serde_yaml::to_string(config).map_err(|e| e.to_string())?;
-    fs::write(path, yaml).map_err(|e| e.to_string())?;
+    let yaml = serde_yaml::to_string(config)?;
+    tokio::fs::write(path, yaml).await?;
     Ok(())
 }
 
 // ── Tauri Commands ──────────────────────────────
 
 #[tauri::command]
-pub fn load_config(app: tauri::AppHandle) -> AppConfig {
+pub async fn load_config(app: tauri::AppHandle) -> AppConfig {
     let path = match config_path(&app) {
         Ok(p) => p,
         Err(_) => return AppConfig::default(),
     };
 
-    let config = fs::read_to_string(&path)
-        .ok()
-        .and_then(|c| serde_yaml::from_str::<AppConfig>(&c).ok())
-        .unwrap_or_default();
+    let config = match tokio::fs::read_to_string(&path).await {
+        Ok(content) => serde_yaml::from_str::<AppConfig>(&content).unwrap_or_default(),
+        Err(_) => AppConfig::default(),
+    };
 
     // Write back to ensure any new fields are persisted
-    let _ = save_config_inner(&path, &config);
+    let _ = save_config_inner(&path, &config).await;
     config
 }
 
 #[tauri::command]
-pub fn save_config(app: tauri::AppHandle, config: AppConfig) -> Result<(), String> {
+pub async fn save_config(app: tauri::AppHandle, config: AppConfig) -> Result<(), AppError> {
     let path = config_path(&app)?;
-    save_config_inner(&path, &config)
+    save_config_inner(&path, &config).await
 }
 
 #[tauri::command]
-pub fn reset_config(app: tauri::AppHandle) -> Result<AppConfig, String> {
+pub async fn reset_config(app: tauri::AppHandle) -> Result<AppConfig, AppError> {
     let path = config_path(&app)?;
     let config = AppConfig::default();
-    save_config_inner(&path, &config)?;
+    save_config_inner(&path, &config).await?;
     Ok(config)
 }

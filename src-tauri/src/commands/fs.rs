@@ -1,11 +1,10 @@
-use base64::Engine;
 use serde::Serialize;
-use std::fs;
 use std::path::PathBuf;
-use std::sync::Mutex;
 use std::time::UNIX_EPOCH;
 use tauri::{Manager, State};
+use tokio::sync::Mutex;
 
+use crate::error::AppError;
 use crate::state::AppState;
 
 #[derive(Serialize, Clone)]
@@ -16,46 +15,62 @@ pub struct FileEntry {
     pub modified: Option<u64>,
 }
 
-/// Validate that `path` resolves to a location inside the current workspace.
-fn validate_path(path: &str, state: &State<Mutex<AppState>>) -> Result<PathBuf, String> {
-    let canonical = fs::canonicalize(path)
-        .or_else(|_| {
-            // File/dir may not exist yet — canonicalize parent and append filename
-            let p = PathBuf::from(path);
-            let parent = p.parent().ok_or("Invalid path")?;
-            let name = p.file_name().ok_or("Invalid path")?;
-            fs::canonicalize(parent)
-                .map(|cp| cp.join(name))
-                .map_err(|e| e.to_string())
-        })
-        .map_err(|e| format!("Path resolution failed: {e}"))?;
+/// Resolve a path string into a canonical `PathBuf`.
+/// For paths that don't exist yet, canonicalize the parent and append the filename.
+fn resolve_path(path: &str) -> Result<PathBuf, AppError> {
+    std::fs::canonicalize(path).or_else(|_| {
+        let p = PathBuf::from(path);
+        let parent = p
+            .parent()
+            .ok_or_else(|| AppError::InvalidPath("no parent".into()))?;
+        let name = p
+            .file_name()
+            .ok_or_else(|| AppError::InvalidPath("no filename".into()))?;
+        Ok(std::fs::canonicalize(parent)?.join(name))
+    })
+}
 
-    let app_state = state.lock().map_err(|e| e.to_string())?;
+/// Validate that `path` resolves to a location inside the current workspace.
+async fn validate_path(
+    path: &str,
+    state: &State<'_, Mutex<AppState>>,
+) -> Result<PathBuf, AppError> {
+    let canonical = resolve_path(path)?;
+
+    let app_state = state.lock().await;
     let workspace = app_state
         .workspace_path
         .as_ref()
-        .ok_or("No workspace opened")?;
-    let ws_canonical = fs::canonicalize(workspace).map_err(|e| e.to_string())?;
+        .ok_or(AppError::NoWorkspace)?;
+    let ws_canonical = std::fs::canonicalize(workspace)?;
 
     if !canonical.starts_with(&ws_canonical) {
-        return Err("Access denied: path outside workspace".into());
+        return Err(AppError::PathTraversal(canonical.display().to_string()));
     }
     Ok(canonical)
 }
 
 #[tauri::command]
-pub fn list_directory(path: String, state: State<Mutex<AppState>>) -> Result<Vec<FileEntry>, String> {
-    let safe_path = validate_path(&path, &state)?;
-    let entries = fs::read_dir(&safe_path).map_err(|e| e.to_string())?;
+pub async fn list_directory(
+    path: String,
+    state: State<'_, Mutex<AppState>>,
+) -> Result<Vec<FileEntry>, AppError> {
+    let canonical = resolve_path(&path)?;
 
+    // Auto-set workspace path — the frontend's "open workspace" IS listing a directory.
+    {
+        let mut app_state = state.lock().await;
+        app_state.workspace_path = Some(canonical.clone());
+    }
+
+    let mut reader = tokio::fs::read_dir(&canonical).await?;
     let mut files: Vec<FileEntry> = Vec::new();
 
-    for entry in entries {
-        let entry = entry.map_err(|e| e.to_string())?;
-        let metadata = entry.metadata().map_err(|e| e.to_string())?;
+    while let Some(entry) = reader.next_entry().await? {
+        let metadata = entry.metadata().await?;
         let name = entry.file_name().to_string_lossy().to_string();
 
-        // Skip hidden files (starting with '.')
+        // Skip hidden files
         if name.starts_with('.') {
             continue;
         }
@@ -74,7 +89,7 @@ pub fn list_directory(path: String, state: State<Mutex<AppState>>) -> Result<Vec
         });
     }
 
-    // Sort: directories first, then alphabetically by name
+    // Sort: directories first, then alphabetically
     files.sort_by(|a, b| {
         b.is_directory
             .cmp(&a.is_directory)
@@ -85,75 +100,65 @@ pub fn list_directory(path: String, state: State<Mutex<AppState>>) -> Result<Vec
 }
 
 #[tauri::command]
-pub fn read_file(path: String, state: State<Mutex<AppState>>) -> Result<String, String> {
-    let safe_path = validate_path(&path, &state)?;
-    fs::read_to_string(&safe_path).map_err(|e| e.to_string())
-}
-
-#[tauri::command]
-pub fn write_file(path: String, content: String, state: State<Mutex<AppState>>) -> Result<(), String> {
-    let safe_path = validate_path(&path, &state)?;
-    fs::write(&safe_path, &content).map_err(|e| e.to_string())
-}
-
-#[tauri::command]
-pub fn create_directory(path: String, state: State<Mutex<AppState>>) -> Result<(), String> {
-    let safe_path = validate_path(&path, &state)?;
-    fs::create_dir_all(&safe_path).map_err(|e| e.to_string())
-}
-
-#[tauri::command]
-pub fn write_binary_file(
+pub async fn read_file(
     path: String,
-    data: String,
-    state: State<Mutex<AppState>>,
-) -> Result<(), String> {
-    let safe_path = validate_path(&path, &state)?;
-    if let Some(parent) = safe_path.parent() {
-        fs::create_dir_all(parent).map_err(|e| e.to_string())?;
-    }
-    let bytes = base64::engine::general_purpose::STANDARD
-        .decode(&data)
-        .map_err(|e| format!("Base64 decode failed: {e}"))?;
-    fs::write(&safe_path, &bytes).map_err(|e| e.to_string())
+    state: State<'_, Mutex<AppState>>,
+) -> Result<String, AppError> {
+    let safe_path = validate_path(&path, &state).await?;
+    Ok(tokio::fs::read_to_string(&safe_path).await?)
 }
 
 #[tauri::command]
-pub fn copy_file(
-    source: String,
-    destination: String,
-    state: State<Mutex<AppState>>,
-) -> Result<(), String> {
-    let src = PathBuf::from(&source);
-    let dest_path = validate_path(&destination, &state)?;
-    if let Some(parent) = dest_path.parent() {
-        fs::create_dir_all(parent).map_err(|e| e.to_string())?;
+pub async fn write_file(
+    path: String,
+    content: String,
+    state: State<'_, Mutex<AppState>>,
+) -> Result<(), AppError> {
+    let safe_path = validate_path(&path, &state).await?;
+    Ok(tokio::fs::write(&safe_path, &content).await?)
+}
+
+#[tauri::command]
+pub async fn create_directory(
+    path: String,
+    state: State<'_, Mutex<AppState>>,
+) -> Result<(), AppError> {
+    let safe_path = validate_path(&path, &state).await?;
+    Ok(tokio::fs::create_dir_all(&safe_path).await?)
+}
+
+#[tauri::command]
+pub async fn rename_entry(
+    old_path: String,
+    new_path: String,
+    state: State<'_, Mutex<AppState>>,
+) -> Result<(), AppError> {
+    let safe_old = validate_path(&old_path, &state).await?;
+    let safe_new = validate_path(&new_path, &state).await?;
+    Ok(tokio::fs::rename(&safe_old, &safe_new).await?)
+}
+
+#[tauri::command]
+pub async fn delete_entry(
+    path: String,
+    is_directory: bool,
+    state: State<'_, Mutex<AppState>>,
+) -> Result<(), AppError> {
+    let safe_path = validate_path(&path, &state).await?;
+    if is_directory {
+        tokio::fs::remove_dir_all(&safe_path).await?;
+    } else {
+        tokio::fs::remove_file(&safe_path).await?;
     }
-    fs::copy(&src, &dest_path).map_err(|e| e.to_string())?;
     Ok(())
 }
 
 #[tauri::command]
-pub fn rename_entry(old_path: String, new_path: String, state: State<Mutex<AppState>>) -> Result<(), String> {
-    let safe_old = validate_path(&old_path, &state)?;
-    let safe_new = validate_path(&new_path, &state)?;
-    fs::rename(&safe_old, &safe_new).map_err(|e| e.to_string())
-}
-
-#[tauri::command]
-pub fn delete_entry(path: String, is_directory: bool, state: State<Mutex<AppState>>) -> Result<(), String> {
-    let safe_path = validate_path(&path, &state)?;
-    if is_directory {
-        fs::remove_dir_all(&safe_path).map_err(|e| e.to_string())
-    } else {
-        fs::remove_file(&safe_path).map_err(|e| e.to_string())
-    }
-}
-
-#[tauri::command]
-pub fn get_default_storage_dir(app: tauri::AppHandle) -> Result<String, String> {
-    let data_dir = app.path().app_data_dir().map_err(|e| e.to_string())?;
+pub async fn get_default_storage_dir(app: tauri::AppHandle) -> Result<String, AppError> {
+    let data_dir = app.path().app_data_dir().map_err(|e| AppError::Io(
+        std::io::Error::new(std::io::ErrorKind::NotFound, e.to_string()),
+    ))?;
     let storage = data_dir.join("workspace");
-    fs::create_dir_all(&storage).map_err(|e| e.to_string())?;
+    tokio::fs::create_dir_all(&storage).await?;
     Ok(storage.to_string_lossy().to_string())
 }

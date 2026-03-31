@@ -9,7 +9,7 @@ pub fn build_menu(app: &App) -> tauri::Result<tauri::menu::Menu<Wry>> {
         .item(&PredefinedMenuItem::about(app, None, None)?)
         .separator()
         .item(
-            &MenuItemBuilder::new("设置...")
+            &MenuItemBuilder::new("Settings...")
                 .id("settings")
                 .accelerator("CmdOrCtrl+Comma")
                 .build(app)?,
@@ -26,14 +26,14 @@ pub fn build_menu(app: &App) -> tauri::Result<tauri::menu::Menu<Wry>> {
     // ── File submenu ──
     let file_menu = SubmenuBuilder::new(app, "File")
         .item(
-            &MenuItemBuilder::new("打开文件夹")
+            &MenuItemBuilder::new("Open Folder")
                 .id("open-folder")
                 .accelerator("CmdOrCtrl+Shift+O")
                 .build(app)?,
         )
         .separator()
         .item(
-            &MenuItemBuilder::new("保存")
+            &MenuItemBuilder::new("Save")
                 .id("save")
                 .accelerator("CmdOrCtrl+S")
                 .build(app)?,
