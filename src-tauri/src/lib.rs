@@ -27,11 +27,18 @@ pub fn run() {
             commands::config::reset_config,
         ])
         .setup(|app| {
-            let menu = menu::build_menu(app)?;
-            app.set_menu(menu)?;
-            app.on_menu_event(|app, event| {
-                let _ = app.emit("menu-action", event.id().0.as_str());
-            });
+            // Only set native menu on macOS — it lives in the system menu bar
+            // and doesn't consume window space. On Windows/Linux the native
+            // menu would stack below the titlebar creating a large blank area,
+            // so we skip it and rely on keyboard shortcuts + custom UI instead.
+            #[cfg(target_os = "macos")]
+            {
+                let menu = menu::build_menu(app)?;
+                app.set_menu(menu)?;
+                app.on_menu_event(|app, event| {
+                    let _ = app.emit("menu-action", event.id().0.as_str());
+                });
+            }
             Ok(())
         })
         .run(tauri::generate_context!())

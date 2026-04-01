@@ -153,7 +153,7 @@ body {
 
 @font-face {
   font-family: "LXGW WenKai Screen";
-  src: url("/fonts/LXGWWenKaiScreen.woff2") format("woff2");
+  src: url("/fonts/LXGWWenKaiScreen.ttf") format("truetype");
   font-weight: normal;
   font-style: normal;
   font-display: swap;
@@ -161,7 +161,7 @@ body {
 
 @font-face {
   font-family: "LXGW WenKai Mono Screen";
-  src: url("/fonts/LXGWWenKaiMonoScreen.woff2") format("woff2");
+  src: url("/fonts/LXGWWenKaiMonoScreen.ttf") format("truetype");
   font-weight: normal;
   font-style: normal;
   font-display: swap;
@@ -169,7 +169,7 @@ body {
 
 @font-face {
   font-family: "Cascadia Code NF";
-  src: url("/fonts/CascadiaCodeNF.woff2") format("woff2");
+  src: url("/fonts/CascadiaCodeNF.ttf") format("truetype");
   font-weight: normal;
   font-style: normal;
   font-display: swap;
