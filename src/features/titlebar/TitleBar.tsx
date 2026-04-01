@@ -24,6 +24,8 @@ const layoutIcons: Record<LayoutMode, React.ComponentType<{ className?: string }
   focus: Maximize2,
 };
 
+const isMac = navigator.userAgent.includes("Mac");
+
 async function formatWithPrettier(source: string): Promise<string> {
   const prettier = await import("prettier/standalone");
   const markdownPlugin = await import("prettier/plugins/markdown");
@@ -46,7 +48,7 @@ export function TitleBar() {
   const setContent = useEditorStore((s) => s.setContent);
 
   const LayoutIcon = layoutIcons[layoutMode];
-  const fileName = filePath ? filePath.split("/").pop() : null;
+  const fileName = filePath ? filePath.split(/[/\\]/).pop() : null;
 
   const ModeIcon = editorMode === "wysiwyg" ? FileCode : Eye;
   const modeTooltip = editorMode === "wysiwyg" ? t("sourceMode") : t("wysiwygMode");
@@ -66,9 +68,9 @@ export function TitleBar() {
       data-tauri-drag-region
       className="flex h-11 items-center justify-between border-b bg-background/80 backdrop-blur-sm px-3 select-none"
     >
-      {/* Left: macOS traffic light spacer */}
+      {/* Left: macOS traffic light spacer / Windows: nothing */}
       <div data-tauri-drag-region className="flex items-center gap-1 min-w-[80px]">
-        <div className="w-[70px]" />
+        {isMac && <div className="w-[70px]" />}
       </div>
 
       {/* Center: File name */}
@@ -81,7 +83,7 @@ export function TitleBar() {
         )}
       </div>
 
-      {/* Right: Actions */}
+      {/* Right: Actions + Windows system button spacer */}
       <div className="flex items-center gap-0.5">
         {filePath && (
           <>
@@ -128,6 +130,9 @@ export function TitleBar() {
             <Settings className="h-4 w-4" />
           </Button>
         </Tooltip>
+
+        {/* Windows/Linux: reserve space for native window controls (min/max/close) */}
+        {!isMac && <div className="w-[140px]" />}
       </div>
     </div>
   );
