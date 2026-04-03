@@ -1,7 +1,7 @@
 {
   "name": "pidanmd",
   "private": true,
-  "version": "0.2.0",
+  "version": "0.2.1",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -35,6 +35,7 @@
     "@tiptap/extension-task-list": "^3.0.0",
     "@tiptap/extension-typography": "^3.0.0",
     "@tiptap/markdown": "^3.21.0",
+    "@tiptap/pm": "^3.22.0",
     "@tiptap/react": "^3.0.0",
     "@tiptap/starter-kit": "^3.0.0",
     "class-variance-authority": "^0.7.1",
