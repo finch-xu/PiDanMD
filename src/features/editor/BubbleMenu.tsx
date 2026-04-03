@@ -4,12 +4,14 @@ import { Button } from "~/components/ui/button";
 import { Bold, Italic, Code, Highlighter, Link2 } from "lucide-react";
 import { cn } from "~/lib/utils";
 import { useState, useEffect, useRef } from "react";
+import { usePromptDialog } from "~/hooks/use-prompt-dialog";
 
 interface BubbleMenuBarProps {
   editor: Editor;
 }
 
 export function BubbleMenuBar({ editor }: BubbleMenuBarProps) {
+  const { prompt, dialogElement } = usePromptDialog();
   const [isVisible, setIsVisible] = useState(false);
   const [position, setPosition] = useState({ top: 0, left: 0 });
   const menuRef = useRef<HTMLDivElement>(null);
@@ -50,6 +52,7 @@ export function BubbleMenuBar({ editor }: BubbleMenuBarProps) {
   if (!isVisible) return null;
 
   return (
+  <>
     <div
       ref={menuRef}
       className="absolute z-50 flex items-center gap-0.5 rounded-lg border bg-background p-1 shadow-lg"
@@ -80,8 +83,8 @@ export function BubbleMenuBar({ editor }: BubbleMenuBarProps) {
         <Highlighter className="h-3.5 w-3.5" />
       </BubbleButton>
       <BubbleButton
-        onClick={() => {
-          const url = window.prompt("URL");
+        onClick={async () => {
+          const url = await prompt("URL", "https://");
           if (url) editor.chain().focus().setLink({ href: url }).run();
         }}
         active={editor.isActive("link")}
@@ -89,6 +92,8 @@ export function BubbleMenuBar({ editor }: BubbleMenuBarProps) {
         <Link2 className="h-3.5 w-3.5" />
       </BubbleButton>
     </div>
+    {dialogElement}
+  </>
   );
 }
 

@@ -20,6 +20,7 @@ import { useT } from "~/lib/i18n";
 import { Toolbar } from "./Toolbar";
 import { BubbleMenuBar } from "./BubbleMenu";
 import { SourceEditor } from "./SourceEditor";
+import { ColorCodePreview } from "./extensions/color-code-preview";
 import "~/styles/editor.css";
 
 const lowlight = createLowlight(common);
@@ -64,6 +65,7 @@ export function Editor() {
       TableCell,
       TableHeader,
       CodeBlockLowlight.configure({ lowlight }),
+      ColorCodePreview,
       Markdown,
     ],
     content: "",

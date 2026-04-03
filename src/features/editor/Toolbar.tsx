@@ -23,12 +23,15 @@ import {
   Redo,
 } from "lucide-react";
 import { cn } from "~/lib/utils";
+import { usePromptDialog } from "~/hooks/use-prompt-dialog";
 
 interface ToolbarProps {
   editor: Editor | null;
 }
 
 export function Toolbar({ editor }: ToolbarProps) {
+  const { prompt, dialogElement } = usePromptDialog();
+
   if (!editor) return null;
 
   const items: ToolbarItem[] = [
@@ -128,8 +131,8 @@ export function Toolbar({ editor }: ToolbarProps) {
     {
       icon: Link2,
       title: "Link",
-      action: () => {
-        const url = window.prompt("URL");
+      action: async () => {
+        const url = await prompt("URL", "https://");
         if (url) {
           editor.chain().focus().setLink({ href: url }).run();
         }
@@ -139,8 +142,8 @@ export function Toolbar({ editor }: ToolbarProps) {
     {
       icon: ImageIcon,
       title: "Image",
-      action: () => {
-        const url = window.prompt("Image URL");
+      action: async () => {
+        const url = await prompt("Image URL", "https://");
         if (url) {
           editor.chain().focus().setImage({ src: url }).run();
         }
@@ -159,34 +162,37 @@ export function Toolbar({ editor }: ToolbarProps) {
   ];
 
   return (
-    <div className="flex items-center gap-0.5 border-b px-2 py-1 overflow-x-auto">
-      {items.map((item, i) => {
-        if ("type" in item && item.type === "separator") {
-          return <Separator key={i} orientation="vertical" className="mx-1 h-5" />;
-        }
-        const btn = item as ToolbarButton;
-        return (
-          <Tooltip key={i} content={btn.title}>
-            <Button
-              variant="ghost"
-              size="icon-sm"
-              onClick={btn.action}
-              disabled={btn.disabled}
-              className={cn(btn.active && "bg-accent")}
-            >
-              <btn.icon className="h-4 w-4" />
-            </Button>
-          </Tooltip>
-        );
-      })}
-    </div>
+    <>
+      <div className="flex items-center gap-0.5 border-b px-2 py-1 overflow-x-auto">
+        {items.map((item, i) => {
+          if ("type" in item && item.type === "separator") {
+            return <Separator key={i} orientation="vertical" className="mx-1 h-5" />;
+          }
+          const btn = item as ToolbarButton;
+          return (
+            <Tooltip key={i} content={btn.title}>
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                onClick={btn.action}
+                disabled={btn.disabled}
+                className={cn(btn.active && "bg-accent")}
+              >
+                <btn.icon className="h-4 w-4" />
+              </Button>
+            </Tooltip>
+          );
+        })}
+      </div>
+      {dialogElement}
+    </>
   );
 }
 
 type ToolbarButton = {
   icon: React.ComponentType<{ className?: string }>;
   title: string;
-  action: () => void;
+  action: () => unknown;
   active?: boolean;
   disabled?: boolean;
 };
