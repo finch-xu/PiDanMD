@@ -107,7 +107,7 @@ export function TitleBar() {
         "flex h-11 items-center justify-between px-3 select-none",
         isMac
           ? "bg-background/80 backdrop-blur-sm border-b"
-          : "bg-background"
+          : "relative bg-background"
       )}
     >
       {isMac ? (
@@ -129,19 +129,16 @@ export function TitleBar() {
         </>
       ) : (
         <>
-          {/* Left: filename + actions together (VS Code style) */}
-          <div data-tauri-drag-region className="flex items-center gap-1.5">
+          {/* Center: filename (absolute-centered, ignores left/right width) */}
+          <div data-tauri-drag-region className="absolute inset-x-0 flex items-center justify-center pointer-events-none">
             {fileNameDisplay}
-            {fileName && filePath && (
-              <Separator orientation="vertical" className="mx-0.5 h-5" />
-            )}
-            <div className="flex items-center gap-0.5">
-              {actionButtons}
-            </div>
           </div>
 
-          {/* Right: reserve space for native window controls (min/max/close) */}
-          <div className="w-[140px] shrink-0" />
+          {/* Right: actions + native window controls spacer */}
+          <div className="ml-auto flex items-center gap-0.5">
+            {actionButtons}
+            <div className="w-[140px] shrink-0" />
+          </div>
         </>
       )}
     </div>
