@@ -63,77 +63,87 @@ export function TitleBar() {
     }
   }, [content, setContent]);
 
+  const fileNameDisplay = fileName ? (
+    <span className={cn("truncate max-w-[300px] text-sm text-muted-foreground", isDirty && "italic")}>
+      {fileName}
+      {isDirty && " *"}
+    </span>
+  ) : null;
+
+  const actionButtons = (
+    <>
+      {filePath && (
+        <>
+          <Tooltip content={t("formatMarkdown")}>
+            <Button variant="ghost" size="icon-sm" onClick={handleFormat}>
+              <WandSparkles className="h-4 w-4" />
+            </Button>
+          </Tooltip>
+          <Tooltip content={modeTooltip}>
+            <Button variant="ghost" size="icon-sm" onClick={toggleEditorMode}>
+              <ModeIcon className="h-4 w-4" />
+            </Button>
+          </Tooltip>
+          <Separator orientation="vertical" className="mx-1 h-5" />
+        </>
+      )}
+      <Tooltip content={t("layout")}>
+        <Button variant="ghost" size="icon-sm" onClick={cycleLayoutMode}>
+          <LayoutIcon className="h-4 w-4" />
+        </Button>
+      </Tooltip>
+      <Tooltip content={t("settings")}>
+        <Button variant="ghost" size="icon-sm" onClick={openSettings}>
+          <Settings className="h-4 w-4" />
+        </Button>
+      </Tooltip>
+    </>
+  );
+
   return (
     <div
       data-tauri-drag-region
-      className="flex h-11 items-center justify-between border-b bg-background/80 backdrop-blur-sm px-3 select-none"
+      className={cn(
+        "flex h-11 items-center justify-between px-3 select-none",
+        isMac
+          ? "bg-background/80 backdrop-blur-sm border-b"
+          : "bg-background"
+      )}
     >
-      {/* Left: macOS traffic light spacer / Windows: nothing */}
-      <div data-tauri-drag-region className="flex items-center gap-1 min-w-[80px]">
-        {isMac && <div className="w-[70px]" />}
-      </div>
+      {isMac ? (
+        <>
+          {/* Left: macOS traffic light spacer */}
+          <div data-tauri-drag-region className="flex items-center gap-1 min-w-[80px]">
+            <div className="w-[70px]" />
+          </div>
 
-      {/* Center: File name */}
-      <div data-tauri-drag-region className="flex items-center gap-2 text-sm text-muted-foreground">
-        {fileName && (
-          <span className={cn("truncate max-w-[300px]", isDirty && "italic")}>
-            {fileName}
-            {isDirty && " *"}
-          </span>
-        )}
-      </div>
+          {/* Center: File name */}
+          <div data-tauri-drag-region className="flex items-center gap-2">
+            {fileNameDisplay}
+          </div>
 
-      {/* Right: Actions + Windows system button spacer */}
-      <div className="flex items-center gap-0.5">
-        {filePath && (
-          <>
-            <Tooltip content={t("formatMarkdown")}>
-              <Button
-                variant="ghost"
-                size="icon-sm"
-                onClick={handleFormat}
-              >
-                <WandSparkles className="h-4 w-4" />
-              </Button>
-            </Tooltip>
+          {/* Right: Actions */}
+          <div className="flex items-center gap-0.5">
+            {actionButtons}
+          </div>
+        </>
+      ) : (
+        <>
+          {/* Left: filename + actions together (VS Code style) */}
+          <div data-tauri-drag-region className="flex items-center gap-1.5">
+            {fileNameDisplay}
+            {fileName && filePath && (
+              <Separator orientation="vertical" className="mx-0.5 h-5" />
+            )}
+            <div className="flex items-center gap-0.5">
+              {actionButtons}
+            </div>
+          </div>
 
-            <Tooltip content={modeTooltip}>
-              <Button
-                variant="ghost"
-                size="icon-sm"
-                onClick={toggleEditorMode}
-              >
-                <ModeIcon className="h-4 w-4" />
-              </Button>
-            </Tooltip>
-
-            <Separator orientation="vertical" className="mx-1 h-5" />
-          </>
-        )}
-
-        <Tooltip content={t("layout")}>
-          <Button
-            variant="ghost"
-            size="icon-sm"
-            onClick={cycleLayoutMode}
-          >
-            <LayoutIcon className="h-4 w-4" />
-          </Button>
-        </Tooltip>
-
-        <Tooltip content={t("settings")}>
-          <Button
-            variant="ghost"
-            size="icon-sm"
-            onClick={openSettings}
-          >
-            <Settings className="h-4 w-4" />
-          </Button>
-        </Tooltip>
-
-        {/* Windows/Linux: reserve space for native window controls (min/max/close) */}
-        {!isMac && <div className="w-[140px]" />}
-      </div>
+          {/* Right: reserve space for native window controls (min/max/close) */}
+          <div className="w-[140px] shrink-0" />
+        </>
+      )}
     </div>
   );
 }
