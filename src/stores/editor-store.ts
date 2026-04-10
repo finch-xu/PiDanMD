@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { readFile, writeFile } from "~/lib/tauri";
 
-type EditorMode = "wysiwyg" | "source";
+type EditorMode = "wysiwyg" | "source" | "preview";
 
 interface EditorState {
   content: string;
@@ -74,6 +74,10 @@ export const useEditorStore = create<EditorState>((set, get) => ({
   },
 
   toggleEditorMode: () => {
-    set((s) => ({ editorMode: s.editorMode === "wysiwyg" ? "source" : "wysiwyg" }));
+    const cycle: EditorMode[] = ["wysiwyg", "source", "preview"];
+    set((s) => {
+      const idx = cycle.indexOf(s.editorMode);
+      return { editorMode: cycle[(idx + 1) % cycle.length] };
+    });
   },
 }));

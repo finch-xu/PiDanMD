@@ -78,6 +78,9 @@ const messages: Record<Locale, Record<string, string>> = {
     focus: "专注",
     sourceMode: "源码模式",
     wysiwygMode: "所见即所得",
+    previewMode: "预览模式",
+    fullscreen: "全屏",
+    exitFullscreen: "退出全屏",
   },
   "zh-TW": {
     appName: "皮蛋記",
@@ -152,6 +155,9 @@ const messages: Record<Locale, Record<string, string>> = {
     focus: "專注",
     sourceMode: "原始碼模式",
     wysiwygMode: "所見即所得",
+    previewMode: "預覽模式",
+    fullscreen: "全螢幕",
+    exitFullscreen: "退出全螢幕",
   },
   "en-US": {
     appName: "PiDanMD",
@@ -226,6 +232,9 @@ const messages: Record<Locale, Record<string, string>> = {
     focus: "Focus",
     sourceMode: "Source Mode",
     wysiwygMode: "Rich Text",
+    previewMode: "Preview",
+    fullscreen: "Fullscreen",
+    exitFullscreen: "Exit Fullscreen",
   },
   "ja-JP": {
     appName: "PiDanMD",
@@ -300,6 +309,9 @@ const messages: Record<Locale, Record<string, string>> = {
     focus: "フォーカス",
     sourceMode: "ソースモード",
     wysiwygMode: "リッチテキスト",
+    previewMode: "プレビュー",
+    fullscreen: "フルスクリーン",
+    exitFullscreen: "フルスクリーン解除",
   },
   "ko-KR": {
     appName: "PiDanMD",
@@ -374,6 +386,9 @@ const messages: Record<Locale, Record<string, string>> = {
     focus: "집중",
     sourceMode: "소스 모드",
     wysiwygMode: "리치 텍스트",
+    previewMode: "미리보기",
+    fullscreen: "전체 화면",
+    exitFullscreen: "전체 화면 종료",
   },
 };
 

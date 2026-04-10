@@ -6,6 +6,8 @@
     "core:default",
     "core:window:allow-start-dragging",
     "core:window:allow-set-focus",
+    "core:window:allow-is-fullscreen",
+    "core:window:allow-set-fullscreen",
     "dialog:default",
     "opener:default"
   ]

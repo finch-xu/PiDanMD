@@ -19,6 +19,8 @@ export function App() {
   const showSidebar = layoutMode !== "focus";
   const gridColumns = GRID_COLUMNS[layoutMode];
 
+  const toggleFullscreen = useAppStore((s) => s.toggleFullscreen);
+
   // Global keyboard shortcuts
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -32,10 +34,15 @@ export function App() {
         e.preventDefault();
         useEditorStore.getState().saveFile();
       }
+      // F11 → Toggle Fullscreen
+      if (e.key === "F11") {
+        e.preventDefault();
+        toggleFullscreen();
+      }
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [toggleSettings]);
+  }, [toggleSettings, toggleFullscreen]);
 
   // Tauri menu events
   const handleMenuAction = useCallback(

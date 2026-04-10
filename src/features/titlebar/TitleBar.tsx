@@ -10,9 +10,11 @@ import {
   PanelLeft,
   BookOpen,
   Maximize2,
+  Minimize2,
   WandSparkles,
   FileCode,
   Eye,
+  Type,
 } from "lucide-react";
 import { cn } from "~/lib/utils";
 
@@ -40,6 +42,8 @@ export function TitleBar() {
   const layoutMode = useAppStore((s) => s.layoutMode);
   const cycleLayoutMode = useAppStore((s) => s.cycleLayoutMode);
   const openSettings = useAppStore((s) => s.openSettings);
+  const isFullscreen = useAppStore((s) => s.isFullscreen);
+  const toggleFullscreen = useAppStore((s) => s.toggleFullscreen);
   const isDirty = useEditorStore((s) => s.isDirty);
   const filePath = useEditorStore((s) => s.filePath);
   const editorMode = useEditorStore((s) => s.editorMode);
@@ -50,8 +54,10 @@ export function TitleBar() {
   const LayoutIcon = layoutIcons[layoutMode];
   const fileName = filePath ? filePath.split(/[/\\]/).pop() : null;
 
-  const ModeIcon = editorMode === "wysiwyg" ? FileCode : Eye;
-  const modeTooltip = editorMode === "wysiwyg" ? t("sourceMode") : t("wysiwygMode");
+  const modeIcons = { wysiwyg: FileCode, source: Eye, preview: Type };
+  const modeTooltips = { wysiwyg: "sourceMode", source: "previewMode", preview: "wysiwygMode" };
+  const ModeIcon = modeIcons[editorMode];
+  const modeTooltip = t(modeTooltips[editorMode]);
 
   const handleFormat = useCallback(async () => {
     if (!content) return;
@@ -90,6 +96,11 @@ export function TitleBar() {
       <Tooltip content={t("layout")}>
         <Button variant="ghost" size="icon-sm" onClick={cycleLayoutMode}>
           <LayoutIcon className="h-4 w-4" />
+        </Button>
+      </Tooltip>
+      <Tooltip content={isFullscreen ? t("exitFullscreen") : t("fullscreen")}>
+        <Button variant="ghost" size="icon-sm" onClick={toggleFullscreen}>
+          {isFullscreen ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
         </Button>
       </Tooltip>
       <Tooltip content={t("settings")}>
