@@ -7,6 +7,8 @@ import {
   Italic,
   Strikethrough,
   Code,
+  Superscript,
+  Subscript,
   Heading1,
   Heading2,
   Heading3,
@@ -19,6 +21,7 @@ import {
   Link2,
   Table as TableIcon,
   Highlighter,
+  Sigma,
   Undo,
   Redo,
 } from "lucide-react";
@@ -97,6 +100,18 @@ export function Toolbar({ editor }: ToolbarProps) {
       action: () => editor.chain().focus().toggleHighlight().run(),
       active: editor.isActive("highlight"),
     },
+    {
+      icon: Superscript,
+      title: "Superscript",
+      action: () => editor.chain().focus().toggleSuperscript().run(),
+      active: editor.isActive("superscript"),
+    },
+    {
+      icon: Subscript,
+      title: "Subscript",
+      action: () => editor.chain().focus().toggleSubscript().run(),
+      active: editor.isActive("subscript"),
+    },
     { type: "separator" },
     {
       icon: List,
@@ -148,6 +163,16 @@ export function Toolbar({ editor }: ToolbarProps) {
           editor.chain().focus().setImage({ src: url }).run();
         }
       },
+    },
+    {
+      icon: Sigma,
+      title: "Math",
+      action: () =>
+        editor
+          .chain()
+          .focus()
+          .insertContent({ type: "mathBlock", attrs: { latex: "E = mc^2" } })
+          .run(),
     },
     {
       icon: TableIcon,

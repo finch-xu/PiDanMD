@@ -216,6 +216,284 @@
   background-color: oklch(0.45 0.12 90);
 }
 
+/* Preview Mode */
+.preview-mode .ProseMirror {
+  cursor: default;
+}
+
+.preview-mode .ProseMirror *::selection {
+  background: transparent;
+}
+
+/* Superscript / Subscript */
+.tiptap-editor .ProseMirror sup {
+  font-size: 0.75em;
+  vertical-align: super;
+}
+
+.tiptap-editor .ProseMirror sub {
+  font-size: 0.75em;
+  vertical-align: sub;
+}
+
+/* Math Block */
+.math-block {
+  text-align: center;
+  padding: 1em 0;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: background 0.15s;
+}
+
+.math-block:hover {
+  background: oklch(0.97 0 0);
+}
+
+.dark .math-block:hover {
+  background: oklch(0.2 0 0);
+}
+
+.math-block--selected {
+  background: oklch(0.95 0.05 250 / 0.2);
+}
+
+.dark .math-block--selected {
+  background: oklch(0.3 0.05 250 / 0.3);
+}
+
+.math-block--editing {
+  background: oklch(0.97 0 0);
+  padding: 0.75em;
+}
+
+.dark .math-block--editing {
+  background: oklch(0.18 0 0);
+}
+
+.math-block__input {
+  width: 100%;
+  font-family: var(--editor-font-code, monospace);
+  font-size: var(--editor-code-font-size, 14px);
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 0.5em;
+  color: var(--foreground);
+  resize: vertical;
+  outline: none;
+}
+
+.math-block__input:focus {
+  border-color: oklch(0.55 0.15 250);
+}
+
+/* Math Inline */
+.math-inline {
+  cursor: pointer;
+  border-radius: 3px;
+  padding: 0 2px;
+  transition: background 0.15s;
+}
+
+.math-inline:hover {
+  background: oklch(0.95 0.05 250 / 0.15);
+}
+
+.math-inline--selected {
+  background: oklch(0.95 0.05 250 / 0.2);
+}
+
+.math-inline--editing {
+  display: inline-flex;
+}
+
+.math-inline__input {
+  font-family: var(--editor-font-code, monospace);
+  font-size: 0.875em;
+  background: oklch(0.97 0 0);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 0.1em 0.3em;
+  color: var(--foreground);
+  outline: none;
+  min-width: 80px;
+}
+
+.dark .math-inline__input {
+  background: oklch(0.18 0 0);
+}
+
+.math-inline__input:focus {
+  border-color: oklch(0.55 0.15 250);
+}
+
+/* Frontmatter Card */
+.frontmatter-card {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.75em 1em;
+  margin: 0 0 1em;
+  background: oklch(0.97 0.01 250 / 0.3);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.dark .frontmatter-card {
+  background: oklch(0.2 0.01 250 / 0.3);
+}
+
+.frontmatter-card:hover {
+  background: oklch(0.95 0.02 250 / 0.4);
+}
+
+.dark .frontmatter-card:hover {
+  background: oklch(0.22 0.02 250 / 0.4);
+}
+
+.frontmatter-card--selected {
+  outline: 2px solid oklch(0.55 0.15 250);
+}
+
+.frontmatter-card__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875em;
+}
+
+.frontmatter-card__table td {
+  padding: 0.25em 0.5em;
+  border: none;
+  vertical-align: top;
+}
+
+.frontmatter-card__key {
+  font-weight: 600;
+  color: oklch(0.5 0.15 250);
+  white-space: nowrap;
+  width: 1%;
+}
+
+.dark .frontmatter-card__key {
+  color: oklch(0.7 0.12 250);
+}
+
+.frontmatter-card__value {
+  color: var(--foreground);
+}
+
+.frontmatter-card__empty {
+  color: var(--muted-foreground);
+  font-size: 0.875em;
+}
+
+.frontmatter-card--editing {
+  background: oklch(0.97 0 0);
+  padding: 0.75em;
+}
+
+.dark .frontmatter-card--editing {
+  background: oklch(0.18 0 0);
+}
+
+.frontmatter-card__input {
+  width: 100%;
+  font-family: var(--editor-font-code, monospace);
+  font-size: var(--editor-code-font-size, 14px);
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 0.5em;
+  color: var(--foreground);
+  resize: vertical;
+  outline: none;
+  line-height: 1.6;
+}
+
+.frontmatter-card__input:focus {
+  border-color: oklch(0.55 0.15 250);
+}
+
+/* Mermaid Block */
+.mermaid-block {
+  padding: 1em;
+  border-radius: 8px;
+  background: oklch(0.97 0 0);
+  margin: 1em 0;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.dark .mermaid-block {
+  background: oklch(0.18 0 0);
+}
+
+.mermaid-block:hover {
+  background: oklch(0.95 0 0);
+}
+
+.dark .mermaid-block:hover {
+  background: oklch(0.2 0 0);
+}
+
+.mermaid-block--selected {
+  outline: 2px solid oklch(0.55 0.15 250);
+}
+
+.mermaid-block__svg {
+  display: flex;
+  justify-content: center;
+}
+
+.mermaid-block__svg svg {
+  max-width: 100%;
+  height: auto;
+}
+
+.mermaid-block__error {
+  color: oklch(0.55 0.2 25);
+  font-family: var(--editor-font-code, monospace);
+  font-size: 0.875em;
+  padding: 0.5em;
+}
+
+.mermaid-block__error pre {
+  white-space: pre-wrap;
+  margin: 0;
+  background: transparent;
+}
+
+.mermaid-block__loading {
+  text-align: center;
+  color: var(--muted-foreground);
+  padding: 2em;
+}
+
+.mermaid-block--editing {
+  background: oklch(0.97 0 0);
+}
+
+.dark .mermaid-block--editing {
+  background: oklch(0.18 0 0);
+}
+
+.mermaid-block__input {
+  width: 100%;
+  font-family: var(--editor-font-code, monospace);
+  font-size: var(--editor-code-font-size, 14px);
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 0.75em;
+  color: var(--foreground);
+  resize: vertical;
+  outline: none;
+  line-height: 1.6;
+}
+
+.mermaid-block__input:focus {
+  border-color: oklch(0.55 0.15 250);
+}
+
 /* Selection */
 .tiptap-editor .ProseMirror ::selection {
   background-color: oklch(0.82 0.12 83 / 0.35);

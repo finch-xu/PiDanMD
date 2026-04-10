@@ -8,6 +8,8 @@ import { TaskList } from "@tiptap/extension-task-list";
 import { TaskItem } from "@tiptap/extension-task-item";
 import { Highlight } from "@tiptap/extension-highlight";
 import { Typography } from "@tiptap/extension-typography";
+import { Superscript } from "@tiptap/extension-superscript";
+import { Subscript } from "@tiptap/extension-subscript";
 import { Table } from "@tiptap/extension-table";
 import { TableRow } from "@tiptap/extension-table-row";
 import { TableCell } from "@tiptap/extension-table-cell";
@@ -21,6 +23,10 @@ import { Toolbar } from "./Toolbar";
 import { BubbleMenuBar } from "./BubbleMenu";
 import { SourceEditor } from "./SourceEditor";
 import { ColorCodePreview } from "./extensions/color-code-preview";
+import { MathBlock } from "./extensions/math-block";
+import { MathInline } from "./extensions/math-inline";
+import { MermaidBlock } from "./extensions/mermaid-block";
+import { Frontmatter } from "./extensions/frontmatter";
 import "~/styles/editor.css";
 
 const lowlight = createLowlight(common);
@@ -58,14 +64,24 @@ export function Editor() {
       }),
       Highlight,
       Typography,
+      Superscript.extend({
+        renderMarkdown: (node, h) => `<sup>${h.renderChildren(node)}</sup>`,
+      }),
+      Subscript.extend({
+        renderMarkdown: (node, h) => `<sub>${h.renderChildren(node)}</sub>`,
+      }),
       Table.configure({
         resizable: false,
       }),
       TableRow,
       TableCell,
       TableHeader,
+      MermaidBlock,
       CodeBlockLowlight.configure({ lowlight }),
       ColorCodePreview,
+      MathBlock,
+      MathInline,
+      Frontmatter,
       Markdown,
     ],
     content: "",
@@ -85,10 +101,11 @@ export function Editor() {
   useEffect(() => {
     if (!editor || !filePath || isLoading) return;
 
-    if (editorMode === "wysiwyg") {
-      // Entering WYSIWYG: parse markdown into Tiptap
+    if (editorMode === "wysiwyg" || editorMode === "preview") {
+      // Entering WYSIWYG or Preview: parse markdown into Tiptap
       isSyncingRef.current = true;
       editor.commands.setContent(content, { contentType: "markdown" });
+      editor.setEditable(editorMode === "wysiwyg");
       requestAnimationFrame(() => {
         isSyncingRef.current = false;
       });
@@ -127,6 +144,16 @@ export function Editor() {
     return (
       <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
         <SourceEditor content={content} onChange={handleSourceChange} />
+      </div>
+    );
+  }
+
+  if (editorMode === "preview") {
+    return (
+      <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+        <div className="tiptap-editor preview-mode">
+          <EditorContent editor={editor} />
+        </div>
       </div>
     );
   }
