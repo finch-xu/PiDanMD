@@ -3,6 +3,11 @@ import { ReactNodeViewRenderer, NodeViewWrapper } from "@tiptap/react";
 import { useState, useEffect, useRef } from "react";
 import "katex/dist/katex.min.css";
 import { cn } from "~/lib/utils";
+import {
+  findMathInlineStart,
+  tokenizeMathInline,
+  renderMathInline,
+} from "~/lib/markdown-serde";
 
 function MathInlineView({ node, updateAttributes, selected }: any) {
   const [editing, setEditing] = useState(false);
@@ -98,26 +103,8 @@ export const MathInline = Node.create({
   markdownTokenizer: {
     name: "mathInline",
     level: "inline" as const,
-    start: (src: string) => {
-      const idx = src.indexOf("$");
-      // skip $$ (handled by mathBlock)
-      if (idx >= 0 && src[idx + 1] === "$") {
-        return src.indexOf("$", idx + 2);
-      }
-      return idx;
-    },
-    tokenize(src: string) {
-      // Don't match $$ (block math)
-      if (src.startsWith("$$")) return;
-      const match = src.match(/^\$([^\$\n]+?)\$/);
-      if (match) {
-        return {
-          type: "mathInline",
-          raw: match[0],
-          text: match[1],
-        };
-      }
-    },
+    start: findMathInlineStart,
+    tokenize: tokenizeMathInline,
   },
 
   markdownTokenName: "mathInline",
@@ -130,6 +117,6 @@ export const MathInline = Node.create({
   },
 
   renderMarkdown(node: JSONContent) {
-    return `$${node.attrs?.latex ?? ""}$`;
+    return renderMathInline({ latex: node.attrs?.latex });
   },
 });

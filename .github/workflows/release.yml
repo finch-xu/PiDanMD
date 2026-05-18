@@ -78,6 +78,9 @@ jobs:
           APPLE_ID: ${{ secrets.APPLE_ID }}
           APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          # Tauri updater 签名（用 pnpm tauri signer generate 生成密钥对）
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
         with:
           args: ${{ matrix.args }}
 
@@ -107,3 +110,21 @@ jobs:
             exit 1
           fi
           echo "Total uploaded: $count"
+
+  # ── 生成 latest.json updater manifest ──
+  # 所有平台构建完成后跑：从 release 已上传的 .sig 读签名，拼成 Tauri
+  # updater 需要的 manifest 格式，上传为 latest.json。前端 check() 命中
+  # 该 endpoint 后即可识别版本 + 校验签名。
+  publish-manifest:
+    needs: build
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Generate latest.json
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ inputs.tag || github.event.release.tag_name }}
+          REPO: ${{ github.repository }}
+        run: bash scripts/build-latest-json.sh

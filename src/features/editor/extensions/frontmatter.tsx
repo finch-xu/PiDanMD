@@ -2,6 +2,7 @@ import { Node, type JSONContent } from "@tiptap/core";
 import { ReactNodeViewRenderer, NodeViewWrapper } from "@tiptap/react";
 import { useState, useEffect, useRef } from "react";
 import { cn } from "~/lib/utils";
+import { renderFrontmatter, tokenizeFrontmatter } from "~/lib/markdown-serde";
 
 /** Parse simple YAML key-value pairs (handles strings, arrays, nested keys) */
 function parseSimpleYaml(yaml: string): Array<[string, string]> {
@@ -120,16 +121,9 @@ export const Frontmatter = Node.create({
     level: "block" as const,
     start: (src: string) => (src.startsWith("---") ? 0 : -1),
     tokenize(src: string, tokens: any[]) {
-      // Only match at the very beginning of the document (no prior tokens)
+      // Frontmatter 只在文档最开头允许（之前必须无 token）
       if (tokens.length > 0) return;
-      const match = src.match(/^---\n([\s\S]*?)\n---(?:\n|$)/);
-      if (match) {
-        return {
-          type: "frontmatter",
-          raw: match[0],
-          text: match[1],
-        };
-      }
+      return tokenizeFrontmatter(src);
     },
   },
 
@@ -143,6 +137,6 @@ export const Frontmatter = Node.create({
   },
 
   renderMarkdown(node: JSONContent) {
-    return `---\n${node.attrs?.data ?? ""}\n---`;
+    return renderFrontmatter({ data: node.attrs?.data });
   },
 });

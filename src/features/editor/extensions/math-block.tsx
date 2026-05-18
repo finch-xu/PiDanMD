@@ -3,6 +3,11 @@ import { ReactNodeViewRenderer, NodeViewWrapper } from "@tiptap/react";
 import { useState, useEffect, useRef } from "react";
 import "katex/dist/katex.min.css";
 import { cn } from "~/lib/utils";
+import {
+  findMathBlockStart,
+  tokenizeMathBlock,
+  renderMathBlock,
+} from "~/lib/markdown-serde";
 
 function MathBlockView({ node, updateAttributes, selected }: any) {
   const [editing, setEditing] = useState(false);
@@ -100,17 +105,8 @@ export const MathBlock = Node.create({
   markdownTokenizer: {
     name: "mathBlock",
     level: "block" as const,
-    start: (src: string) => src.indexOf("$$"),
-    tokenize(src: string) {
-      const match = src.match(/^\$\$\n?([\s\S]+?)\n?\$\$/);
-      if (match) {
-        return {
-          type: "mathBlock",
-          raw: match[0],
-          text: match[1],
-        };
-      }
-    },
+    start: findMathBlockStart,
+    tokenize: tokenizeMathBlock,
   },
 
   markdownTokenName: "mathBlock",
@@ -123,6 +119,6 @@ export const MathBlock = Node.create({
   },
 
   renderMarkdown(node: JSONContent) {
-    return `$$\n${node.attrs?.latex ?? ""}\n$$`;
+    return renderMathBlock({ latex: node.attrs?.latex });
   },
 });

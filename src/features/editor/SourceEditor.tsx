@@ -19,6 +19,7 @@ import {
 import { tags } from "@lezer/highlight";
 import { useEditorStore } from "~/stores/editor-store";
 import { useSettingsStore } from "~/stores/settings-store";
+import { useWritingModeStore } from "~/features/writing-modes";
 
 const darkHighlight = HighlightStyle.define([
   { tag: tags.heading1, color: "#569cd6", fontWeight: "bold" },
@@ -91,6 +92,14 @@ export function SourceEditor({ content, onChange }: SourceEditorProps) {
 
   const filePath = useEditorStore((s) => s.filePath);
   const isDark = useSettingsStore((s) => s.resolvedMode === "dark");
+  const typewriter = useWritingModeStore((s) => s.typewriter);
+
+  // typewriter 状态变化时，同步切 .cm-editor 上的 class（CSS 控制 padding）
+  useEffect(() => {
+    const view = viewRef.current;
+    if (!view) return;
+    view.dom.classList.toggle("typewriter-mode", typewriter);
+  }, [typewriter]);
 
   // Create editor on mount
   useEffect(() => {

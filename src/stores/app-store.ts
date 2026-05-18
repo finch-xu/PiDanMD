@@ -27,7 +27,7 @@ export const GRID_COLUMNS: Record<LayoutMode, string> = {
 
 export const useAppStore = create<AppState>((set, get) => ({
   settingsOpen: false,
-  layoutMode: "files",
+  layoutMode: "focus",
   isFullscreen: false,
 
   openSettings: () => set({ settingsOpen: true }),

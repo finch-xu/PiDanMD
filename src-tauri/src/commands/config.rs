@@ -46,7 +46,7 @@ impl Default for FontConfig {
                 size: 16,
             },
             code: FontEntry {
-                family: "Cascadia Code NF".into(),
+                family: "LXGW WenKai Mono Screen".into(),
                 size: 14,
             },
         }
@@ -90,7 +90,7 @@ impl Default for AppConfig {
             light_theme: "default-light".into(),
             dark_theme: "default-dark".into(),
             locale: "zh-CN".into(),
-            layout: "files".into(),
+            layout: "focus".into(),
             font: FontConfig::default(),
             reading: ReadingConfig::default(),
         }

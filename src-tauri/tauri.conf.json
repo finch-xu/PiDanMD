@@ -1,6 +1,6 @@
 {
   "productName": "PiDanMD",
-  "version": "0.2.3",
+  "version": "1.0.0",
   "identifier": "com.pidanmd.app",
   "build": {
     "beforeDevCommand": "pnpm dev",
@@ -19,11 +19,21 @@
       }
     ],
     "security": {
-      "csp": "default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self' 'wasm-unsafe-eval'; img-src 'self' data: asset: http://asset.localhost; font-src 'self' data:",
+      "csp": "default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self' 'wasm-unsafe-eval'; img-src 'self' data: blob: asset: http://asset.localhost http: https:; font-src 'self' data:; connect-src 'self' ipc: http://ipc.localhost https:",
       "assetProtocol": {
         "enable": true,
         "scope": ["**/*"]
       }
+    }
+  },
+  "plugins": {
+    "updater": {
+      "active": true,
+      "endpoints": [
+        "https://github.com/finch-xu/PiDanMD/releases/latest/download/latest.json"
+      ],
+      "dialog": false,
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDk3MTQ3M0YxQjQ1QUI2NzgKUldSNHRscTA4WE1VbDgzenFkVDdLTHhZMFBkUlhIeU5hNXl5am50dDZvaGlEa09qMmRoWCtTZWQK"
     }
   },
   "bundle": {

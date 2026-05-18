@@ -27,6 +27,10 @@ import { MathBlock } from "./extensions/math-block";
 import { MathInline } from "./extensions/math-inline";
 import { MermaidBlock } from "./extensions/mermaid-block";
 import { Frontmatter } from "./extensions/frontmatter";
+import { FocusParagraph, useWritingModeStore } from "~/features/writing-modes";
+import { useAppStore } from "~/stores/app-store";
+import { renderSuperscript, renderSubscript } from "~/lib/markdown-serde";
+import { cn } from "~/lib/utils";
 import "~/styles/editor.css";
 
 const lowlight = createLowlight(common);
@@ -38,6 +42,17 @@ export function Editor() {
   const isLoading = useEditorStore((s) => s.isLoading);
   const editorMode = useEditorStore((s) => s.editorMode);
   const setContent = useEditorStore((s) => s.setContent);
+
+  const typewriter = useWritingModeStore((s) => s.typewriter);
+  const focusParagraph = useWritingModeStore((s) => s.focusParagraph);
+  const isFullscreen = useAppStore((s) => s.isFullscreen);
+
+  const editorClass = cn(
+    "tiptap-editor",
+    typewriter && "typewriter-mode",
+    focusParagraph && "focus-paragraph-mode",
+    isFullscreen && "immersive-mode"
+  );
 
   // Guard: prevent onUpdate from writing back to store during programmatic setContent
   const isSyncingRef = useRef(false);
@@ -65,10 +80,10 @@ export function Editor() {
       Highlight,
       Typography,
       Superscript.extend({
-        renderMarkdown: (node, h) => `<sup>${h.renderChildren(node)}</sup>`,
+        renderMarkdown: (node, h) => renderSuperscript(h.renderChildren(node)),
       }),
       Subscript.extend({
-        renderMarkdown: (node, h) => `<sub>${h.renderChildren(node)}</sub>`,
+        renderMarkdown: (node, h) => renderSubscript(h.renderChildren(node)),
       }),
       Table.configure({
         resizable: false,
@@ -82,6 +97,7 @@ export function Editor() {
       MathBlock,
       MathInline,
       Frontmatter,
+      FocusParagraph,
       Markdown,
     ],
     content: "",
@@ -151,7 +167,7 @@ export function Editor() {
   if (editorMode === "preview") {
     return (
       <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-        <div className="tiptap-editor preview-mode">
+        <div className={cn(editorClass, "preview-mode")}>
           <EditorContent editor={editor} />
         </div>
       </div>
@@ -161,7 +177,7 @@ export function Editor() {
   return (
     <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
       <Toolbar editor={editor} />
-      <div className="tiptap-editor">
+      <div className={editorClass}>
         {editor && <BubbleMenuBar editor={editor} />}
         <EditorContent editor={editor} />
       </div>

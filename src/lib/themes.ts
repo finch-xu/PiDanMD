@@ -1,11 +1,8 @@
-// ── Theme System ──
+// ── 主题系统 ──
 //
-// Each theme provides a complete set of CSS variable overrides.
-// Themes are categorized as "light" or "dark" so the user can
-// independently choose which theme to use for each mode.
-//
-// "appearance" controls the mode: system / light / dark
-// "lightTheme" + "darkTheme" control which theme applies in each mode
+// v1.0 简化为 3 个主题：Light（宣纸）/ Paper（古书）/ Dark（暖灰夜）。
+// 全部使用松花蛋黄作为统一强调色——呼应"皮蛋记"的产品名。
+// Dark 主题启用 4 层 surface 分层，告别"黑白反转"廉价感。
 
 export type Appearance = "system" | "light" | "dark";
 
@@ -13,67 +10,71 @@ export interface ThemeDefinition {
   id: string;
   name: string;
   mode: "light" | "dark";
-  /** Representative color for the preview swatch */
+  /** 主题预览色板（设置面板的小色块）*/
   preview: { bg: string; fg: string; accent: string };
-  /** CSS variable overrides applied to :root */
+  /** 应用到 :root 的 CSS 变量覆盖 */
   vars: Record<string, string>;
 }
+
+// 松花蛋黄——v1.0 统一强调色（皮蛋的标志性色彩）
+const PIDAN_YELLOW = "oklch(0.72 0.12 80)";
+const PIDAN_YELLOW_DEEP = "oklch(0.58 0.13 70)"; // 强调色在浅色背景上的可读版本
 
 // ── Light Themes ──
 
 const defaultLight: ThemeDefinition = {
   id: "default-light",
-  name: "Light",
+  name: "宣纸",
   mode: "light",
-  preview: { bg: "#ffffff", fg: "#09090b", accent: "#71717a" },
+  preview: { bg: "#fbfaf6", fg: "#1a1916", accent: "#b8893a" },
   vars: {
-    "--background": "oklch(1 0 0)",
-    "--foreground": "oklch(0.141 0.005 285.823)",
-    "--card": "oklch(1 0 0)",
-    "--card-foreground": "oklch(0.141 0.005 285.823)",
-    "--popover": "oklch(1 0 0)",
-    "--popover-foreground": "oklch(0.141 0.005 285.823)",
-    "--primary": "oklch(0.141 0.005 285.823)",
-    "--primary-foreground": "oklch(0.985 0 0)",
-    "--secondary": "oklch(0.967 0.001 286.375)",
-    "--secondary-foreground": "oklch(0.141 0.005 285.823)",
-    "--muted": "oklch(0.967 0.001 286.375)",
-    "--muted-foreground": "oklch(0.552 0.016 285.938)",
-    "--accent": "oklch(0.967 0.001 286.375)",
-    "--accent-foreground": "oklch(0.141 0.005 285.823)",
-    "--destructive": "oklch(0.577 0.245 27.325)",
-    "--border": "oklch(0.92 0.004 286.32)",
-    "--input": "oklch(0.92 0.004 286.32)",
-    "--ring": "oklch(0.141 0.005 285.823)",
-    "--sidebar": "oklch(0.985 0 0)",
-    "--sidebar-foreground": "oklch(0.141 0.005 285.823)",
-    "--sidebar-border": "oklch(0.92 0.004 286.32)",
+    "--background": "oklch(0.985 0.005 85)",         // 略带米黄的宣纸白
+    "--foreground": "oklch(0.20 0.005 60)",          // 墨黑
+    "--card": "oklch(0.97 0.006 85)",                // L1 卡片
+    "--card-foreground": "oklch(0.20 0.005 60)",
+    "--popover": "oklch(0.99 0.005 85)",
+    "--popover-foreground": "oklch(0.20 0.005 60)",
+    "--primary": "oklch(0.22 0.008 60)",             // 主操作 - 接近墨色
+    "--primary-foreground": "oklch(0.98 0.005 85)",
+    "--secondary": "oklch(0.94 0.008 85)",
+    "--secondary-foreground": "oklch(0.22 0.005 60)",
+    "--muted": "oklch(0.94 0.008 85)",
+    "--muted-foreground": "oklch(0.50 0.010 60)",    // 次要文字
+    "--accent": "oklch(0.93 0.012 85)",              // hover 态
+    "--accent-foreground": "oklch(0.22 0.005 60)",
+    "--destructive": "oklch(0.55 0.22 25)",
+    "--border": "oklch(0.91 0.008 85)",
+    "--input": "oklch(0.93 0.008 85)",
+    "--ring": PIDAN_YELLOW_DEEP,                     // focus ring 用松花蛋黄
+    "--sidebar": "oklch(0.97 0.006 85)",
+    "--sidebar-foreground": "oklch(0.22 0.005 60)",
+    "--sidebar-border": "oklch(0.91 0.008 85)",
   },
 };
 
 const paper: ThemeDefinition = {
   id: "paper",
-  name: "Paper",
+  name: "古书",
   mode: "light",
   preview: { bg: "#faf6ef", fg: "#3b3228", accent: "#8b6914" },
   vars: {
-    "--background": "oklch(0.97 0.012 80)",       // #faf6ef warm cream
-    "--foreground": "oklch(0.27 0.025 60)",        // #3b3228 deep brown
-    "--card": "oklch(0.96 0.015 75)",              // #f5f0e8
+    "--background": "oklch(0.97 0.012 80)",          // 暖米黄
+    "--foreground": "oklch(0.27 0.025 60)",          // 深褐
+    "--card": "oklch(0.96 0.015 75)",
     "--card-foreground": "oklch(0.27 0.025 60)",
     "--popover": "oklch(0.97 0.012 80)",
     "--popover-foreground": "oklch(0.27 0.025 60)",
-    "--primary": "oklch(0.50 0.10 70)",            // #8b6914 amber gold
+    "--primary": "oklch(0.50 0.10 70)",              // 琥珀金
     "--primary-foreground": "oklch(0.98 0.008 80)",
-    "--secondary": "oklch(0.94 0.015 75)",         // #ede7db
+    "--secondary": "oklch(0.94 0.015 75)",
     "--secondary-foreground": "oklch(0.27 0.025 60)",
     "--muted": "oklch(0.94 0.015 75)",
-    "--muted-foreground": "oklch(0.58 0.035 60)",  // #8a7b6b warm gray-brown
-    "--accent": "oklch(0.94 0.015 75)",
+    "--muted-foreground": "oklch(0.58 0.035 60)",
+    "--accent": "oklch(0.93 0.018 70)",
     "--accent-foreground": "oklch(0.27 0.025 60)",
     "--destructive": "oklch(0.55 0.20 25)",
-    "--border": "oklch(0.90 0.018 70)",            // #e0d8cc warm tan
-    "--input": "oklch(0.90 0.018 70)",
+    "--border": "oklch(0.90 0.018 70)",
+    "--input": "oklch(0.92 0.018 70)",
     "--ring": "oklch(0.50 0.10 70)",
     "--sidebar": "oklch(0.96 0.015 75)",
     "--sidebar-foreground": "oklch(0.27 0.025 60)",
@@ -81,104 +82,57 @@ const paper: ThemeDefinition = {
   },
 };
 
-const claude: ThemeDefinition = {
-  id: "claude",
-  name: "Claude",
-  mode: "light",
-  preview: { bg: "#faf9f5", fg: "#2d2b28", accent: "#da7756" },
-  vars: {
-    "--background": "oklch(0.98 0.008 85)",        // #faf9f5 warm off-white
-    "--foreground": "oklch(0.24 0.012 55)",         // #2d2b28 dark brown-black
-    "--card": "oklch(0.97 0.010 80)",               // #f5f3ee
-    "--card-foreground": "oklch(0.24 0.012 55)",
-    "--popover": "oklch(0.98 0.008 85)",
-    "--popover-foreground": "oklch(0.24 0.012 55)",
-    "--primary": "oklch(0.60 0.14 45)",             // #c96442 deep terracotta
-    "--primary-foreground": "oklch(0.98 0.008 85)",
-    "--secondary": "oklch(0.95 0.010 80)",
-    "--secondary-foreground": "oklch(0.24 0.012 55)",
-    "--muted": "oklch(0.95 0.010 80)",
-    "--muted-foreground": "oklch(0.58 0.020 65)",   // #807a72 warm gray
-    "--accent": "oklch(0.95 0.010 80)",
-    "--accent-foreground": "oklch(0.24 0.012 55)",
-    "--destructive": "oklch(0.55 0.22 25)",
-    "--border": "oklch(0.92 0.012 75)",             // #e8e4dd
-    "--input": "oklch(0.92 0.012 75)",
-    "--ring": "oklch(0.65 0.15 42)",                // #da7756 Claude orange
-    "--sidebar": "oklch(0.97 0.010 80)",
-    "--sidebar-foreground": "oklch(0.24 0.012 55)",
-    "--sidebar-border": "oklch(0.92 0.012 75)",
-  },
-};
-
-// ── Dark Themes ──
+// ── Dark Theme ──
 
 const defaultDark: ThemeDefinition = {
   id: "default-dark",
-  name: "Dark",
+  name: "暖灰夜",
   mode: "dark",
-  preview: { bg: "#09090b", fg: "#fafafa", accent: "#a1a1aa" },
+  preview: { bg: "#1d1c1a", fg: "#eae4d6", accent: "#d4a253" },
   vars: {
-    "--background": "oklch(0.141 0.005 285.823)",
-    "--foreground": "oklch(0.985 0 0)",
-    "--card": "oklch(0.141 0.005 285.823)",
-    "--card-foreground": "oklch(0.985 0 0)",
-    "--popover": "oklch(0.141 0.005 285.823)",
-    "--popover-foreground": "oklch(0.985 0 0)",
-    "--primary": "oklch(0.985 0 0)",
-    "--primary-foreground": "oklch(0.141 0.005 285.823)",
-    "--secondary": "oklch(0.274 0.006 286.033)",
-    "--secondary-foreground": "oklch(0.985 0 0)",
-    "--muted": "oklch(0.274 0.006 286.033)",
-    "--muted-foreground": "oklch(0.716 0.01 286.067)",
-    "--accent": "oklch(0.274 0.006 286.033)",
-    "--accent-foreground": "oklch(0.985 0 0)",
-    "--destructive": "oklch(0.577 0.245 27.325)",
-    "--border": "oklch(0.274 0.006 286.033)",
-    "--input": "oklch(0.274 0.006 286.033)",
-    "--ring": "oklch(0.871 0.006 286.286)",
-    "--sidebar": "oklch(0.141 0.005 285.823)",
-    "--sidebar-foreground": "oklch(0.985 0 0)",
-    "--sidebar-border": "oklch(0.274 0.006 286.033)",
-  },
-};
+    // surface 分层（L0 ~ L3，明度逐级提升 ~ 0.04）
+    "--background": "oklch(0.18 0.008 60)",          // L0 主背景 - 暖灰
+    "--card": "oklch(0.22 0.008 60)",                // L1 卡片
+    "--popover": "oklch(0.24 0.008 60)",             // L1.5 浮层
+    "--secondary": "oklch(0.26 0.008 60)",           // L2 次要表面
+    "--muted": "oklch(0.24 0.008 60)",
+    "--accent": "oklch(0.28 0.010 60)",              // L2.5 hover 态
+    "--border": "oklch(0.30 0.010 60)",              // L3 边框
+    "--input": "oklch(0.26 0.010 60)",
 
-const night: ThemeDefinition = {
-  id: "night",
-  name: "Night",
-  mode: "dark",
-  preview: { bg: "#0a0a0a", fg: "#c8c8c8", accent: "#7aa2f7" },
-  vars: {
-    "--background": "oklch(0.08 0 0)",              // #0a0a0a near-black
-    "--foreground": "oklch(0.82 0 0)",              // #c8c8c8 soft gray-white
-    "--card": "oklch(0.11 0 0)",                    // #111111
-    "--card-foreground": "oklch(0.82 0 0)",
-    "--popover": "oklch(0.10 0 0)",
-    "--popover-foreground": "oklch(0.82 0 0)",
-    "--primary": "oklch(0.70 0.12 250)",            // #7aa2f7 soft blue
-    "--primary-foreground": "oklch(0.08 0 0)",
-    "--secondary": "oklch(0.16 0 0)",
-    "--secondary-foreground": "oklch(0.80 0 0)",
-    "--muted": "oklch(0.16 0 0)",
-    "--muted-foreground": "oklch(0.52 0 0)",        // #707070
-    "--accent": "oklch(0.16 0 0)",
-    "--accent-foreground": "oklch(0.82 0 0)",
-    "--destructive": "oklch(0.55 0.22 25)",
-    "--border": "oklch(0.18 0 0)",                  // #1e1e1e
-    "--input": "oklch(0.18 0 0)",
-    "--ring": "oklch(0.70 0.12 250)",
-    "--sidebar": "oklch(0.09 0 0)",
-    "--sidebar-foreground": "oklch(0.82 0 0)",
-    "--sidebar-border": "oklch(0.18 0 0)",
+    // 前景色
+    "--foreground": "oklch(0.92 0.008 80)",          // 米色主文字
+    "--card-foreground": "oklch(0.92 0.008 80)",
+    "--popover-foreground": "oklch(0.92 0.008 80)",
+    "--secondary-foreground": "oklch(0.92 0.008 80)",
+    "--muted-foreground": "oklch(0.66 0.010 70)",    // 次要文字
+    "--accent-foreground": "oklch(0.94 0.008 80)",
+
+    // 主操作 + 强调色
+    "--primary": "oklch(0.92 0.008 80)",             // 主操作（深底浅按钮）
+    "--primary-foreground": "oklch(0.20 0.008 60)",
+    "--destructive": "oklch(0.62 0.22 25)",
+    "--ring": PIDAN_YELLOW,
+
+    // sidebar 用同色系（如果未来要重启 sidebar）
+    "--sidebar": "oklch(0.20 0.008 60)",
+    "--sidebar-foreground": "oklch(0.92 0.008 80)",
+    "--sidebar-border": "oklch(0.28 0.010 60)",
   },
 };
 
 // ── Exports ──
 
-export const LIGHT_THEMES: ThemeDefinition[] = [defaultLight, paper, claude];
-export const DARK_THEMES: ThemeDefinition[] = [defaultDark, night];
+export const LIGHT_THEMES: ThemeDefinition[] = [defaultLight, paper];
+export const DARK_THEMES: ThemeDefinition[] = [defaultDark];
 export const ALL_THEMES: ThemeDefinition[] = [...LIGHT_THEMES, ...DARK_THEMES];
 
 export function getTheme(id: string): ThemeDefinition | undefined {
   return ALL_THEMES.find((t) => t.id === id);
 }
+
+// v0.x 老用户主题迁移到 v1.0
+export const LEGACY_THEME_MIGRATIONS: Record<string, string> = {
+  claude: "default-light",
+  night: "default-dark",
+};

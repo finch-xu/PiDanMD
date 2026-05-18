@@ -4,158 +4,135 @@
   <img src="assets/logo.png" width="80" />
 </p>
 
-<h1 align="center">PiDanMD</h1>
+<h1 align="center">PiDanMD · 皮蛋记</h1>
 
 <p align="center">
   <img src="https://img.shields.io/github/v/release/finch-xu/PiDanMD?color=blue&label=version" />
   <img src="https://img.shields.io/badge/license-MIT-green" />
   <img src="https://img.shields.io/badge/Tauri-2-24C8D8?logo=tauri&logoColor=white" />
   <img src="https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=white" />
-  <img src="https://img.shields.io/badge/Tiptap-3-1a1a2e?logo=tiptap&logoColor=white" />
-  <img src="https://img.shields.io/badge/Rust-1.80+-DEA584?logo=rust&logoColor=white" />
-  <img src="https://img.shields.io/badge/Tailwind_CSS-4-06B6D4?logo=tailwindcss&logoColor=white" />
+  <img src="https://img.shields.io/badge/font-LXGW_WenKai-c9a961" />
 </p>
 
-<p align="center">A lightweight and elegant cross-platform Markdown editor for macOS, Windows, and Linux. Features live preview, GFM, math equations, syntax highlighting, and ships with the beautiful LXGW WenKai font out of the box.</p>
+<p align="center">A quiet writing tool for Markdown · cross-platform · local-first · one font family throughout</p>
 
 <p align="center">
   <img src="assets/screenshot.png" width="720" />
 </p>
 
-## Features
+---
 
-- **Dual Editor Modes** — WYSIWYG (Tiptap) + Source editing (CodeMirror 6), switch with one click
-- **Multiple Rendering Modes** — Built-in Standard Markdown, Skills, Hexo, Jekyll, and Hugo rendering, ready for blog writing out of the box
-- **Multi-Theme System** — Independent theme selection for light / dark mode with semantic design tokens
-- **GFM + Math + Syntax Highlighting** — GitHub Flavored Markdown, KaTeX equations, syntax highlighting, and Mermaid diagrams
-- **Native Cross-Platform** — Built on Tauri 2 with small bundle size and fast startup, covering macOS / Windows / Linux / x86_64 / ARM
-- **Multilingual UI** — Simplified Chinese, Traditional Chinese, English, Japanese, Korean with automatic system language detection
-- **Crafted Typography** — Bundled LXGW WenKai + Cascadia Code NF for beautiful CJK and Latin mixed typesetting
-- **File Tree + Outline + Status Bar** — Sidebar file management, document outline navigation, and status bar showing word count and cursor position
+## What is it
 
-## Platform Support
+**PiDanMD (皮蛋记)** is a Markdown writing tool that chases quietness.
 
-| OS | Architecture | Minimum Version | Format |
-|----|-------------|----------------|--------|
+Open the app and the world settles. No sidebar, no toolbar, no tabs. Just a canvas, a cursor, and one font. When you need anything, every function is one `⌘K` away.
+
+### Why another Markdown editor?
+
+| PiDanMD | Others |
+|---|---|
+| **One font family throughout** (LXGW WenKai) — UI, body, code | iA Writer uses IBM Plex; Bear uses system fonts; most mix and look fragmented |
+| **Typewriter mode + paragraph focus** — true writing immersion | Most don't have it |
+| **Cross-platform** — macOS / Windows / Linux | iA Writer has no Linux; Bear is Apple-only |
+| **Local-first** — pure file system, no accounts, no cloud | Notion / Obsidian Sync require lock-in |
+| **Minimal but discoverable** — `⌘K` palette finds anything | iA Writer is minimal but functions get lost |
+
+## Core features
+
+### The writing immersion trio
+
+| Mode | Shortcut | What it does |
+|------|----------|--------------|
+| Typewriter | `⌘⇧T` | Current line always stays vertically centered |
+| Paragraph focus | `⌘⇧F` | Non-active paragraphs fade to 28% opacity |
+| Immersive fullscreen | `F11` | Hides titlebar + statusbar — just the canvas |
+
+Combine all three for long-form writing.
+
+### Palette + quick open
+
+| Shortcut | Use |
+|----------|-----|
+| `⌘K` | Command palette — search and run any action |
+| `⌘O` | Quick open — fuzzy-search all Markdown files in workspace |
+| `⌘B` | Toggle file sidebar |
+| `⌘S` | Save |
+| `⌘,` | Open settings |
+
+### Editor modes
+
+- **WYSIWYG (Tiptap)**: rich text editing with LaTeX, Mermaid, sub/sup, tables, task lists, code highlighting
+- **Source (CodeMirror 6)**: raw Markdown with syntax highlighting
+- **Preview**: read-only rendered view
+
+All three switch with one click. Formulas / diagrams / frontmatter round-trip between modes without data loss (unit-tested in v1.0).
+
+### Visual
+
+- **3 themes**: 宣纸 Rice-paper / 古书 Classic-book / 暖灰夜 Warm-night (with proper surface layering)
+- **Unified accent**: pidan-egg yellow `oklch(0.72 0.12 80)`
+- **All interactions transition**: hover lifts shadow, press shrinks to `scale(0.97)`, 150ms ease
+
+### Auto-update
+
+GitHub Release + `tauri-plugin-updater`. Silent check on launch; popup card on bottom-right if a new version exists; one-click download + restart. Manually trigger anytime via `⌘K` → "Check for updates".
+
+## Platform support
+
+| OS | Arch | Min Version | Format |
+|---------|------|---------|---------|
 | macOS | ARM64 (Apple Silicon) | macOS 14.6 (Sonoma) | `.dmg` |
 | Windows | x64 | Windows 10 (1803+) | `.msi` `.exe` |
 | Windows | ARM64 | Windows 11 | `.msi` `.exe` |
-| Linux | x64 | Ubuntu 22.04 / glibc 2.35+ | `.deb` |
+| Linux | x64 | Ubuntu 22.04 / glibc 2.35+ | `.deb` / `.AppImage` |
 
-## Tech Stack
+## Tech stack
 
-| Layer | Technology |
-|-------|-----------|
-| Desktop Framework | Tauri 2 |
-| Frontend Framework | React 19 |
-| Editor Engine | Tiptap 3 (ProseMirror) + CodeMirror 6 |
-| UI Components | shadcn/ui (New York) |
-| State Management | Zustand |
-| Styling | Tailwind CSS 4 |
-| Icons | Lucide React |
-| Build Tool | Vite 7 |
-| Languages | TypeScript 5 + Rust |
-
-## Prerequisites
-
-- [Rust](https://rustup.rs/) (stable 1.80+)
-- [Node.js](https://nodejs.org/) (v18+)
-- [pnpm](https://pnpm.io/) (v10+)
-- Platform-specific Tauri 2 dependencies, see [Tauri docs](https://v2.tauri.app/start/prerequisites/)
+| Layer | Tech |
+|------|------|
+| Desktop framework | Tauri 2 |
+| Frontend | React 19 + TypeScript 5 |
+| Editor core | Tiptap 3 (ProseMirror) + CodeMirror 6 |
+| UI components | shadcn/ui (New York) |
+| State | Zustand |
+| Styles | Tailwind CSS 4 |
+| Tests | Vitest 4 + happy-dom |
+| Font | LXGW WenKai Screen + LXGW WenKai Mono Screen |
 
 ## Development
 
 ```bash
-# 1. Install frontend dependencies
+# Install
 pnpm install
 
-# 2. Start dev mode (frontend HMR + Rust auto-recompile)
+# Dev mode (hot reload + Rust auto-rebuild)
 pnpm tauri dev
-```
 
-In dev mode, the Vite dev server runs at `http://localhost:5173` and the Tauri window loads from it automatically. Frontend changes hot-reload instantly; Rust changes trigger an automatic recompile and app restart.
-
-To debug frontend only (without the Tauri desktop window):
-
-```bash
+# Frontend only
 pnpm dev
-```
 
-Then open `http://localhost:5173` in a browser (note: Tauri API calls won't work — this is only for debugging UI layout and styles).
+# Run tests (markdown serialization round-trip)
+pnpm test
 
-## Build
-
-```bash
-# Build installer for the current platform
+# Build installer for current platform
 pnpm tauri build
 ```
 
-Build artifacts are located at `src-tauri/target/release/bundle/`:
+## Fonts
 
-| Platform | Output |
-|----------|--------|
-| macOS | `.dmg`, `.app` |
-| Windows | `.msi`, `.exe` (NSIS) |
-| Linux | `.deb`, `.rpm`, `.AppImage` |
+| Font | Use | License |
+|------|------|--------|
+| LXGW WenKai Screen | UI / body / heading | SIL OFL 1.1 |
+| LXGW WenKai Mono Screen | code | SIL OFL 1.1 |
 
-To build frontend only (without desktop packaging):
+Source: https://github.com/lxgw/LxgwWenKai/releases
 
-```bash
-pnpm build
-```
+## Credits
 
-Output goes to the `dist/` directory.
-
-## Project Structure
-
-```
-PiDanMD/
-├── src/                    # Frontend source (React + TypeScript)
-│   ├── components/ui/      # Shared UI components (shadcn/ui)
-│   ├── features/           # Feature modules
-│   │   ├── editor/         # Tiptap editor + CodeMirror source editor + status bar
-│   │   ├── outline/        # Document outline panel
-│   │   ├── settings/       # Settings dialog
-│   │   ├── sidebar/        # File sidebar
-│   │   └── titlebar/       # Custom title bar
-│   ├── stores/             # Zustand state management
-│   ├── lib/                # Utilities (Tauri commands, i18n, themes, config)
-│   ├── hooks/              # React hooks
-│   ├── styles/             # Editor styles
-│   ├── App.tsx             # Root component
-│   └── main.tsx            # Entry point
-├── src-tauri/              # Rust backend (Tauri 2)
-│   ├── src/
-│   │   ├── commands/       # Tauri commands (file ops, config, fonts)
-│   │   ├── error.rs        # Typed error handling
-│   │   ├── menu.rs         # App menu
-│   │   └── state.rs        # App state
-│   └── tauri.conf.json     # Tauri config
-├── public/                 # Static assets (logo, fonts)
-└── package.json
-```
-
-## Bundled Fonts
-
-This project bundles the following fonts. See [THIRD_PARTY_LICENSES](THIRD_PARTY_LICENSES.md) for details.
-
-| Font | Usage | License |
-|------|-------|---------|
-| LXGW WenKai Screen | Body / UI | SIL OFL 1.1 |
-| Cascadia Code NF | Code | SIL OFL 1.1 |
-
-## License Audit
-
-This project uses [cargo-deny](https://github.com/EmbarkStudios/cargo-deny) to check Rust dependency license compatibility.
-
-```bash
-cargo install cargo-deny        # first-time setup
-cd src-tauri && cargo deny check licenses
-```
-
-## Acknowledgments
-
-The UI design of this project is inspired by [MiaoYan](https://github.com/tw93/MiaoYan). If you are looking for a native macOS Markdown editor, MiaoYan is highly recommended.
+- [MiaoYan](https://github.com/tw93/MiaoYan): UI design inspiration
+- [iA Writer](https://ia.net/writer): the gold standard of minimalist writing
+- [LXGW WenKai](https://github.com/lxgw/LxgwWenKai): the font that gave this app a soul
 
 ## License
 

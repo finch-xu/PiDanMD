@@ -30,18 +30,7 @@ See "SIL OPEN FONT LICENSE" and "APACHE LICENSE" sections below.
 
 
 ================================================================================
-3. Cascadia Code
-================================================================================
-
-Copyright (c) 2019 - Present, Microsoft Corporation,
-with Reserved Font Name "Cascadia Code".
-
-Licensed under the SIL Open Font License, Version 1.1.
-See "SIL OPEN FONT LICENSE" section below.
-
-
-================================================================================
-4. LXGW WenKai Screen (霞鹜文楷屏幕阅读版)
+3. LXGW WenKai Screen (霞鹜文楷屏幕阅读版)
 ================================================================================
 
 Copyright 2021 LXGW (https://github.com/lxgw)
@@ -55,6 +44,21 @@ This font also incorporates:
   - Inconsolata (Copyright The Inconsolata Project Authors) — SIL OFL 1.1
 
 See "SIL OPEN FONT LICENSE" and "APACHE LICENSE" sections below.
+
+
+================================================================================
+4. LXGW WenKai Mono Screen (霞鹜文楷等宽屏幕阅读版)
+================================================================================
+
+Copyright 2021 LXGW (https://github.com/lxgw)
+Based on Klee One by FONTWORKS Inc. (now Monotype KK)
+
+"LXGW WenKai" series fonts are licensed under the SIL Open Font License, Version 1.1.
+Reserved Font Names: "霞鹜" and "LXGW".
+
+Source: https://github.com/lxgw/LxgwWenKai/releases
+
+See "SIL OPEN FONT LICENSE" section below.
 
 
 ================================================================================

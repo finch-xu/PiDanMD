@@ -6,6 +6,7 @@ import {
   DARK_THEMES,
   getTheme,
   type ThemeDefinition,
+  LEGACY_THEME_MIGRATIONS,
 } from "~/lib/themes";
 
 export type LineHeight = "compact" | "comfortable" | "loose";
@@ -27,16 +28,15 @@ export const BUILTIN_TEXT_FONTS: BuiltinFont[] = [
 
 export const BUILTIN_CODE_FONTS: BuiltinFont[] = [
   {
-    name: "Cascadia Code NF",
-    label: "Cascadia Code NF",
-    css: "'Cascadia Code NF', monospace",
-  },
-  {
     name: "LXGW WenKai Mono Screen",
     label: "霞鹜文楷 Mono Screen",
     css: "'LXGW WenKai Mono Screen', monospace",
   },
 ];
+
+const LEGACY_CODE_FONT_MIGRATIONS: Record<string, string> = {
+  "Cascadia Code NF": "LXGW WenKai Mono Screen",
+};
 
 export const LINE_HEIGHT_MAP: Record<LineHeight, number> = {
   compact: 1.6,
@@ -228,8 +228,12 @@ export const useSettingsStore = create<SettingsState>((set, get) => {
 
     initFromConfig: (config) => {
       const appearance = (config.appearance as Appearance) || "system";
-      const lightTheme = config.lightTheme || "default-light";
-      const darkTheme = config.darkTheme || "default-dark";
+      const rawLightTheme = config.lightTheme || "default-light";
+      const rawDarkTheme = config.darkTheme || "default-dark";
+      const lightTheme = LEGACY_THEME_MIGRATIONS[rawLightTheme] ?? rawLightTheme;
+      const darkTheme = LEGACY_THEME_MIGRATIONS[rawDarkTheme] ?? rawDarkTheme;
+      const rawCodeFont = config.font.code.family;
+      const codeFont = LEGACY_CODE_FONT_MIGRATIONS[rawCodeFont] ?? rawCodeFont;
       const state = {
         appearance,
         lightTheme,
@@ -237,7 +241,7 @@ export const useSettingsStore = create<SettingsState>((set, get) => {
         resolvedMode: resolveMode(appearance),
         uiFont: config.font.ui.family,
         bodyFont: config.font.body.family,
-        codeFont: config.font.code.family,
+        codeFont,
         uiFontSize: config.font.ui.size,
         bodyFontSize: config.font.body.size,
         codeFontSize: config.font.code.size,

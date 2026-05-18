@@ -15,6 +15,7 @@ interface EditorState {
   saveFile: () => Promise<void>;
   clearEditor: () => void;
   toggleEditorMode: () => void;
+  setEditorMode: (mode: EditorMode) => void;
 }
 
 let saveTimer: ReturnType<typeof setTimeout> | null = null;
@@ -80,4 +81,6 @@ export const useEditorStore = create<EditorState>((set, get) => ({
       return { editorMode: cycle[(idx + 1) % cycle.length] };
     });
   },
+
+  setEditorMode: (mode) => set({ editorMode: mode }),
 }));

@@ -640,3 +640,39 @@
   color: oklch(0.7 0.12 25);
   background-color: oklch(0.25 0.05 25);
 }
+
+/* ── v1.0 写作模式 ── */
+
+/* 打字机模式：上下加 45vh 空白，让光标在常用编辑位置自然居中。
+ * 用 scroll-padding 让 :focus 时的滚动也尊重这个边界。
+ * 同一规则对 Tiptap 和 CodeMirror 都生效。 */
+.tiptap-editor.typewriter-mode {
+  scroll-padding-block: 45vh;
+}
+.tiptap-editor.typewriter-mode .ProseMirror {
+  padding-block: 45vh;
+}
+.cm-editor.typewriter-mode {
+  scroll-padding-block: 45vh;
+}
+.cm-editor.typewriter-mode .cm-content {
+  padding-block: 45vh !important;
+}
+
+/* 段落聚焦：非当前 top-level block 节点淡化，
+ * .has-focus class 由 FocusParagraph ProseMirror plugin 动态添加。
+ * 过渡 250ms 让光标移动时有"焦点流动感"而不是突变。 */
+.tiptap-editor.focus-paragraph-mode .ProseMirror > * {
+  transition: opacity 250ms cubic-bezier(0, 0, 0.2, 1);
+}
+.tiptap-editor.focus-paragraph-mode .ProseMirror > *:not(.has-focus) {
+  opacity: 0.28;
+}
+.tiptap-editor.focus-paragraph-mode .ProseMirror > *.has-focus {
+  opacity: 1;
+}
+
+/* 沉浸全屏：编辑器容器不再有 padding 边距，给写作更多呼吸 */
+.tiptap-editor.immersive-mode {
+  padding-inline: max(2rem, calc((100vw - var(--editor-content-width, 700px)) / 2 - 2rem));
+}

@@ -2,45 +2,42 @@ import { useCallback } from "react";
 import { useAppStore } from "~/stores/app-store";
 import { useEditorStore } from "~/stores/editor-store";
 import { useT } from "~/lib/i18n";
-import { Button } from "~/components/ui/button";
-import { Tooltip } from "~/components/ui/tooltip";
-import { Separator } from "~/components/ui/separator";
+import { IconButton, Divider } from "~/components/ui/icon-button";
+import { usePaletteStore } from "~/features/quick-open";
+import { formatMarkdown } from "~/lib/format-markdown";
+import { isMac } from "~/lib/utils";
 import {
   Settings,
   PanelLeft,
-  BookOpen,
   Maximize2,
   Minimize2,
   WandSparkles,
   FileCode,
   Eye,
   Type,
+  Command,
 } from "lucide-react";
 import { cn } from "~/lib/utils";
 
-type LayoutMode = "files" | "reading" | "focus";
+// 平台留白：给原生窗口控件留位置（macOS 流量灯 / Windows 三连按钮）
+const TRAFFIC_LIGHT_WIDTH = 78;
+const WINDOWS_CONTROLS_WIDTH = 138;
 
-const layoutIcons: Record<LayoutMode, React.ComponentType<{ className?: string }>> = {
-  files: PanelLeft,
-  reading: BookOpen,
-  focus: Maximize2,
-};
+// 编辑模式循环：[当前模式, 图标, 提示 i18n key（提示的是下一个模式）]
+const MODE_CYCLE = [
+  ["wysiwyg", FileCode, "sourceMode"],
+  ["source", Eye, "previewMode"],
+  ["preview", Type, "wysiwygMode"],
+] as const;
 
-const isMac = navigator.userAgent.includes("Mac");
-
-async function formatWithPrettier(source: string): Promise<string> {
-  const prettier = await import("prettier/standalone");
-  const markdownPlugin = await import("prettier/plugins/markdown");
-  return prettier.format(source, {
-    parser: "markdown",
-    plugins: [markdownPlugin.default ?? markdownPlugin],
-  });
-}
+const MODE_LOOKUP = Object.fromEntries(
+  MODE_CYCLE.map(([mode, icon, hintKey]) => [mode, { icon, hintKey }])
+) as Record<(typeof MODE_CYCLE)[number][0], { icon: typeof FileCode; hintKey: string }>;
 
 export function TitleBar() {
   const t = useT();
   const layoutMode = useAppStore((s) => s.layoutMode);
-  const cycleLayoutMode = useAppStore((s) => s.cycleLayoutMode);
+  const setLayoutMode = useAppStore((s) => s.setLayoutMode);
   const openSettings = useAppStore((s) => s.openSettings);
   const isFullscreen = useAppStore((s) => s.isFullscreen);
   const toggleFullscreen = useAppStore((s) => s.toggleFullscreen);
@@ -50,108 +47,100 @@ export function TitleBar() {
   const toggleEditorMode = useEditorStore((s) => s.toggleEditorMode);
   const content = useEditorStore((s) => s.content);
   const setContent = useEditorStore((s) => s.setContent);
+  const showPalette = usePaletteStore((s) => s.show);
 
-  const LayoutIcon = layoutIcons[layoutMode];
   const fileName = filePath ? filePath.split(/[/\\]/).pop() : null;
-
-  const modeIcons = { wysiwyg: FileCode, source: Eye, preview: Type };
-  const modeTooltips = { wysiwyg: "sourceMode", source: "previewMode", preview: "wysiwygMode" };
-  const ModeIcon = modeIcons[editorMode];
-  const modeTooltip = t(modeTooltips[editorMode]);
+  const { icon: ModeIcon, hintKey: modeHintKey } = MODE_LOOKUP[editorMode];
 
   const handleFormat = useCallback(async () => {
     if (!content) return;
     try {
-      const formatted = await formatWithPrettier(content);
+      const formatted = await formatMarkdown(content);
       setContent(formatted);
     } catch (e) {
       console.error("Format failed:", e);
     }
   }, [content, setContent]);
 
-  const fileNameDisplay = fileName ? (
-    <span className={cn("truncate max-w-[300px] text-sm text-muted-foreground", isDirty && "italic")}>
-      {fileName}
-      {isDirty && " *"}
-    </span>
-  ) : null;
-
-  const actionButtons = (
-    <>
-      {filePath && (
-        <>
-          <Tooltip content={t("formatMarkdown")}>
-            <Button variant="ghost" size="icon-sm" onClick={handleFormat}>
-              <WandSparkles className="h-4 w-4" />
-            </Button>
-          </Tooltip>
-          <Tooltip content={modeTooltip}>
-            <Button variant="ghost" size="icon-sm" onClick={toggleEditorMode}>
-              <ModeIcon className="h-4 w-4" />
-            </Button>
-          </Tooltip>
-          <Separator orientation="vertical" className="mx-1 h-5" />
-        </>
-      )}
-      <Tooltip content={t("layout")}>
-        <Button variant="ghost" size="icon-sm" onClick={cycleLayoutMode}>
-          <LayoutIcon className="h-4 w-4" />
-        </Button>
-      </Tooltip>
-      <Tooltip content={isFullscreen ? t("exitFullscreen") : t("fullscreen")}>
-        <Button variant="ghost" size="icon-sm" onClick={toggleFullscreen}>
-          {isFullscreen ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
-        </Button>
-      </Tooltip>
-      <Tooltip content={t("settings")}>
-        <Button variant="ghost" size="icon-sm" onClick={openSettings}>
-          <Settings className="h-4 w-4" />
-        </Button>
-      </Tooltip>
-    </>
-  );
+  const leftSpacerWidth = isMac ? TRAFFIC_LIGHT_WIDTH : 0;
+  const rightSpacerWidth = isMac ? 0 : WINDOWS_CONTROLS_WIDTH;
 
   return (
     <div
       data-tauri-drag-region
       className={cn(
-        "flex h-11 items-center justify-between px-3 select-none",
-        isMac
-          ? "bg-background/80 backdrop-blur-sm border-b"
-          : "relative bg-background"
+        "flex h-10 items-center select-none border-b border-border/60",
+        "bg-background/80 backdrop-blur-md"
       )}
     >
-      {isMac ? (
-        <>
-          {/* Left: macOS traffic light spacer */}
-          <div data-tauri-drag-region className="flex items-center gap-1 min-w-[80px]">
-            <div className="w-[70px]" />
-          </div>
+      {/* 左侧：平台 spacer + 文件名（左对齐）*/}
+      <div
+        data-tauri-drag-region
+        className="shrink-0"
+        style={{ width: leftSpacerWidth }}
+      />
+      <div
+        data-tauri-drag-region
+        className="flex-1 min-w-0 flex items-center px-3"
+      >
+        {fileName ? (
+          <span
+            className={cn(
+              "truncate text-sm text-muted-foreground",
+              isDirty && "italic"
+            )}
+            title={filePath ?? undefined}
+          >
+            {fileName}
+            {isDirty && " ·"}
+          </span>
+        ) : (
+          <span className="text-sm text-muted-foreground/40">皮蛋记</span>
+        )}
+      </div>
 
-          {/* Center: File name */}
-          <div data-tauri-drag-region className="flex items-center gap-2">
-            {fileNameDisplay}
-          </div>
+      {/* 右侧：动作按钮 */}
+      <div className="flex items-center gap-0.5 pr-2">
+        {filePath && (
+          <>
+            <IconButton label={t("formatMarkdown")} tooltipSide="bottom" onClick={handleFormat}>
+              <WandSparkles className="h-3.5 w-3.5" />
+            </IconButton>
+            <IconButton label={t(modeHintKey)} tooltipSide="bottom" onClick={toggleEditorMode}>
+              <ModeIcon className="h-3.5 w-3.5" />
+            </IconButton>
+            <Divider />
+          </>
+        )}
+        <IconButton
+          label={layoutMode === "focus" ? "显示文件树 ⌘B" : "隐藏文件树 ⌘B"}
+          tooltipSide="bottom"
+          active={layoutMode !== "focus"}
+          onClick={() => setLayoutMode(layoutMode === "focus" ? "files" : "focus")}
+        >
+          <PanelLeft className="h-3.5 w-3.5" />
+        </IconButton>
+        <IconButton
+          label={isFullscreen ? t("exitFullscreen") : t("fullscreen")}
+          tooltipSide="bottom"
+          onClick={toggleFullscreen}
+        >
+          {isFullscreen ? <Minimize2 className="h-3.5 w-3.5" /> : <Maximize2 className="h-3.5 w-3.5" />}
+        </IconButton>
+        <IconButton label="命令面板 ⌘K" tooltipSide="bottom" onClick={() => showPalette("command")}>
+          <Command className="h-3.5 w-3.5" />
+        </IconButton>
+        <IconButton label={t("settings")} tooltipSide="bottom" onClick={openSettings}>
+          <Settings className="h-3.5 w-3.5" />
+        </IconButton>
+      </div>
 
-          {/* Right: Actions */}
-          <div className="flex items-center gap-0.5">
-            {actionButtons}
-          </div>
-        </>
-      ) : (
-        <>
-          {/* Center: filename (absolute-centered, ignores left/right width) */}
-          <div data-tauri-drag-region className="absolute inset-x-0 flex items-center justify-center pointer-events-none">
-            {fileNameDisplay}
-          </div>
-
-          {/* Right: actions + native window controls spacer */}
-          <div className="ml-auto flex items-center gap-0.5">
-            {actionButtons}
-            <div className="w-[140px] shrink-0" />
-          </div>
-        </>
-      )}
+      {/* 右侧 spacer：Windows 给原生窗口控件让位 */}
+      <div
+        data-tauri-drag-region
+        className="shrink-0"
+        style={{ width: rightSpacerWidth }}
+      />
     </div>
   );
 }

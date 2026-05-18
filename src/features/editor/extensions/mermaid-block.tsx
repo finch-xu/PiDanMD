@@ -2,37 +2,38 @@ import { Node, type JSONContent } from "@tiptap/core";
 import { ReactNodeViewRenderer, NodeViewWrapper } from "@tiptap/react";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { cn } from "~/lib/utils";
+import { renderMermaidBlock } from "~/lib/markdown-serde";
+import { useSettingsStore } from "~/stores/settings-store";
 
-let mermaidInstance: typeof import("mermaid")["default"] | null = null;
-let lastTheme: string | null = null;
-let renderIdCounter = 0;
+// Mermaid lib 懒加载 + 主题级 initialize 缓存。
+// initialize 是全局 side effect，多个 instance 各跑会互相覆盖配置；
+// 改成同一主题只 initialize 一次，主题变化时重置 lastTheme 标志。
+let mermaidPromise: Promise<typeof import("mermaid")["default"]> | null = null;
+let lastInitTheme: "default" | "dark" | null = null;
 
-async function getMermaid() {
-  if (!mermaidInstance) {
-    const m = await import("mermaid");
-    mermaidInstance = m.default;
+async function getInitializedMermaid(dark: boolean) {
+  if (!mermaidPromise) {
+    mermaidPromise = import("mermaid").then((m) => m.default);
   }
-  const theme = document.documentElement.classList.contains("dark") ? "dark" : "default";
-  if (lastTheme !== theme) {
-    mermaidInstance.initialize({
+  const mermaid = await mermaidPromise;
+  const theme = dark ? "dark" : "default";
+  if (lastInitTheme !== theme) {
+    mermaid.initialize({
       startOnLoad: false,
       securityLevel: "strict",
       theme,
     });
-    lastTheme = theme;
+    lastInitTheme = theme;
   }
-  return mermaidInstance;
+  return mermaid;
 }
 
-/**
- * Safely parse SVG string into a DOM element using DOMParser.
- * Mermaid with securityLevel:"strict" already sanitizes output.
- */
+let renderIdCounter = 0;
+
 function parseSvgString(svgString: string): SVGElement | null {
   const parser = new DOMParser();
   const doc = parser.parseFromString(svgString, "image/svg+xml");
-  const errorNode = doc.querySelector("parsererror");
-  if (errorNode) return null;
+  if (doc.querySelector("parsererror")) return null;
   return doc.documentElement as unknown as SVGElement;
 }
 
@@ -43,37 +44,49 @@ function MermaidBlockView({ node, updateAttributes, selected }: any) {
   const svgRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  const renderDiagram = useCallback(async (source: string) => {
-    try {
-      const mermaid = await getMermaid();
-      const id = `mermaid-${++renderIdCounter}`;
-      const { svg } = await mermaid.render(id, source);
-      document.getElementById(id)?.remove();
-      if (svgRef.current) {
-        const svgEl = parseSvgString(svg);
-        if (svgEl) {
-          const imported = svgRef.current.ownerDocument.importNode(svgEl, true);
-          svgRef.current.replaceChildren(imported);
-        } else {
-          svgRef.current.replaceChildren();
-        }
+  // 跟随主题：当前 resolvedMode 是 dark/light，重渲染所有 mermaid 图
+  const isDark = useSettingsStore((s) => s.resolvedMode === "dark");
+
+  const renderDiagram = useCallback(
+    async (source: string, dark: boolean) => {
+      if (!source.trim()) {
+        if (svgRef.current) svgRef.current.replaceChildren();
+        setError("");
+        return;
       }
-      setError("");
-    } catch (e: any) {
-      setError(e.message || "Mermaid render error");
-      if (svgRef.current) svgRef.current.replaceChildren();
-    }
-  }, []);
+      try {
+        const mermaid = await getInitializedMermaid(dark);
+        const id = `mermaid-${++renderIdCounter}`;
+        const { svg } = await mermaid.render(id, source);
+        document.getElementById(id)?.remove();
+        if (svgRef.current) {
+          const svgEl = parseSvgString(svg);
+          if (svgEl) {
+            const imported = svgRef.current.ownerDocument.importNode(svgEl, true);
+            svgRef.current.replaceChildren(imported);
+          } else {
+            svgRef.current.replaceChildren();
+          }
+        }
+        setError("");
+      } catch (e: any) {
+        setError(e?.message || "Mermaid 渲染错误");
+        if (svgRef.current) svgRef.current.replaceChildren();
+      }
+    },
+    []
+  );
 
   useEffect(() => {
     setCode(node.attrs.code);
   }, [node.attrs.code]);
 
+  // code 或主题变化都触发重渲染（修主题切换竞态 issue）
   useEffect(() => {
     if (!editing) {
-      renderDiagram(code);
+      renderDiagram(code, isDark);
     }
-  }, [code, editing, renderDiagram]);
+  }, [code, editing, isDark, renderDiagram]);
 
   useEffect(() => {
     if (editing && textareaRef.current) {
@@ -152,7 +165,9 @@ export const MermaidBlock = Node.create({
   markdownTokenName: "code",
 
   parseMarkdown(token: any): any {
-    if (token.lang !== "mermaid") return null;
+    // 兼容不同 markdown parser 给 lang 字段不同名字（lang / info）
+    const lang = (token.lang ?? token.info ?? "").toString().trim().toLowerCase();
+    if (lang !== "mermaid") return null;
     return {
       type: "mermaidBlock",
       attrs: { code: token.text },
@@ -160,6 +175,6 @@ export const MermaidBlock = Node.create({
   },
 
   renderMarkdown(node: JSONContent) {
-    return "```mermaid\n" + (node.attrs?.code ?? "") + "\n```";
+    return renderMermaidBlock({ code: node.attrs?.code });
   },
 });
